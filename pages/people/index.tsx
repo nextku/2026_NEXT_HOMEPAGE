@@ -14,7 +14,7 @@ const AOS = dynamic(() => import("aos"), { ssr: false });
 const Member = dynamic(() => import("./components/Member"), { ssr: false });
 const Cardnews = dynamic(() => import("./components/Cardnews"), { ssr: false });
 
-const { TEN, ELEVEN, TWELVE } = PEOPLE_ITEMS;
+const { TEN, ELEVEN, TWELVE, THIRTEEN } = PEOPLE_ITEMS;
 
 export default function People() {
     const router = useRouter();
@@ -65,6 +65,13 @@ export default function People() {
                                 key: "4",
                                 children: (
                                     <Member peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 12)} />
+                                ),
+                            },
+                            {
+                                label: `${THIRTEEN}기`,
+                                key: "5",
+                                children: (
+                                    <Member peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 13)} />
                                 ),
                             },
                         ]}
