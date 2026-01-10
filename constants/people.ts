@@ -708,7 +708,7 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         name: '노윤하',
         department: DEPARTMENT.PHILOSPHY,
         classOf: 22,
-        imgSrc: '/images/profile/13gen/13기_노윤하.jpeg',
+        imgSrc: '/images/profile/13gen/13기_노윤하.png',
         managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
     },
     {
