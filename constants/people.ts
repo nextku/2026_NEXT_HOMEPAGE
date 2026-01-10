@@ -732,7 +732,7 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         name: '배상일',
         department: DEPARTMENT.BUSINESS,
         classOf: 21,
-        imgSrc: '/images/profile/13gen/13기_배상일.jpg',
+        imgSrc: '/images/profile/13gen/13기_배상일.png',
         managementTeam: MANAGEMENT_TEAM_POSITION.STARTUPLEADER,
     },
     {
@@ -756,7 +756,7 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         name: '엄빅토리아',
         department: DEPARTMENT.LINGUISTICS,
         classOf: 20,
-        imgSrc: '/images/profile/13gen/13기_엄빅토리아.jpg',
+        imgSrc: '/images/profile/13gen/13기_엄빅토리아.png',
         managementTeam: MANAGEMENT_TEAM_POSITION.VICE_REPRESENTATIVE,
     },
     {

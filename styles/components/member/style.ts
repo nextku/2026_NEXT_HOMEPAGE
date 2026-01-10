@@ -31,9 +31,14 @@ export const MemberImgBox = styled.div`
   height: 375px; */
   width: 22rem;
   height: 22rem;
+  overflow: hidden;
+  position: relative;
 
   & img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
   }
 `;
 
