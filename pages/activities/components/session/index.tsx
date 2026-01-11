@@ -5,7 +5,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useMediaQuery } from "react-responsive";
 import AOS from "aos";
 import SessionDev from "public/images/activities/session/session-development.png";
-import special_guest from "public/images/activities/session/session-special_2024.jpg";
 import SessionStartup from "public/images/activities/session/session-startup_2024.jpg";
 import "aos/dist/aos.css";
 import { useRouter } from "next/router";
@@ -52,20 +51,6 @@ export default function Session() {
               <S.SessionInfoBox isMobile={isMobile}>
                 서비스 기획 단계에서 필요한 창업적 마인드를 배운 후 프로젝트와 네트워킹을 통해
                 실전을 경험하며 창업가로 성장합니다.
-              </S.SessionInfoBox>
-            </S.SessionWrapper>
-            <S.SessionWrapper isMobile={isMobile}>
-              <S.SessionImgBox isMobile={isMobile}>
-                <Image src={special_guest} alt="스페셜 세션" layout="intrinsic" />
-              </S.SessionImgBox>
-              <S.SessionTitleBox isMobile={isMobile}>
-                <p>스페셜 세션</p>
-                <span />
-                <p>비정기 진행</p>
-              </S.SessionTitleBox>
-              <S.SessionInfoBox isMobile={isMobile}>
-                창업가, VC, 개발자 등 다양한 직군의 유명연사를 초청하여 현직자의 이야기를 듣고,
-                네트워킹을 진행합니다.
               </S.SessionInfoBox>
             </S.SessionWrapper>
           </S.MainContainer>
