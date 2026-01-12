@@ -137,7 +137,7 @@ export default function Greeting() {
                                 justifyContent: "flex-end",
                             }}
                         >
-                            NEXT 13기 임원진 드림
+                            NEXT 14기 임원진 드림
                         </b>
                         <span
                             style={{
@@ -160,7 +160,7 @@ export default function Greeting() {
                                 >
                                     대표
                                 </b>
-                                &nbsp;&nbsp;김정현 |
+                                &nbsp;&nbsp;홍지우 |
                             </span>
                             <span>
                                 <b
@@ -172,31 +172,7 @@ export default function Greeting() {
                                 >
                                     부대표
                                 </b>
-                                &nbsp;&nbsp;송하영, 김강민 |
-                            </span>
-                            <span>
-                                <b
-                                    style={{
-                                        color: "#000",
-                                        fontWeight: "500",
-                                        paddingLeft: "3px",
-                                    }}
-                                >
-                                    창업팀장
-                                </b>
-                                &nbsp;&nbsp;신현성 |
-                            </span>
-                            <span>
-                                <b
-                                    style={{
-                                        color: "#000",
-                                        fontWeight: "500",
-                                        paddingLeft: "3px",
-                                    }}
-                                >
-                                    개발팀장
-                                </b>
-                                &nbsp;&nbsp;배연준
+                                &nbsp;&nbsp;엄빅토리아
                             </span>
                         </span>
                     </p>
