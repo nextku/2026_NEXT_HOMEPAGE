@@ -5,7 +5,7 @@ import "aos/dist/aos.css";
 import * as S from "styles/components/sticky/style";
 import { useMediaQuery } from "react-responsive";
 // import homecoming from "public/assets/homecoming.jpg";
-import Demoday from "public/assets/demoday2024.png";
+import Demoday from "public/images/next13/demoday.png";
 import { Fade } from "react-awesome-reveal";
 import Slick from "components/slick/index";
 import Logo from "public/assets/logo.png";
@@ -67,7 +67,7 @@ export default function Sticky() {
                 </div>
             </S.StickyContent>
             <S.Sticky isMobile={isMobile}>
-                <Image src={Demoday} alt="2024 Demoday" width={600} height={400} priority fetchPriority="high" />
+                <Image src={Demoday} alt="2025 Demoday" width={600} height={400} priority fetchPriority="high" />
             </S.Sticky>
         </S.StickyContainer>
     );

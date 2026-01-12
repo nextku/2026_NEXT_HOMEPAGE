@@ -52,7 +52,7 @@ export const SessionWrapper = styled.div<{ isMobile: boolean }>`
     img{
      width: 100%;
     aspect-ratio: 16/9;
-    object-fit: contain;
+    object-fit: cover;
     }
 `;
 
@@ -60,6 +60,9 @@ export const SessionImgBox = styled.div<{ isMobile: boolean }>`
   width: 90%;
   margin: 0 auto;
   margin-bottom: 3rem;
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
 
   /* &:after {
     content: "";

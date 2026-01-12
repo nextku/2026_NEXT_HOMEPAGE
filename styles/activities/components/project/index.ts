@@ -56,7 +56,7 @@ export const SessionWrapper = styled.div<{ isMobile: boolean }>`
     img {
     width: 100%;
     aspect-ratio: 16/9;
-    object-fit: contain;
+    object-fit: cover;
   }
 `;
 
@@ -167,7 +167,7 @@ export const ProjectExampleWrapper = styled.div`
     max-width: 100%;
     height: auto;
     aspect-ratio: 16/9;
-    object-fit: contain;
+    object-fit: cover;
   }
 `;
 
@@ -178,7 +178,7 @@ export const ProjectTextBox = styled.p`
   margin: 0 auto;
   background-color: ${THEME.BLACK_200};
   color: ${THEME.WHITE};
-  font-size: 2rem;==-
+  font-size: 2rem;
   line-height: 4rem;
   text-align: center;
   padding: 0px 5rem;

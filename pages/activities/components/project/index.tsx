@@ -6,9 +6,9 @@ import "aos/dist/aos.css";
 import { useRouter } from "next/router";
 import SliderSlick from "components/sliderSlick/index";
 import { ProjectItem } from "constants/project";
-import hackathon_codeit from "public/images/activities/project/hackathon_codeit.jpg";
-import ideathon from "public/images/activities/project/ideathon.png";
-import product_day from "public/images/activities/project/product_day.jpg";
+import hackathon_codeit from "public/images/next13/hackathon.png";
+import ideathon from "public/images/next13/lean-startup.png";
+import product_day from "public/images/next13/product-day.png";
 
 export default function Curriculrum() {
   const [loading, setLoading] = useState(true);
