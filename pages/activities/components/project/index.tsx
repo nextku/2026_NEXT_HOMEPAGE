@@ -9,6 +9,7 @@ import { ProjectItem } from "constants/project";
 import hackathon_codeit from "public/images/next13/hackathon.png";
 import ideathon from "public/images/next13/lean-startup.png";
 import product_day from "public/images/next13/product-day.png";
+import dongul from "public/images/activities/project/dongul.jpeg";
 
 export default function Curriculrum() {
   const [loading, setLoading] = useState(true);
@@ -26,6 +27,21 @@ export default function Curriculrum() {
       {!loading && (
         <S.Container className="mount" isMobile={isMobile}>
           <S.MainContainer isMobile={isMobile}>
+          <S.SessionWrapper isMobile={isMobile}>
+              <S.SessionTitleBox isMobile={isMobile}>
+                <p>돈굴돈굴 프로젝트</p>
+              </S.SessionTitleBox>
+              <S.SessionSemiTitleBox isMobile={isMobile}>
+                <p>3월</p>
+              </S.SessionSemiTitleBox>
+              <S.SessionInfoBox isMobile={isMobile}>
+                단돈 10만 원의 자본으로 3주간 최대의 수익을 창출하며, <br />
+                비즈니스의 본질과 자본의 흐름을 몸소 체득하는 실전 프로젝트입니다. <br />
+              </S.SessionInfoBox>
+              <S.SessionImgBox isMobile={isMobile}>
+                <img src={dongul.src} alt="돈굴돈굴 프로젝트" />
+              </S.SessionImgBox>
+            </S.SessionWrapper>
             <S.SessionWrapper isMobile={isMobile}>
               <S.SessionTitleBox isMobile={isMobile}>
                 <p>린스타트업 세션</p>
