@@ -23,16 +23,17 @@ export const MainContainer = styled.div<{ isMobile: boolean }>`
     `}
 
   & > div:nth-child(1),
-& > div:nth-child(2) {
-  border-right: 2px solid ${THEME.GRAY_200};
-}
-& > div:nth-child(3) {
-  border-right: none;
-}
+  & > div:nth-child(3) {
+    border-right: 2px solid ${THEME.GRAY_200};
+  }
+  & > div:nth-child(2),
+  & > div:nth-child(4) {
+    border-right: none;
+  }
 `;
 
 export const SessionWrapper = styled.div<{ isMobile: boolean }>`
-  width: 33%;
+  width: 50%;
   padding-top: 3%;
   padding-bottom: 8%;
   display: flex;
