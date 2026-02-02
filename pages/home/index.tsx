@@ -186,6 +186,13 @@ export default function Main() {
                             ))}
                         </S.PartnerContainer>
                     </S.Section2>
+                    <S.Footer isMobile={isMobile}>
+                        <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
+                        <p>email | nextku.contact@gmail.com</p>
+                        <p>대표 홍지우 | 010-7222-8050</p>
+                        <p>부대표 엄빅토리아 | 010-7508-2801</p>
+                        <S.FooterCopyright>NEXT 2025 All Rights Reserved</S.FooterCopyright>
+                    </S.Footer>
                 </S.Container>
             )}
         </div>

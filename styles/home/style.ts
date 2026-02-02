@@ -335,3 +335,43 @@ export const PartnerContainer = styled.div<{ isMobile: boolean }>`
             }
         `}
 `;
+
+export const Footer = styled.footer<{ isMobile: boolean }>`
+    width: 100%;
+    background: #000;
+    color: #fff;
+    padding: 4rem 10% 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    & h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+    }
+    & p {
+        margin: 0;
+        font-size: 1.4rem;
+        line-height: 1.8;
+        font-weight: 500;
+    }
+    ${(props) =>
+        props.isMobile &&
+        css`
+            padding: 3rem 8%;
+            & h3 {
+                font-size: 1.6rem;
+            }
+            & p {
+                font-size: 1.2rem;
+            }
+        `}
+`;
+
+export const FooterCopyright = styled.p`
+    align-self: flex-end;
+    margin-top: 1rem !important;
+    font-size: 1.2rem !important;
+    opacity: 0.9;
+`;
