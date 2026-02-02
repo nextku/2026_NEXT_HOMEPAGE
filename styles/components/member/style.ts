@@ -27,13 +27,17 @@ export const MemberWrapper = styled.div`
 `;
 
 export const MemberImgBox = styled.div`
-  /* width: 375px;
-  height: 375px; */
   width: 22rem;
   height: 22rem;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
 
   & img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
   }
 `;
 

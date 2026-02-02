@@ -39,13 +39,21 @@ export default function Member({ peopleInformation }: MemberProps) {
                                         {/* Image */}
                                         <S.MemberImgBox>
                                             {item.imgSrc ? (
-                                                <Image src={item.imgSrc} alt={item.name} width={220} height={220} />
+                                                <Image
+                                                    src={item.imgSrc}
+                                                    alt={item.name}
+                                                    fill
+                                                    sizes="220px"
+                                                    style={{ objectFit: 'cover', objectPosition: 'top center' }}
+                                                />
                                             ) : (
                                                 <div
                                                     style={{
                                                         backgroundColor: '#333333',
-                                                        width: '220px',
-                                                        height: '220px',
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        position: 'absolute',
+                                                        inset: 0,
                                                     }}
                                                 />
                                             )}
