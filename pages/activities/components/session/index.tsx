@@ -57,7 +57,7 @@ export default function Session() {
               <S.SessionTitleBox isMobile={isMobile}>
                 <p>창업 세션</p>
                 <span />
-                <p>매주 토요일 16시 - 18시</p>
+                <p>매주 토요일 14시 - 18시</p>
               </S.SessionTitleBox>
               <S.SessionInfoBox isMobile={isMobile}>
                 서비스 기획 단계에서 필요한 창업적 마인드를 배운 후 프로젝트와
