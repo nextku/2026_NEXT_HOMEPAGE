@@ -27,32 +27,21 @@ export default function Session() {
           <S.MainContainer isMobile={isMobile}>
             <S.SessionWrapper isMobile={isMobile}>
               <S.SessionImgBox isMobile={isMobile}>
-                <Image
-                  src={SessionDev}
-                  alt="개발 세션"
-                  layout="fill"
-                  objectFit="cover"
-                />
+                <Image src={SessionDev} alt="개발 세션" layout="fill" objectFit="cover" />
               </S.SessionImgBox>
               <S.SessionTitleBox isMobile={isMobile}>
                 <p>개발 세션</p>
                 <span />
-                <p>매주 수요일 19시 반 - 22시 반</p>
+                <p>매주 수요일 19시 반 - 21시 반</p>
               </S.SessionTitleBox>
               <S.SessionInfoBox isMobile={isMobile}>
-                HTML, CSS, Javascript, React, NEXT.js, Firebase 등 실전
-                창업과정에 적용 가능한 다양한 기술스택을 공부하며 과제를
-                수행합니다.
+                HTML, CSS, Javascript, React, NEXT.js, Firebase 등 실전 창업과정에 적용 가능한
+                다양한 기술스택을 공부하며 과제를 수행합니다.
               </S.SessionInfoBox>
             </S.SessionWrapper>
             <S.SessionWrapper isMobile={isMobile}>
               <S.SessionImgBox isMobile={isMobile}>
-                <Image
-                  src={SessionStartup}
-                  alt="창업 세션"
-                  layout="fill"
-                  objectFit="cover"
-                />
+                <Image src={SessionStartup} alt="창업 세션" layout="fill" objectFit="cover" />
               </S.SessionImgBox>
               <S.SessionTitleBox isMobile={isMobile}>
                 <p>창업 세션</p>
@@ -60,8 +49,8 @@ export default function Session() {
                 <p>매주 토요일 14시 - 18시</p>
               </S.SessionTitleBox>
               <S.SessionInfoBox isMobile={isMobile}>
-                서비스 기획 단계에서 필요한 창업적 마인드를 배운 후 프로젝트와
-                네트워킹을 통해 실전을 경험하며 창업가로 성장합니다.
+                서비스 기획 단계에서 필요한 창업적 마인드를 배운 후 프로젝트와 네트워킹을 통해
+                실전을 경험하며 창업가로 성장합니다.
               </S.SessionInfoBox>
             </S.SessionWrapper>
           </S.MainContainer>
