@@ -119,11 +119,12 @@ export const ThumbnailImgDiv = styled.div`
 
 export const CommentDiv = styled.div`
     color: #000;
-    width: 300px;
+    min-width: 300px;
     text-align: center;
-    font-size: 1.8rem;
+    font-size: 1.7rem;
     font-style: normal;
     font-weight: 600;
     line-height: normal;
     margin-top: 2rem;
+    white-space: nowrap;
 `;
