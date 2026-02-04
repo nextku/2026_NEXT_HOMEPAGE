@@ -29,7 +29,7 @@ export const ALUMNI_NEWS_INFORMATION: ALUMNI_NEWS_INFORMATION_TYPE[] = [
         gen: GENERATIONS.FOUR,
         thumbnailImgSrc: '/images/alumni/cardnews/조동근.png',
         comment: '아이디어를 현실로 구현하는 크리에이티브 허브',
-        url: '',
+        url: 'https://www.instagram.com/p/DUQBbKDAdf5/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==',
         name: '조동근',
     },
     {
@@ -99,21 +99,21 @@ export const ALUMNI_NEWS_INFORMATION: ALUMNI_NEWS_INFORMATION_TYPE[] = [
         gen: GENERATIONS.THIRTEEN,
         thumbnailImgSrc: '/images/alumni/cardnews/김재완.png',
         comment: '더 큰 꿈을 향해 나아가는 도약의 발판',
-        url: '',
+        url: 'https://www.instagram.com/p/DUQBvUxgS0Z/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==',
         name: '김재완',
     },
     {
         gen: GENERATIONS.THIRTEEN,
         thumbnailImgSrc: '/images/alumni/cardnews/홍지우.png',
         comment: '창업을 행동으로 옮기게 해준 시작점',
-        url: '',
+        url: 'https://www.instagram.com/p/DUQB5O6AaEf/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==',
         name: '홍지우',
     },
     {
         gen: GENERATIONS.THIRTEEN,
         thumbnailImgSrc: '/images/alumni/cardnews/배상일.png',
         comment: 'NEXT는 나만의 답으로 세상을 바꾸는 인재들의 모임',
-        url: '',
+        url: 'https://www.instagram.com/p/DUQaxMsARRe/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==',
         name: '배상일',
     },
 ];
