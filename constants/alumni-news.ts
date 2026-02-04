@@ -13,6 +13,7 @@ export const GENERATIONS = {
     TEN: 10,
     ELEVEN: 11,
     TWELVE: 12,
+    THIRTEEN: 13,
 };
 
 // 미사용
