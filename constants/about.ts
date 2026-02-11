@@ -16,7 +16,7 @@ export const ABOUT_HISTORY = [
         TITLE: 'NEXT(고려대학교 멋쟁이사자처럼) 13기',
         CONTENT: [
             ['소상공인 중고거래 플랫폼 ‘소상공간’ Seed 투자 / TIPS 운영사 투자유치', 0],
-            ['"Sume" 글로벌 액셀러레이터 Founders Inc 배치 선정', 0],
+            ['"Sume" 글로벌 액셀러레이터 Founders Inc 프리시드 유치', 0],
             ['구글, 토스, 무신사, 우아한 형제들 등 주요 테크기업 개발자, PM, 마케터 다수 배출', 0],
             ['Travolo, lucktime 등의 서비스 출시 및 운영', 0],
             ['스타트업 익스프레스, 정운오 학생창업경진대회 등 창업경진대회 다수 수상 (찾아검진, Travolo)', 0],
