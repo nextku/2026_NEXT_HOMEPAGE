@@ -43,7 +43,6 @@ const DemodayLottie = dynamic(
 
 // Static Assets
 import Logo from "public/assets/logo.png";
-import LikeLion from "public/assets/likelion_kor_logo.svg";
 import MainBG from "public/assets/Rocket_Background.png";
 import Text from "public/assets/Accelerate_Your_Potential_new.svg";
 
@@ -86,7 +85,6 @@ export default function Main() {
               </S.MainContainerLogo>
               <S.MainTextLionWrapper>
                 <h2>고려대학교</h2>
-                <Image src={LikeLion} alt="Like Lion" layout="intrinsic" />
               </S.MainTextLionWrapper>
             </S.MainWrapper>
             {/* 배경 이미지 최적화 */}
