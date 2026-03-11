@@ -17,67 +17,75 @@ const Cardnews = dynamic(() => import("./components/Cardnews"), { ssr: false });
 const { TEN, ELEVEN, TWELVE, THIRTEEN } = PEOPLE_ITEMS;
 
 export default function People() {
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-    const isMobile = useMediaQuery({ query: "(max-width: 820px)" });
+  const isMobile = useMediaQuery({ query: "(max-width: 820px)" });
 
-    useEffect(() => {
-        import("aos").then((AOS) => {
-            AOS.default.init();
-        });
-        setLoading(false);
-    }, []);
+  useEffect(() => {
+    import("aos").then((AOS) => {
+      AOS.default.init();
+    });
+    setLoading(false);
+  }, []);
 
-    return (
-        <>
-            <Head>
-                <title>고려대 소프트웨어 창업 학회 | NEXT 멋사 : PEOPLE</title>
-            </Head>
+  return (
+    <>
+      <Head>
+        <title>고려대 소프트웨어 창업 학회 | NEXT : PEOPLE</title>
+      </Head>
 
-            {!loading && (
-                <S.Container isMobile={isMobile}>
-                    <Tabs
-                        defaultActiveKey="1"
-                        centered
-                        items={[
-                            {
-                                label: "Alumni",
-                                key: "1",
-                                children: <Cardnews />,
-                            },
-                            {
-                                label: `${TEN}기`,
-                                key: "2",
-                                children: (
-                                    <Member peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 10)} />
-                                ),
-                            },
-                            {
-                                label: `${ELEVEN}기`,
-                                key: "3",
-                                children: (
-                                    <Member peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 11)} />
-                                ),
-                            },
-                            {
-                                label: `${TWELVE}기`,
-                                key: "4",
-                                children: (
-                                    <Member peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 12)} />
-                                ),
-                            },
-                            {
-                                label: `${THIRTEEN}기`,
-                                key: "5",
-                                children: (
-                                    <Member peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 13)} />
-                                ),
-                            },
-                        ]}
-                    />
-                </S.Container>
-            )}
-        </>
-    );
+      {!loading && (
+        <S.Container isMobile={isMobile}>
+          <Tabs
+            defaultActiveKey="1"
+            centered
+            items={[
+              {
+                label: "Alumni",
+                key: "1",
+                children: <Cardnews />,
+              },
+              {
+                label: `${TEN}기`,
+                key: "2",
+                children: (
+                  <Member
+                    peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 10)}
+                  />
+                ),
+              },
+              {
+                label: `${ELEVEN}기`,
+                key: "3",
+                children: (
+                  <Member
+                    peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 11)}
+                  />
+                ),
+              },
+              {
+                label: `${TWELVE}기`,
+                key: "4",
+                children: (
+                  <Member
+                    peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 12)}
+                  />
+                ),
+              },
+              {
+                label: `${THIRTEEN}기`,
+                key: "5",
+                children: (
+                  <Member
+                    peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 13)}
+                  />
+                ),
+              },
+            ]}
+          />
+        </S.Container>
+      )}
+    </>
+  );
 }

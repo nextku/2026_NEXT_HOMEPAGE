@@ -20,70 +20,70 @@ const Achievement = dynamic(() => import("pages/about/components/achievement"), 
 const { GREETING, HISTORY, ACHIEVEMENT, PARTNERS } = ABOUT_ITEMS;
 
 export default function About() {
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-    const isMobile = useMediaQuery({ query: "(max-width: 820px)" });
-    const isTabCenter = useMediaQuery({ query: "(min-width: 500px)" });
+  const isMobile = useMediaQuery({ query: "(max-width: 820px)" });
+  const isTabCenter = useMediaQuery({ query: "(min-width: 500px)" });
 
-    const [viewKey, setViewKey] = useState<string>("1");
+  const [viewKey, setViewKey] = useState<string>("1");
 
-    useEffect(() => {
-        import("aos").then((AOS) => {
-            AOS.default.init();
-        });
-    }, []);
+  useEffect(() => {
+    import("aos").then((AOS) => {
+      AOS.default.init();
+    });
+  }, []);
 
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setLoading(false);
-        }
-    }, [isMobile]);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setLoading(false);
+    }
+  }, [isMobile]);
 
-    useEffect(() => {
-        if (router.query.key) {
-            setViewKey(router.query.key as string);
-        }
-    }, [router.query.key]);
+  useEffect(() => {
+    if (router.query.key) {
+      setViewKey(router.query.key as string);
+    }
+  }, [router.query.key]);
 
-    return (
-        <>
-            <Head>
-                <title>고려대 소프트웨어 창업 학회 | NEXT (고려대 멋사) : ABOUT US</title>
-            </Head>
+  return (
+    <>
+      <Head>
+        <title>고려대 소프트웨어 창업 학회 | NEXT : ABOUT US</title>
+      </Head>
 
-            {!loading && (
-                <S.Container isMobile={isMobile}>
-                    <Tabs
-                        defaultActiveKey={"1"}
-                        activeKey={viewKey}
-                        onChange={(key) => setViewKey(key)}
-                        centered={isTabCenter}
-                        items={[
-                            {
-                                label: GREETING,
-                                key: "1",
-                                children: <Greeting />,
-                            },
-                            {
-                                label: HISTORY,
-                                key: "2",
-                                children: <History />,
-                            },
-                            {
-                                label: ACHIEVEMENT,
-                                key: "3",
-                                children: <Achievement />,
-                            },
-                            {
-                                label: PARTNERS,
-                                key: "4",
-                                children: <Partners />,
-                            },
-                        ]}
-                    />
-                </S.Container>
-            )}
-        </>
-    );
+      {!loading && (
+        <S.Container isMobile={isMobile}>
+          <Tabs
+            defaultActiveKey={"1"}
+            activeKey={viewKey}
+            onChange={(key) => setViewKey(key)}
+            centered={isTabCenter}
+            items={[
+              {
+                label: GREETING,
+                key: "1",
+                children: <Greeting />,
+              },
+              {
+                label: HISTORY,
+                key: "2",
+                children: <History />,
+              },
+              {
+                label: ACHIEVEMENT,
+                key: "3",
+                children: <Achievement />,
+              },
+              {
+                label: PARTNERS,
+                key: "4",
+                children: <Partners />,
+              },
+            ]}
+          />
+        </S.Container>
+      )}
+    </>
+  );
 }

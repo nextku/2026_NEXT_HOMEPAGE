@@ -19,70 +19,70 @@ const Demoday = dynamic(() => import("./components/demoday"), { ssr: false });
 const { CURRICULUM, SESSION, PROJECT, DEMODAY } = ACTIVITY_ITEMS;
 
 export default function Activities() {
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-    const isMobile = useMediaQuery({ query: "(max-width: 820px)" });
-    const isTabCenter = useMediaQuery({ query: "(min-width: 381px)" });
+  const isMobile = useMediaQuery({ query: "(max-width: 820px)" });
+  const isTabCenter = useMediaQuery({ query: "(min-width: 381px)" });
 
-    const [viewKey, setViewKey] = useState<string>("1");
+  const [viewKey, setViewKey] = useState<string>("1");
 
-    useEffect(() => {
-        import("aos").then((AOS) => {
-            AOS.default.init();
-        });
-    }, []);
+  useEffect(() => {
+    import("aos").then((AOS) => {
+      AOS.default.init();
+    });
+  }, []);
 
-    useEffect(() => {
-        if (typeof window !== "undefined") {
-            setLoading(false);
-        }
-    }, [isMobile]);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setLoading(false);
+    }
+  }, [isMobile]);
 
-    useEffect(() => {
-        if (router.query.key) {
-            setViewKey(router.query.key as string);
-        }
-    }, [router.query.key]);
+  useEffect(() => {
+    if (router.query.key) {
+      setViewKey(router.query.key as string);
+    }
+  }, [router.query.key]);
 
-    return (
-        <>
-            <Head>
-                <title>고려대 소프트웨어 창업 학회 | NEXT (고려대 멋사) : ACTIVITIES</title>
-            </Head>
+  return (
+    <>
+      <Head>
+        <title>고려대 소프트웨어 창업 학회 | NEXT : ACTIVITIES</title>
+      </Head>
 
-            {!loading && (
-                <S.Container isMobile={isMobile}>
-                    <Tabs
-                        defaultActiveKey="1"
-                        activeKey={viewKey}
-                        onChange={(key) => setViewKey(key)}
-                        centered={isTabCenter}
-                        items={[
-                            {
-                                label: CURRICULUM,
-                                key: "1",
-                                children: <Curriculum />,
-                            },
-                            {
-                                label: SESSION,
-                                key: "2",
-                                children: <Session />,
-                            },
-                            {
-                                label: PROJECT,
-                                key: "3",
-                                children: <Project />,
-                            },
-                            {
-                                label: DEMODAY,
-                                key: "4",
-                                children: <Demoday />,
-                            },
-                        ]}
-                    />
-                </S.Container>
-            )}
-        </>
-    );
+      {!loading && (
+        <S.Container isMobile={isMobile}>
+          <Tabs
+            defaultActiveKey="1"
+            activeKey={viewKey}
+            onChange={(key) => setViewKey(key)}
+            centered={isTabCenter}
+            items={[
+              {
+                label: CURRICULUM,
+                key: "1",
+                children: <Curriculum />,
+              },
+              {
+                label: SESSION,
+                key: "2",
+                children: <Session />,
+              },
+              {
+                label: PROJECT,
+                key: "3",
+                children: <Project />,
+              },
+              {
+                label: DEMODAY,
+                key: "4",
+                children: <Demoday />,
+              },
+            ]}
+          />
+        </S.Container>
+      )}
+    </>
+  );
 }
