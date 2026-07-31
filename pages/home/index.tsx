@@ -205,8 +205,8 @@ export default function Main() {
           <S.Footer isMobile={isMobile}>
             <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
             <p>email | nextku.contact@gmail.com</p>
-            <p>대표 이성민</p>
-            <p>부대표 박보겸</p>
+            <p>대표 이성민 · 010-8693-1884</p>
+            <p>부대표 박보겸 · 010-3185-7117</p>
             <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
           </S.Footer>
         </S.Container>
