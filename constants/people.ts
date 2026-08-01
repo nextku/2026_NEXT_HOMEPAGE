@@ -988,5 +988,13 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         classOf: 24,
         imgSrc: '/images/profile/14gen/14기_조혜진.jpg',
         managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '홍준호',
+        department: DEPARTMENT.COMPUTER,
+        classOf: 20,
+        imgSrc: '/images/profile/14gen/14기_홍준호.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
     }
 ];
