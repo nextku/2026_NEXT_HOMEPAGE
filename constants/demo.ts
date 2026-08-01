@@ -1,10 +1,10 @@
 import { SLIDE_ITEM } from 'types/people/slide-item';
 
-import pic1 from 'public/images/next13/2025demoday/1.png';
-import pic2 from 'public/images/next13/2025demoday/2.png';
-import pic3 from 'public/images/next13/2025demoday/3.png';
-import pic4 from 'public/images/next13/2025demoday/4.png';
-import pic5 from 'public/images/next13/2025demoday/5.png';
+import pic1 from 'public/images/activities/demoday/demoday-1.jpg';
+import pic2 from 'public/images/activities/demoday/demoday-2.jpg';
+import pic3 from 'public/images/activities/demoday/demoday-3.jpg';
+import pic4 from 'public/images/activities/demoday/demoday-4.jpg';
+import pic5 from 'public/images/activities/demoday/demoday-5.jpg';
 
 export const DemoItem: SLIDE_ITEM[] = [
     { name: '1', src: pic1 },
