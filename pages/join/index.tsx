@@ -251,7 +251,7 @@ export default function Join() {
                             currentTime <= endApplicationTime
                           ) {
                             window.open(
-                              "https://forms.gle/8HChTJSvdp8xTjjP7",
+                              "https://docs.google.com/forms/d/e/1FAIpQLScTXBOecHQlOOjlWGaiQNfBbcmAq0h-uEIjgZ_t4P8ReWbc8g/viewform?usp=header",
                               "_blank",
                             );
                           }
