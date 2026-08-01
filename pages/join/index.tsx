@@ -13,7 +13,6 @@ import RocketImg from "public/assets/joinus_rocket.png";
 import PlanetImg from "public/assets/new_earth@4x.png";
 import Text from "public/assets/Accelerate_Your_Potential_new.svg";
 import Logo from "public/assets/new_logo(wh).svg";
-import LogoLikeLion from "public/assets/likelion_kor_logo.svg";
 
 const variants = {
   open: { opacity: 1 },
@@ -21,7 +20,9 @@ const variants = {
 };
 
 // 동적 로딩
-const S3upload = dynamic(() => import("components/s3upload/index"), { ssr: false });
+const S3upload = dynamic(() => import("components/s3upload/index"), {
+  ssr: false,
+});
 const AOS = dynamic(() => import("aos"), { ssr: false });
 
 export default function Join() {
@@ -58,8 +59,8 @@ export default function Join() {
     };
   }, []);
 
-  const startApplicationTime = new Date("2026-02-02T00:00:00");
-  const endApplicationTime = new Date("2026-02-14T23:59:59");
+  const startApplicationTime = new Date("2026-08-03T00:00:00");
+  const endApplicationTime = new Date("2026-08-15T23:59:59");
 
   let buttonText = "지원하기";
   let disabled = false;
@@ -89,6 +90,7 @@ export default function Join() {
     };
   }, [modalOpen]);
 
+  // TODO: Change download & apply link
   return (
     <div>
       <Head>
@@ -114,10 +116,11 @@ export default function Join() {
                 height={Logo.height / 2}
               />
               <div className="university-wrapper">
-                <span style={{ fontWeight: 400, fontSize: "2.5rem" }}>고려대학교</span>
-                <Image src={LogoLikeLion} alt="Like Lion" layout="intrinsic" />
+                <span style={{ fontWeight: 400, fontSize: "2.5rem" }}>
+                  고려대학교 소프트웨어 창업학회
+                </span>
               </div>
-              <p>14기 모집</p>
+              <p>15기 모집</p>
               <S.RocketInfo className="rocket-info">
                 <p>
                   <span className="rocket">로켓</span>을 눌러보세요!
@@ -146,64 +149,72 @@ export default function Join() {
               <S.ModalContentWrapper>
                 {modalPage == 1 && (
                   <S.InfoModal>
-                    <h2>14기 지원 안내</h2>
+                    <h2>15기 지원 안내</h2>
                     <br />
                     <p>
                       <span>1. 지원방식</span>
-                      <br /> a. 아래 <mark>[지원서 다운로드]</mark> 버튼을 클릭한 후 지원서 양식
-                      다운로드 <br />
+                      <br /> a. 아래 <mark>[지원서 다운로드]</mark> 버튼을
+                      클릭한 후 지원서 양식 다운로드 <br />
                       b. 서류 접수 기간 내에 지원서 작성 <br />
-                      c. 아래 <mark>[지원하기]</mark> 버튼을 클릭하여 지원서 업로드
-                      <br /> <b>**</b>[지원하기] 버튼은 지원 기간 중에만 확인 가능합니다.
-                      <br /> d. 모든 문항별 글자수는 공백을 포함한 글자수를 기준으로 합니다.
+                      c. 아래 <mark>[지원하기]</mark> 버튼을 클릭하여 지원서
+                      업로드
+                      <br /> <b>**</b>[지원하기] 버튼은 지원 기간 중에만 확인
+                      가능합니다.
+                      <br /> d. 모든 문항별 글자수는 공백을 포함한 글자수를
+                      기준으로 합니다.
                       <br />
                       e. 제출한 지원서는 수정할 수 없습니다.
                       <br />
                       <br />
                       <span>2. 리크루팅 일정</span>
                       <br />
-                      서류접수 : 2/2(월) - 2/14(토)
+                      서류접수 : 8/3(월) - 8/15(토)
                       <br />
-                      1차 합격자 발표 : 2/18(수)
+                      1차 합격자 발표 : 8/19(수)
                       <br />
-                      면접 : 2/21(토) - 2/22(일)
+                      면접 : 8/22(토) - 8/23(일)
                       <br />
-                      최종 합격자 발표 : 2/25(수)
+                      최종 합격자 발표 : 8/26(수)
                       <br />
                       <br />
                       <span>3. 수료 기준</span>
                       <br />
-                      학회에서 OT부터 여름방학 기간 동안 진행하는 모든 세션 및 행사는 필참입니다.
+                      학회에서 OT부터 겨울방학 기간 동안 진행하는 모든 세션 및
+                      행사는 필참입니다.
                       <br />
-                      불성실하게 참여하는 경우 수료에 제한이 생길 수 있음을 알려드립니다.
+                      불성실하게 참여하는 경우 수료에 제한이 생길 수 있음을
+                      알려드립니다.
                       <br />
                       <br />
                       <span>4. 면접 촬영 및 개인정보 수집 안내</span>
                       <br /> 면접 평가는 모두 <b>대면</b>
                       으로 이뤄집니다.
                       <br />
-                      원활한 스케줄 조정을 위하여 2월 21일(토), 22일(일) 중 가능한 시간대를 꼭
-                      구글폼에 체크해주시면 감사하겠습니다
+                      원활한 스케줄 조정을 위하여 8월 22일(토), 23일(일) 중
+                      가능한 시간대를 꼭 구글폼에 체크해 주시면 감사하겠습니다.
                       <br />
-                      공정한 면접 평가를 위해 면접 내용을 촬영 및 수집할 예정입니다.
+                      공정한 면접 평가를 위해 면접 내용을 촬영 및 수집할
+                      예정입니다.
                       <br />
-                      촬영한 면접영상 및 개인정보는 선발과정에서만 활용되며, 리크루팅 이후 즉시
-                      폐기될 예정입니다.
+                      촬영한 면접영상 및 개인정보는 선발과정에서만 활용되며,
+                      리크루팅 이후 즉시 폐기될 예정입니다.
                       <br />
                       <br />
                       <span>5. 학회비 안내</span> <br />
                       원활한 학회 운영을 위해 학회비를 걷어 운영하고 있습니다.
                       <br />
-                      새로 들어오시는 학회원들은 <b>10만원</b>의 학회비를 납부하고, 해당 금액은 학회
-                      운영을 위해서만 사용될 예정입니다.
+                      새로 들어오시는 학회원들은 <b>10만원</b>의 학회비를
+                      납부하고, 해당 금액은 학회 운영을 위해서만 사용될
+                      예정입니다.
                       <br />
-                      학회원들은 모든 회계 정산 내용을 활동 종료 이후 학회 노션 페이지에서 확인하실
-                      수 있습니다. <br />
+                      학회원들은 모든 회계 정산 내용을 활동 종료 이후 학회 노션
+                      페이지에서 확인하실 수 있습니다. <br />
                       <br />
                       <span>6. 오리엔테이션 필참</span>
                       <br />
-                      최종 합격 이후 <b>2월 28일(토)</b>에 진행되는 OT는 필수 참여입니다. 원활한
-                      학회 운영을 위해, OT를 고려하여 개인 일정을 조정해주시면 감사하겠습니다
+                      최종 합격 이후 <b>8월 29일(토)</b>에 진행되는 OT는 필수
+                      참여입니다. 원활한 학회 운영을 위해, OT 일정을 고려하여
+                      개인 일정을 조정해주시면 감사하겠습니다.
                     </p>
                     <S.CheckContainer>
                       <input
@@ -239,7 +250,10 @@ export default function Join() {
                             currentTime >= startApplicationTime &&
                             currentTime <= endApplicationTime
                           ) {
-                            window.open("https://forms.gle/8HChTJSvdp8xTjjP7", "_blank");
+                            window.open(
+                              "https://forms.gle/8HChTJSvdp8xTjjP7",
+                              "_blank",
+                            );
                           }
                         }}
                       >
