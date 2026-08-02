@@ -123,7 +123,7 @@ export default function Greeting() {
                 justifyContent: "flex-end",
               }}
             >
-              NEXT 14기 임원진 드림
+              NEXT 15기 임원진 드림
             </b>
             <span
               style={{
@@ -146,7 +146,7 @@ export default function Greeting() {
                 >
                   대표
                 </b>
-                &nbsp;&nbsp;홍지우 |
+                &nbsp;&nbsp;이성민 |
               </span>
               <span>
                 <b
@@ -158,7 +158,7 @@ export default function Greeting() {
                 >
                   부대표
                 </b>
-                &nbsp;&nbsp;엄빅토리아
+                &nbsp;&nbsp;박보겸
               </span>
             </span>
           </p>

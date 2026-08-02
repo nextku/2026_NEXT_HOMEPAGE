@@ -16,39 +16,41 @@ const AOS = dynamic(() => import("aos"), { ssr: false });
 // Lottie 애니메이션 동적 로드
 const RocketLottie = dynamic(
   () => import("components/lottie/lottie").then((mod) => mod.RocketLottie),
-  { ssr: false }
+  { ssr: false },
 );
 const LaptopLottie = dynamic(
   () => import("components/lottie/lottie").then((mod) => mod.LaptopLottie),
-  { ssr: false }
+  { ssr: false },
 );
 const SessionLottie = dynamic(
   () => import("components/lottie/lottie").then((mod) => mod.SessionLottie),
   {
     ssr: false,
-  }
+  },
 );
 const ProjectLottie = dynamic(
   () => import("components/lottie/lottie").then((mod) => mod.ProjectLottie),
   {
     ssr: false,
-  }
+  },
 );
 const DemodayLottie = dynamic(
   () => import("components/lottie/lottie").then((mod) => mod.DemodayLottie),
   {
     ssr: false,
-  }
+  },
 );
 
 // Static Assets
 import Logo from "public/assets/logo.png";
 import MainBG from "public/assets/Rocket_Background.png";
 import Text from "public/assets/Accelerate_Your_Potential_new.svg";
+import RecruitRocket from "public/assets/joinus_rocket.png";
 
 export default function Main() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [recruitPopupOpen, setRecruitPopupOpen] = useState(true);
 
   const isMobile = useMediaQuery({ query: "(max-width: 820px)" });
 
@@ -63,6 +65,18 @@ export default function Main() {
       setLoading(false);
     }
   }, [isMobile]);
+
+  useEffect(() => {
+    if (!recruitPopupOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setRecruitPopupOpen(false);
+    };
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [recruitPopupOpen]);
+
   return (
     <div>
       <Head>
@@ -75,6 +89,58 @@ export default function Main() {
       {/* <Intro></Intro> */}
       {!loading && (
         <S.Container>
+          {recruitPopupOpen && (
+            <S.RecruitPopupBackdrop
+              role="presentation"
+              onClick={() => setRecruitPopupOpen(false)}
+            >
+              <S.RecruitPopup
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="recruit-popup-title"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <S.RecruitPopupCanvas>
+                  <S.RecruitPopupGlow />
+                  <S.RecruitPopupClose
+                    type="button"
+                    aria-label="리크루팅 안내 닫기"
+                    onClick={() => setRecruitPopupOpen(false)}
+                  >
+                    ×
+                  </S.RecruitPopupClose>
+                  <S.RecruitPopupContent>
+                    <S.RecruitPopupEyebrow>
+                      Who's NEXT? - 15th Recruiting
+                    </S.RecruitPopupEyebrow>
+                    <h2 id="recruit-popup-title">
+                      세상을 바꿀 다음 여정에
+                      <br />
+                      함께할 <strong>NEXT</strong>를 찾습니다
+                    </h2>
+                    <S.RecruitPopupPeriod>
+                      <span>지원 기간</span>
+                      2026. 08. 03 — 08. 15
+                    </S.RecruitPopupPeriod>
+                    <S.RecruitPopupButton
+                      type="button"
+                      onClick={() => router.push("/join")}
+                    >
+                      지원하기 <span aria-hidden="true">→</span>
+                    </S.RecruitPopupButton>
+                  </S.RecruitPopupContent>
+                  <S.RecruitPopupRocket aria-hidden="true">
+                    <Image
+                      src={RecruitRocket}
+                      alt=""
+                      layout="responsive"
+                      priority
+                    />
+                  </S.RecruitPopupRocket>
+                </S.RecruitPopupCanvas>
+              </S.RecruitPopup>
+            </S.RecruitPopupBackdrop>
+          )}
           <S.MainContainer>
             <S.MainWrapper isMobile={isMobile}>
               <S.MainTextWrapper>
@@ -102,7 +168,13 @@ export default function Main() {
             </div>
             <div>
               <S.HomeTwoTextWrapper data-aos="fade">
-                <Image src={Text} alt="Main Text" width={600} height={300} priority />
+                <Image
+                  src={Text}
+                  alt="Main Text"
+                  width={600}
+                  height={300}
+                  priority
+                />
               </S.HomeTwoTextWrapper>
               <p
                 style={{
@@ -132,17 +204,29 @@ export default function Main() {
               </span>
             </S.TextWrapper>
             <S.LottieContainer isMobile={isMobile}>
-              <S.LottieWrapper isMobile={isMobile} data-aos="zoom-in" data-aos-delay="100">
+              <S.LottieWrapper
+                isMobile={isMobile}
+                data-aos="zoom-in"
+                data-aos-delay="100"
+              >
                 <SessionLottie />
                 <h2>Session</h2>
                 <p>필수 기술 스택 습득</p>
               </S.LottieWrapper>
-              <S.LottieWrapper isMobile={isMobile} data-aos="zoom-in" data-aos-delay="300">
+              <S.LottieWrapper
+                isMobile={isMobile}
+                data-aos="zoom-in"
+                data-aos-delay="300"
+              >
                 <ProjectLottie />
                 <h2>Project</h2>
                 <p>팀별 실전 서비스 개발</p>
               </S.LottieWrapper>
-              <S.LottieWrapper isMobile={isMobile} data-aos="zoom-in" data-aos-delay="500">
+              <S.LottieWrapper
+                isMobile={isMobile}
+                data-aos="zoom-in"
+                data-aos-delay="500"
+              >
                 <DemodayLottie />
                 <h2>Demoday</h2>
                 <p>서비스 검증 및 평가</p>
@@ -150,7 +234,11 @@ export default function Main() {
               <S.ArrowBG isMobile={isMobile}></S.ArrowBG>
             </S.LottieContainer>
 
-            <S.LottieWrapper isMobile={isMobile} data-aos="zoom-in" data-aos-delay="100">
+            <S.LottieWrapper
+              isMobile={isMobile}
+              data-aos="zoom-in"
+              data-aos-delay="100"
+            >
               <RocketLottie />
 
               <p>창업 경진대회 및 VC 투자 유치</p>
@@ -164,7 +252,10 @@ export default function Main() {
                 marginTop: "6rem",
               }}
             >
-              <S.MoreBtn isMobile={isMobile} onClick={() => router.push("activities")}>
+              <S.MoreBtn
+                isMobile={isMobile}
+                onClick={() => router.push("activities")}
+              >
                 &gt;&gt;&nbsp; Activities 자세히 보기
               </S.MoreBtn>
             </div>
@@ -197,7 +288,13 @@ export default function Main() {
             <S.PartnerContainer isMobile={isMobile}>
               {Partners.map(({ name, src }) => (
                 <div key={name} data-aos="fade">
-                  <Image alt={name} src={src} width={200} height={100} layout="responsive" />
+                  <Image
+                    alt={name}
+                    src={src}
+                    width={200}
+                    height={100}
+                    layout="responsive"
+                  />
                 </div>
               ))}
             </S.PartnerContainer>
@@ -205,9 +302,11 @@ export default function Main() {
           <S.Footer isMobile={isMobile}>
             <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
             <p>email | nextku.contact@gmail.com</p>
-            <p>대표 홍지우 | 010-7222-8050</p>
-            <p>부대표 엄빅토리아 | 010-7508-2801</p>
-            <S.FooterCopyright>NEXT 2025 All Rights Reserved</S.FooterCopyright>
+            <S.FooterContacts>
+              <p>대표 이성민 · 010-8693-1884</p>
+              <p>부대표 박보겸 · 010-3185-7117</p>
+            </S.FooterContacts>
+            <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
           </S.Footer>
         </S.Container>
       )}

@@ -8,6 +8,7 @@ export const PEOPLE_ITEMS = {
     ELEVEN: 11,
     TWELVE: 12,
     THIRTEEN: 13,
+    FOURTEEN: 14,
 };
 
 export enum DEPARTMENT {
@@ -42,6 +43,12 @@ export enum DEPARTMENT {
     CHINESE_CHARACTER = '한문학과',
     PHILOSPHY = '철학과',
 
+    // 14기에서 새로 등장한 학과
+    INDUSTRIAL_MANAGEMENT_ENGINEERING = '산업경영공학부',
+    MECHANICAL_ENGINEERING = '기계공학부',
+    GEOGRAPHY_EDUCATION = '지리교육과',
+    ENVIRONMENTAL_ECOLOGY_ENGINEERING = '환경생태공학부',
+    FREE_MAJOR = '자유전공학부',
 }
 
 export enum MANAGEMENT_TEAM_POSITION {
@@ -57,6 +64,10 @@ export enum MANAGEMENT_TEAM_POSITION {
     STARTUPLEADER = '창업팀장',
     FINANCE_LEADER = '재무팀장',
     PR_LEADER = '홍보팀장',
+
+    // 14기(15기 운영진)에서 추가된 팀
+    OPERATION = '운영팀',
+    OPERATION_LEADER = '운영팀장',
 }
 
 export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
@@ -822,5 +833,169 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         classOf: 21,
         imgSrc: '/images/profile/13gen/13기_홍지우.jpg',
         managementTeam: MANAGEMENT_TEAM_POSITION.REPRESENTATICE,
+    },
+    //////////////////////////////////////////////////////////////////
+    //여기서 부터 14기
+    //학번(classOf)은 원본 데이터에 이성민(23) 외 미확인이라 생략됨. 확인되면 채우면 됨.
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '곽민지',
+        department: DEPARTMENT.INDUSTRIAL_MANAGEMENT_ENGINEERING,
+        classOf: 24,
+        imgSrc: '/images/profile/14gen/14기_곽민지.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '김발해',
+        department: DEPARTMENT.BUSINESS,
+        classOf: 23,
+        imgSrc: '/images/profile/14gen/14기_김발해.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '김예은',
+        department: DEPARTMENT.STATISTICS,
+        classOf: 21,
+        imgSrc: '/images/profile/14gen/14기_김예은.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '김태성',
+        department: DEPARTMENT.MECHANICAL_ENGINEERING,
+        classOf: 25,
+        imgSrc: '/images/profile/14gen/14기_김태성.png',
+        imgPosition: 'center bottom', // 인물이 사진 하단에 있어 아래쪽 기준으로 크롭
+        managementTeam: MANAGEMENT_TEAM_POSITION.FINANCE_LEADER,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '노준하',
+        department: DEPARTMENT.BUSINESS,
+        classOf: 25,
+        imgSrc: '/images/profile/14gen/14기_노준하.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '민경민',
+        department: DEPARTMENT.MECHANICAL_ENGINEERING,
+        classOf: 25,
+        imgSrc: '/images/profile/14gen/14기_민경민.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '박기덕',
+        department: DEPARTMENT.ENGLISH_EDUCATION,
+        classOf: 22,
+        imgSrc: '/images/profile/14gen/14기_박기덕.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.STARTUP,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '박보겸',
+        department: DEPARTMENT.GEOGRAPHY_EDUCATION,
+        classOf: 24,
+        imgSrc: '/images/profile/14gen/14기_박보겸.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.VICE_REPRESENTATIVE,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '배준상',
+        department: DEPARTMENT.HEALTH_ENVIRONMENTAL_CONVERGENCE_SCIENCE,
+        classOf: 21,
+        imgSrc: '/images/profile/14gen/14기_배준상.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '송수민',
+        department: DEPARTMENT.SOCIOLOGY,
+        classOf: 25,
+        imgSrc: '/images/profile/14gen/14기_송수민.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.PR_LEADER,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '송현섭',
+        department: DEPARTMENT.PSYCHOTHERAPY,
+        classOf: 24,
+        imgSrc: '/images/profile/14gen/14기_송현섭.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '안유진',
+        department: DEPARTMENT.ENVIRONMENTAL_ECOLOGY_ENGINEERING,
+        classOf: 21,
+        imgSrc: '/images/profile/14gen/14기_안유진.jpeg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '오동',
+        department: DEPARTMENT.COMPUTER,
+        classOf: 24,
+        imgSrc: '/images/profile/14gen/14기_오동.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.DEVELOPER,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '윤가빈',
+        department: DEPARTMENT.KOREA_LANGUAGE_AND_LITERATURE,
+        classOf: 24,
+        imgSrc: '/images/profile/14gen/14기_윤가빈.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.DEVELOPERLEADER,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '이건준',
+        department: DEPARTMENT.STATISTICS,
+        classOf: 22,
+        imgSrc: '/images/profile/14gen/14기_이건준.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.OPERATION,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '이성민',
+        department: DEPARTMENT.COMPUTER,
+        classOf: 23,
+        imgSrc: '/images/profile/14gen/14기_이성민.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.REPRESENTATICE,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '조영환',
+        department: DEPARTMENT.FREE_MAJOR,
+        classOf: 22,
+        imgSrc: '/images/profile/14gen/14기_조영환.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.STARTUP,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '조형식',
+        department: DEPARTMENT.PHILOSPHY,
+        classOf: 22,
+        imgSrc: '/images/profile/14gen/14기_조형식.jpeg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.OPERATION_LEADER,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '조혜진',
+        department: DEPARTMENT.ELECTRONIC_ELECTRICAL_ENGINEERING,
+        classOf: 24,
+        imgSrc: '/images/profile/14gen/14기_조혜진.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '홍준호',
+        department: DEPARTMENT.COMPUTER,
+        classOf: 20,
+        imgSrc: '/images/profile/14gen/14기_홍준호.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
     }
 ];
