@@ -44,7 +44,7 @@ export default function Member({ peopleInformation }: MemberProps) {
                                                     alt={item.name}
                                                     fill
                                                     sizes="220px"
-                                                    style={{ objectFit: 'cover', objectPosition: 'top center' }}
+                                                    style={{ objectFit: 'cover', objectPosition: item.imgPosition ?? 'top center' }}
                                                 />
                                             ) : (
                                                 <div

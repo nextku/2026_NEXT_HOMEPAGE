@@ -867,6 +867,7 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         department: DEPARTMENT.MECHANICAL_ENGINEERING,
         classOf: 25,
         imgSrc: '/images/profile/14gen/14기_김태성.png',
+        imgPosition: 'center bottom', // 인물이 사진 하단에 있어 아래쪽 기준으로 크롭
         managementTeam: MANAGEMENT_TEAM_POSITION.FINANCE_LEADER,
     },
     {

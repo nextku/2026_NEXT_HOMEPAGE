@@ -1,14 +1,14 @@
 import styled from "styled-components";
 import { THEME } from "styles/theme";
 
-export const SliderWrapper = styled.div`
+export const SliderWrapper = styled.div<{ $fit?: string; $ratio?: string }>`
   width: 100%;
   position: relative;
 
   .slick-slide img {
     width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
+    aspect-ratio: ${(props) => props.$ratio || "16 / 9"};
+    object-fit: ${(props) => props.$fit || "cover"};
   }
 
   /* 좌우 이동 화살표: 평소엔 숨기고, 사진에 마우스를 올렸을 때만 노출 */
