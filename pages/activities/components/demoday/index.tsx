@@ -5,7 +5,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { useRouter } from "next/router";
 import { DemodayFinalLottie, DemodayInHouseLottie } from "components/lottie/lottie";
-import SliderSlick from "components/sliderSlick/index";
+import SessionSlider from "components/sessionSlider/index";
 import { DemoItem } from "constants/demo";
 
 export default function Curriculrum() {
@@ -59,7 +59,12 @@ export default function Curriculrum() {
                             overflow: "hidden"             
                         }}>
                             <S.SlideWrapper style={{ margin: "0" }}>
-                                <SliderSlick slideItemGroup={DemoItem} slideShowGroup={1} />
+                                <SessionSlider
+                                    images={DemoItem.map((item) => ({
+                                        src: item.src.src,
+                                        alt: `데모데이 ${item.name}`,
+                                    }))}
+                                />
                             </S.SlideWrapper>
                         </div>
 
