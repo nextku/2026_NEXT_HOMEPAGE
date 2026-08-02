@@ -36,6 +36,7 @@ const rocketFloat = keyframes`
 export const RecruitPopupBackdrop = styled.div`
   position: fixed;
   inset: 0;
+  box-sizing: border-box;
   z-index: 1000001;
   display: flex;
   align-items: center;
@@ -47,8 +48,18 @@ export const RecruitPopupBackdrop = styled.div`
 
 export const RecruitPopup = styled.div`
   position: relative;
-  width: min(92vw, 720px);
+  /*
+   * Keep the 720:430 artwork inside both viewport axes. The vh term is the
+   * available height (minus the backdrop padding) converted to that ratio.
+   */
+  width: min(
+    92vw,
+    calc(100vw - 4rem),
+    calc(167.4419vh - 6.6977rem),
+    720px
+  );
   aspect-ratio: 720 / 430;
+  flex: 0 0 auto;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 28px;
@@ -60,6 +71,20 @@ export const RecruitPopup = styled.div`
     0 30px 90px rgba(0, 0, 0, 0.55),
     0 0 45px rgba(255, 106, 0, 0.08);
   animation: ${popupIn} 0.45s ease-out both;
+
+  &,
+  & * {
+    box-sizing: border-box;
+  }
+
+  @supports (height: 100dvh) {
+    width: min(
+      92vw,
+      calc(100vw - 4rem),
+      calc(167.4419dvh - 6.6977rem),
+      720px
+    );
+  }
 
   &::before,
   &::after {
@@ -236,8 +261,20 @@ export const RecruitPopupRocket = styled.div`
   right: 6.25%;
   bottom: 9.8%;
   width: 20.1%;
+  height: 58%;
   filter: drop-shadow(0 2.5cqw 3.06cqw rgba(255, 106, 0, 0.28));
   animation: ${rocketFloat} 3.2s ease-in-out infinite;
+
+  & > span {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  & img {
+    object-fit: contain;
+  }
 
 `;
 

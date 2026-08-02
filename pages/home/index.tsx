@@ -133,7 +133,8 @@ export default function Main() {
                     <Image
                       src={RecruitRocket}
                       alt=""
-                      layout="responsive"
+                      layout="fill"
+                      objectFit="contain"
                       priority
                     />
                   </S.RecruitPopupRocket>
