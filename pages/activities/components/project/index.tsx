@@ -5,11 +5,29 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { useRouter } from "next/router";
 import SliderSlick from "components/sliderSlick/index";
+import SessionSlider from "components/sessionSlider/index";
 import { ProjectItem } from "constants/project";
-import hackathon_codeit from "public/images/next13/hackathon.png";
-import ideathon from "public/images/next13/lean-startup.png";
-import product_day from "public/images/next13/product-day.png";
-import dongul from "public/images/activities/project/dongul.jpeg";
+import leanstartup1 from "public/images/activities/project/leanstartup-1.jpg";
+import leanstartup2 from "public/images/activities/project/leanstartup-2.jpg";
+import leanstartup3 from "public/images/activities/project/leanstartup-3.jpg";
+import leanstartup4 from "public/images/activities/project/leanstartup-4.jpg";
+import leanstartup5 from "public/images/activities/project/leanstartup-5.jpg";
+import hackathon1 from "public/images/activities/project/hackathon-1.jpg";
+import hackathon2 from "public/images/activities/project/hackathon-2.jpg";
+import productday1 from "public/images/activities/project/productday-1.jpg";
+import productday2 from "public/images/activities/project/productday-2.jpg";
+import productday3 from "public/images/activities/project/productday-3.jpg";
+import productday4 from "public/images/activities/project/productday-4.jpg";
+import productday5 from "public/images/activities/project/productday-5.jpg";
+import productday6 from "public/images/activities/project/productday-6.jpg";
+import dongul1 from "public/images/activities/project/dongul-1.jpg";
+import dongul2 from "public/images/activities/project/dongul-2.jpg";
+import dongul3 from "public/images/activities/project/dongul-3.jpg";
+import dongul4 from "public/images/activities/project/dongul-4.jpg";
+import dongul5 from "public/images/activities/project/dongul-5.jpg";
+import dongul6 from "public/images/activities/project/dongul-6.jpg";
+import dongul7 from "public/images/activities/project/dongul-7.jpg";
+import dongul8 from "public/images/activities/project/dongul-8.jpg";
 
 export default function Curriculrum() {
   const [loading, setLoading] = useState(true);
@@ -39,7 +57,18 @@ export default function Curriculrum() {
                 비즈니스의 본질과 자본의 흐름을 몸소 체득하는 실전 프로젝트입니다. <br />
               </S.SessionInfoBox>
               <S.SessionImgBox isMobile={isMobile}>
-                <img src={dongul.src} alt="돈굴돈굴 프로젝트" />
+                <SessionSlider
+                  images={[
+                    { src: dongul1.src, alt: "돈굴돈굴 프로젝트 1" },
+                    { src: dongul2.src, alt: "돈굴돈굴 프로젝트 2" },
+                    { src: dongul3.src, alt: "돈굴돈굴 프로젝트 3" },
+                    { src: dongul4.src, alt: "돈굴돈굴 프로젝트 4" },
+                    { src: dongul5.src, alt: "돈굴돈굴 프로젝트 5" },
+                    { src: dongul6.src, alt: "돈굴돈굴 프로젝트 6" },
+                    { src: dongul7.src, alt: "돈굴돈굴 프로젝트 7" },
+                    { src: dongul8.src, alt: "돈굴돈굴 프로젝트 8" },
+                  ]}
+                />
               </S.SessionImgBox>
             </S.SessionWrapper>
             <S.SessionWrapper isMobile={isMobile}>
@@ -55,7 +84,15 @@ export default function Curriculrum() {
                 서비스를 지속적으로 개선해 나가는 경험을 쌓습니다.
               </S.SessionInfoBox>
               <S.SessionImgBox isMobile={isMobile}>
-                <img src={ideathon.src} alt="린스타트업 세션" />
+                <SessionSlider
+                  images={[
+                    { src: leanstartup1.src, alt: "린스타트업 세션 1" },
+                    { src: leanstartup2.src, alt: "린스타트업 세션 2" },
+                    { src: leanstartup3.src, alt: "린스타트업 세션 3" },
+                    { src: leanstartup4.src, alt: "린스타트업 세션 4" },
+                    { src: leanstartup5.src, alt: "린스타트업 세션 5" },
+                  ]}
+                />
               </S.SessionImgBox>
             </S.SessionWrapper>
             <S.SessionWrapper isMobile={isMobile}>
@@ -71,7 +108,14 @@ export default function Curriculrum() {
                 창업가로서의 협업 경험을 쌓습니다.
               </S.SessionInfoBox>
               <S.SessionImgBox isMobile={isMobile}>
-                <img src={hackathon_codeit.src} alt="무박해커톤" />
+                <SessionSlider
+                  fit="contain"
+                  ratio="3 / 4"
+                  images={[
+                    { src: hackathon1.src, alt: "무박해커톤 1" },
+                    { src: hackathon2.src, alt: "무박해커톤 2" },
+                  ]}
+                />
               </S.SessionImgBox>
             </S.SessionWrapper>
             <S.SessionWrapper isMobile={isMobile}>
@@ -87,7 +131,16 @@ export default function Curriculrum() {
                 <br />
               </S.SessionInfoBox>
               <S.SessionImgBox isMobile={isMobile}>
-                <img src={product_day.src} alt="프로덕트 데이" />
+                <SessionSlider
+                  images={[
+                    { src: productday1.src, alt: "프로덕트 데이 1" },
+                    { src: productday2.src, alt: "프로덕트 데이 2" },
+                    { src: productday3.src, alt: "프로덕트 데이 3" },
+                    { src: productday4.src, alt: "프로덕트 데이 4" },
+                    { src: productday5.src, alt: "프로덕트 데이 5" },
+                    { src: productday6.src, alt: "프로덕트 데이 6" },
+                  ]}
+                />
               </S.SessionImgBox>
             </S.SessionWrapper>
             {/* <S.ProjectExampleWrapper>

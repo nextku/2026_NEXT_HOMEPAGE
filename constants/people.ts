@@ -867,6 +867,7 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         department: DEPARTMENT.MECHANICAL_ENGINEERING,
         classOf: 25,
         imgSrc: '/images/profile/14gen/14기_김태성.png',
+        imgPosition: 'center bottom', // 인물이 사진 하단에 있어 아래쪽 기준으로 크롭
         managementTeam: MANAGEMENT_TEAM_POSITION.FINANCE_LEADER,
     },
     {
@@ -987,6 +988,14 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         department: DEPARTMENT.ELECTRONIC_ELECTRICAL_ENGINEERING,
         classOf: 24,
         imgSrc: '/images/profile/14gen/14기_조혜진.jpg',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.FOURTEEN,
+        name: '홍준호',
+        department: DEPARTMENT.COMPUTER,
+        classOf: 20,
+        imgSrc: '/images/profile/14gen/14기_홍준호.jpg',
         managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
     }
 ];

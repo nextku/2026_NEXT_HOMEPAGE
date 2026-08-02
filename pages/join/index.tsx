@@ -238,7 +238,7 @@ export default function Join() {
                       <button
                         onClick={() =>
                           (location.href =
-                            "https://docs.google.com/document/d/1g_-Lx0edF5NeW1pNgcd8DmDQkQlA5MCI/export?format=docx")
+                            "https://docs.google.com/document/d/1jHm_GrZzElCt47xJIP5HQJVuElVaWb_G/export?format=docx")
                         }
                       >
                         지원서 다운로드
@@ -251,7 +251,7 @@ export default function Join() {
                             currentTime <= endApplicationTime
                           ) {
                             window.open(
-                              "https://forms.gle/8HChTJSvdp8xTjjP7",
+                              "https://docs.google.com/forms/d/e/1FAIpQLScTXBOecHQlOOjlWGaiQNfBbcmAq0h-uEIjgZ_t4P8ReWbc8g/viewform?usp=header",
                               "_blank",
                             );
                           }
