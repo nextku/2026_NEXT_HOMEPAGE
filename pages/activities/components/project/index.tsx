@@ -109,8 +109,6 @@ export default function Curriculrum() {
               </S.SessionInfoBox>
               <S.SessionImgBox isMobile={isMobile}>
                 <SessionSlider
-                  fit="contain"
-                  ratio="3 / 4"
                   images={[
                     { src: hackathon1.src, alt: "무박해커톤 1" },
                     { src: hackathon2.src, alt: "무박해커톤 2" },
