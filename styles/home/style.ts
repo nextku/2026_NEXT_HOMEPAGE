@@ -588,6 +588,12 @@ export const Footer = styled.footer<{ isMobile: boolean }>`
     `}
 `;
 
+export const FooterContacts = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+`;
+
 export const FooterCopyright = styled.p`
   align-self: flex-end;
   margin-top: 1rem !important;
