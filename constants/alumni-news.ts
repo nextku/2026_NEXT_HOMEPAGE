@@ -84,7 +84,7 @@ export const ALUMNI_NEWS_INFORMATION: ALUMNI_NEWS_INFORMATION_TYPE[] = [
         gen: GENERATIONS.TWELVE,
         thumbnailImgSrc: '/images/alumni/cardnews/임도현.png',
         comment: '창업의 꿈을 현실로 만든 인연과 혁신의 장',
-        url: 'https://www.instagram.com/p/DFmlgZ9hPmB/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==',
+        url: 'https://www.instagram.com/p/DbipMweE323/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==',
         name: '임도현',
     },
 ];
