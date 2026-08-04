@@ -1,91 +1,40 @@
-// import React, { useState, useEffect } from "react";
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useRef,
-  memo,
-  MouseEvent,
-} from "react";
-// import classNames from 'classnames';
-import * as S from "styles/about/components/history/styles";
-import { ScrollProgress } from "components/scrollprogress";
-import { useMediaQuery } from "react-responsive";
-import AOS from "aos";
-import "aos/dist/aos.css";
-// import { useRouter } from "next/router";
-import { ABOUT_HISTORY, ABOUT_HISTORY as HistoryItems } from "constants/about";
+import React from "react";
+import * as A from "styles/activities/shared";
+import { ABOUT_HISTORY } from "constants/about";
 
-export const DESKTOP_TAB = {
-  width: "100%",
-  margin: "0 auto 2rem auto",
-};
+/**
+ * 연혁.
+ *
+ * 이전에는 연도가 오렌지였고 화면 밖까지 이어지는 세로선이 왼쪽에 있었다.
+ * 선을 걷고 연도를 왼쪽 열에 고정해 눈이 연도를 따라 내려가게 한다.
+ * 데이터(constants/about.ts)는 그대로 쓴다.
+ */
 
 export default function History() {
-  const [loading, setLoading] = useState(true);
-  const isDesktop = useMediaQuery({ minDeviceWidth: 820 });
-  const isMobile = useMediaQuery({ maxWidth: 820 });
-
-  useEffect(() => {
-    AOS.init();
-    if (isMobile != undefined && isDesktop != undefined) {
-      setLoading(false);
-    }
-  }, []);
   return (
-    <S.Container isMobile={isMobile} className="mount">
-      <ScrollProgress></ScrollProgress>
-      {/* <S.ProgressIndicator></S.ProgressIndicator> */}
-      <S.MainContainer isMobile={isMobile} className="mount">
-        {HistoryItems.map(({ YEAR, TITLE, CONTENT }) => (
-          <S.TextWrapper key={YEAR} data-aos="fade">
-            <S.TitleTextElementWrapper isMobile={isMobile}>
-              <span>
-                <b>{YEAR}</b>
-              </span>
-              <span style={{ fontSize: "2.4rem" }}>{TITLE}</span>
-            </S.TitleTextElementWrapper>
-            <S.TextElementWrapper isMobile={isMobile}>
-              {/* {IsActing ? (
-                          <S.Badge>Acting</S.Badge>
-                        ) : (<div></div>
-                        )} */}
-              {CONTENT.map((item) => (
-                <p>
-                  <S.FlexRow isMobile={isMobile} key={item[1]}>
-                    {
-                      item[1] == 2 ? (
-                        <S.TextElementWrapper
-                          isMobile={isMobile}
-                          style={{ width: "10rem" }}
-                        >
-                          <S.Badge>Alumni</S.Badge>
-                        </S.TextElementWrapper>
-                      ) : item[1] == 3 ? (
-                        <S.TextElementWrapper
-                          isMobile={isMobile}
-                          style={{ width: "10rem" }}
-                        ></S.TextElementWrapper>
-                      ) : item[1] == 1 ? (
-                        <S.TextElementWrapper
-                          isMobile={isMobile}
-                          style={{ width: "10rem" }}
-                        >
-                          <S.Badge>Acting</S.Badge>
-                        </S.TextElementWrapper>
-                      ) : null
-                      // <br />
-                    }
-                    <S.TextElementWrapper isMobile={isMobile}>
-                      {item[0]}
-                    </S.TextElementWrapper>
-                  </S.FlexRow>
-                </p>
-              ))}
-            </S.TextElementWrapper>
-          </S.TextWrapper>
+    <A.Section className="mount">
+      <A.Intro>
+        <h2>2014년부터 지금까지</h2>
+        <p>
+          멋쟁이사자처럼 고려대 지부에서 시작해 소프트웨어 창업학회가 됐습니다.
+        </p>
+      </A.Intro>
+
+      <A.Timeline>
+        {ABOUT_HISTORY.map((era) => (
+          <A.Era key={era.YEAR}>
+            <A.EraYear>{era.YEAR}</A.EraYear>
+            <div>
+              <A.EraTitle>{era.TITLE}</A.EraTitle>
+              <A.EraList>
+                {era.CONTENT.map(([text], i) => (
+                  <li key={i}>{text}</li>
+                ))}
+              </A.EraList>
+            </div>
+          </A.Era>
         ))}
-      </S.MainContainer>
-    </S.Container>
+      </A.Timeline>
+    </A.Section>
   );
 }

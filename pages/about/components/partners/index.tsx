@@ -1,60 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import * as S from 'styles/about/components/achievement/styles';
-import { useMediaQuery } from 'react-responsive';
-import { Partners as PartnersItems } from 'constants/partners';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import blackLogo from 'public/assets/new_logo(bl).svg';
-export const DESKTOP_TAB = {
-    width: '100%',
-    margin: '0 auto 2rem auto',
-};
+import React from "react";
+import Image from "next/image";
+import * as A from "styles/activities/shared";
+import { Partners as PartnersItems } from "constants/partners";
+
+/**
+ * 파트너.
+ *
+ * Achievement 와 같은 격자를 쓴다. 이전에는 로고를 원본 크기로 늘어놓아
+ * 마지막 줄이 어색하게 남고 크기가 요동쳤다.
+ * 문의 메일은 실제로 누를 수 있게 링크로 만든다.
+ */
 
 export default function Partners() {
-    const [loading, setLoading] = useState(true);
-    const isDesktop = useMediaQuery({ minDeviceWidth: 820 });
-    const isMobile = useMediaQuery({ maxWidth: 820 });
-    const partners = Partners;
+  return (
+    <A.Section className="mount">
+      <A.Intro>
+        <h2>함께해주시는 분들</h2>
+        <p>
+          교내 창업지원단체와 교육 기업, 그리고 다양한 VC와 긴밀하게 협력하고
+          있습니다. 협업 문의는{" "}
+          <a href="mailto:nextku.contact@gmail.com">nextku.contact@gmail.com</a>
+          으로 부탁드립니다.
+        </p>
+      </A.Intro>
 
-    useEffect(() => {
-        AOS.init();
-        if (isMobile != undefined && isDesktop != undefined) {
-            setLoading(false);
-        }
-    }, []);
-    return (
-        <S.Container isMobile={isMobile}>
-            <S.MainWrapper isMobile={isMobile}>
-                <S.TextWrapper isMobile={isMobile}>
-                    <p>
-                        <span>
-                            고려대학교 소프트웨어 창업학회 
-                            <img
-                                src={blackLogo.src}
-                                alt="NEXT"
-                                style={{
-                                    height: '1em',
-                                    verticalAlign: 'top',
-                                    margin: '0 5px',
-                                    display: 'inline-block',
-                                }}
-                            />는
-                        </span>
-                    </p>
-                    <p>
-                        교내 창업지원단체와 교육 기업, <br />
-                        그리고 다양한 VC와 긴밀하게 협력하고 있습니다 <br />
-                    </p>
-                    <p>협업 관련 문의는 nextku.contact@gmail.com으로 부탁드립니다</p>
-                </S.TextWrapper>
-                <S.ImageWrapper isMobile={isMobile} className="mount">
-                    {PartnersItems.map(({ name, src }) => (
-                        <S.ImageElementWrapper key={name} data-aos="fade" isMobile={isMobile}>
-                            <img src={src.src} />
-                        </S.ImageElementWrapper>
-                    ))}
-                </S.ImageWrapper>
-            </S.MainWrapper>
-        </S.Container>
-    );
+      <A.LogoGrid>
+        {PartnersItems.map(({ name, src }) => (
+          <A.LogoCell key={name}>
+            <Image
+              src={src}
+              alt={name}
+              fill
+              sizes="(max-width: 36rem) 45vw, 240px"
+              style={{ objectFit: "contain" }}
+            />
+          </A.LogoCell>
+        ))}
+      </A.LogoGrid>
+    </A.Section>
+  );
 }
