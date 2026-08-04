@@ -31,7 +31,24 @@ export default class MyDocument extends Document {
           {/* Preconnect & Preload (폰트 & CDN 리소스 최적화) */}
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-          <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+          <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="" />
+
+          {/*
+            Pretendard.
+            styles/globals.css 에 @font-face 9종이 선언돼 있지만 그 파일을 어디서도
+            import 하지 않아 지금까지 한 번도 로드된 적이 없다. public/font 의 16MB 는
+            배포만 되고 아무도 받아가지 않는 죽은 용량이다.
+
+            여기서는 dynamic subset 판을 쓴다. unicode-range 로 쪼개져 있어 실제로
+            화면에 나온 글자가 속한 조각만 내려받는다. 통짜 woff2 한 벌이 790KB 인 것과
+            달리 수십 KB 수준이고, 가변 폰트라 weight 를 자유롭게 쓸 수 있다.
+          */}
+          <link
+            rel="stylesheet"
+            as="style"
+            crossOrigin=""
+            href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+          />
 
           {/* Canonical URL */}
           <link rel="canonical" href="https://www.next-ku.com/" />
