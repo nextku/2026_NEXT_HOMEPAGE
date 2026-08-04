@@ -43,7 +43,7 @@ export default function Member({ peopleInformation }: MemberProps) {
                                                     src={item.imgSrc}
                                                     alt={item.name}
                                                     fill
-                                                    sizes="220px"
+                                                    sizes="(max-width: 700px) 45vw, 220px"
                                                     style={{ objectFit: 'cover', objectPosition: item.imgPosition ?? 'top center' }}
                                                 />
                                             ) : (
