@@ -23,10 +23,25 @@ export const Section = styled.section`
     clamp(6rem, 10vw, 12rem);
 `;
 
+/**
+ * 옆에 이미지가 없는 글 전용 섹션.
+ * 글 덩어리를 화면 가운데에 두어 좌우 여백이 같아지게 한다.
+ */
+export const SectionNarrow = styled(Section)`
+  max-width: 86rem;
+`;
+
 /** 탭 맨 위에 오는 제목과 한 줄 설명. 모든 탭이 같은 형태로 시작한다. */
 export const Intro = styled.div`
-  max-width: 52rem;
-  margin-bottom: clamp(4rem, 6vw, 7rem);
+  /* 1. Timeline과 동일한 틀 크기 및 가운데 정렬 부여 */
+  width: 100%;
+  max-width: 92rem;
+  margin: 0 auto clamp(4rem, 6vw, 7rem);
+
+  /* 2. 글 텍스트가 끝없이 길어지지 않도록 내부 요소 너비만 52rem으로 제한 */
+  & h2, & p {
+    max-width: 52rem;
+  }
 
   & h2 {
     margin: 0 0 1.2rem;
@@ -44,6 +59,17 @@ export const Intro = styled.div`
     letter-spacing: -0.025em;
     color: #7d766c;
     word-break: keep-all;
+  }
+  & a {
+    color: #17150f;
+    font-weight: 600;
+    box-shadow: inset 0 -1px 0 #cfc8bc;
+    overflow-wrap: anywhere;
+  }
+  @media (any-hover: hover) {
+    & a:hover {
+      box-shadow: inset 0 -1px 0 #f7941e;
+    }
   }
 `;
 
@@ -329,5 +355,248 @@ export const VcLogo = styled.div<{ $scale?: number }>`
      * Strong Ventures 1.0)가 높이에 갇혀 작게 보인다. 파일별로 배율을 보정한다.
      */
     transform: scale(${({ $scale }) => $scale ?? 1});
+  }
+`;
+
+/* ------------------------------------------------------------------ */
+/* ABOUT 전용                                                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * 인사말처럼 긴 글이 이어지는 본문.
+ *
+ * 이전에는 <br> 로 줄을 강제해서 화면 폭이 달라지면 줄바꿈이 어긋났다.
+ * 폭을 글자 수로 제한하고 줄바꿈은 브라우저에 맡긴다.
+ */
+export const Prose = styled.div`
+  /* 옆에 아무것도 없을 때는 넓게 둔다. 좁으면 오른쪽이 통째로 비어 보인다. */
+  max-width: 68ch;
+
+  & p {
+    margin: 0 0 1.6rem;
+    font-size: clamp(1.55rem, 1.6vw, 1.7rem);
+    line-height: 1.85;
+    letter-spacing: -0.025em;
+    color: #57524a;
+    word-break: keep-all;
+  }
+  & p:last-child {
+    margin-bottom: 0;
+  }
+  /* 강조는 색이 아니라 굵기로. 오렌지는 페이지에서 아껴 쓴다. */
+  & b {
+    color: #17150f;
+    font-weight: 700;
+  }
+  /*
+   * 마지막 문단은 맺음말이라 크게 띄운다. 같은 크기로 이어지면 글이 그냥
+   * 끝나버리고, 화면 오른쪽이 빈 채로 남는다.
+   */
+  & p:last-of-type {
+    margin-top: 3.2rem;
+    font-size: clamp(2rem, 2.6vw, 2.6rem);
+    line-height: 1.5;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    color: #17150f;
+    max-width: 22ch;
+  }
+  & p:last-of-type b {
+    color: #95500a;
+  }
+
+  /* 문장 안의 워드마크는 글자 높이에 맞춘다 */
+  & img {
+    display: inline-block;
+    height: 0.86em;
+    width: auto;
+    vertical-align: baseline;
+    position: relative;
+    top: 0.06em;
+    margin: 0 0.12em;
+  }
+`;
+
+/** 글 끝 서명. */
+export const Signature = styled.div`
+  margin-top: clamp(3.2rem, 5vw, 4.8rem);
+  padding-top: clamp(2rem, 3vw, 2.8rem);
+  border-top: 1px solid #e7e2d8;
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+  color: #8d877f;
+
+  & strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #17150f;
+    font-weight: 700;
+    font-size: 1.6rem;
+  }
+`;
+
+/**
+ * 연혁 목록.
+ *
+ * 이전에는 화면 밖까지 나가는 세로선 하나에 연도가 오렌지였다.
+ * 선을 걷고 연도는 왼쪽 열에 고정해, 눈이 연도를 따라 내려가게 한다.
+ */
+export const Timeline = styled.ol`
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  display: grid;
+  gap: clamp(3.2rem, 5vw, 5.6rem);
+  max-width: 92rem;
+
+  /*
+   * 연도 열 오른쪽에 얇은 선을 두고, 스크롤한 만큼 오렌지가 차오르게 한다.
+   * 장식이 아니라 '지금 어디쯤 읽고 있는가' 를 나타내는 표시다.
+   * 좁은 화면에서는 연도가 위로 올라가므로 선을 두지 않는다.
+   */
+  @media (min-width: 48rem) {
+    position: relative;
+    padding-left: 0;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 10.4rem;
+      top: 0.6rem;
+      bottom: 0.6rem;
+      width: 2px;
+      background: #e7e2d8;
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      left: 10.4rem;
+      top: 0.6rem;
+      bottom: 0.6rem;
+      width: 2px;
+      background: #f7941e;
+      transform-origin: top center;
+      transform: scaleY(0);
+    }
+
+    @supports (animation-timeline: view()) {
+      &::after {
+        animation: nextEraProgress linear both;
+        animation-timeline: view();
+        /*
+         * cover 는 요소가 화면을 완전히 벗어날 때를 100% 로 잡는다. 연혁은 화면보다
+         * 훨씬 길어서 페이지 끝까지 내려도 그 지점에 닿지 않아 선이 덜 찬 채로 남는다.
+         * entry 로 끝내면 마지막 항목에 닿기 전에 선이 다 차버린다.
+         * 처음 보일 때부터 위로 완전히 사라질 때까지로 잡아야 끝까지 내려간다.
+         */
+        animation-range: cover 20% contain 100%;
+      }
+
+      @keyframes nextEraProgress {
+        from {
+          transform: scaleY(0);
+        }
+        to {
+          transform: scaleY(1);
+        }
+      }
+    }
+  }
+`;
+
+export const Era = styled.li`
+  display: grid;
+  gap: 1rem 3.2rem;
+
+  @media (min-width: 48rem) {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    align-items: start;
+  }
+`;
+
+export const EraYear = styled.div`
+  font-size: clamp(1.8rem, 2.4vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #17150f;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+`;
+
+export const EraTitle = styled.h3`
+  margin: 0 0 1.2rem;
+  font-size: clamp(1.6rem, 1.8vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #17150f;
+  word-break: keep-all;
+`;
+
+export const EraList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.7rem;
+
+  & li {
+    position: relative;
+    padding-left: 1.4rem;
+    font-size: clamp(1.45rem, 1.5vw, 1.55rem);
+    line-height: 1.75;
+    letter-spacing: -0.025em;
+    color: #7d766c;
+    word-break: keep-all;
+  }
+  /* 점 하나로만 표시한다. 선이나 배지를 쓰면 목록이 무거워진다. */
+  & li::before {
+    content: "";
+    position: absolute;
+    left: 0.2rem;
+    top: 0.85em;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #cfc8bc;
+  }
+`;
+
+/**
+ * 로고 격자.
+ *
+ * 파일마다 원본 비율과 여백이 제각각이라 그냥 늘어놓으면 크기가 요동친다.
+ * 같은 크기의 칸을 주고 그 안에서 맞춘다.
+ */
+export const LogoGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2.8rem, 4vw, 4.8rem) clamp(2.4rem, 3.5vw, 4rem);
+  align-items: center;
+
+  @media (min-width: 36rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (min-width: 56rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  @media (min-width: 76rem) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+`;
+
+export const LogoCell = styled.div`
+  /*
+   * 배경을 깔면 흰 바탕이 박힌 로고 파일이 '박스 안의 박스' 가 된다.
+   * 칸은 크기만 잡고 배경은 두지 않는다. 정렬은 격자가 한다.
+   */
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 `;
