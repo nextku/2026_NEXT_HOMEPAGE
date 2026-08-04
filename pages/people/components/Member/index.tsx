@@ -11,6 +11,30 @@ import 'aos/dist/aos.css'; //aos 애니메이션 스타일
 interface MemberProps {
     peopleInformation: PEOPLE_INFORMATION_TYPE[];
 }
+
+/*
+ * 직책이 있으면 운영진이다. 직책은 기수마다 달라서
+ * (10~11기는 학술부·기획부, 12기는 창업팀·개발팀, 13~14기는 팀장 체제)
+ * 직책명을 목록으로 박아두면 다음 기수에서 깨진다. 값의 유무로만 판별한다.
+ */
+function isLeadership(position?: string) {
+    return Boolean(position && position.trim());
+}
+
+/**
+ * 운영진 안에서의 표시 순서.
+ * 대표 → 부대표 → 임원진 → 팀장 → 나머지 팀·부서.
+ * 목록에 없는 새 직책은 뒤로 보내되 서로의 원래 순서는 유지한다.
+ */
+const LEAD_ORDER = ['대표', '부대표', '임원진'];
+
+function leadRank(position?: string) {
+    const p = position ?? '';
+    const i = LEAD_ORDER.indexOf(p);
+    if (i !== -1) return i;
+    if (p.endsWith('팀장')) return LEAD_ORDER.length;
+    return LEAD_ORDER.length + 1;
+}
 export default function Member({ peopleInformation }: MemberProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
@@ -30,57 +54,89 @@ export default function Member({ peopleInformation }: MemberProps) {
     return (
         <>
             {!loading && ( //loading이 false일 때만 멤버 정보 렌더링
-                <S.Container className="mount" isMobile={isMobile}>
-                    <>
-                        {peopleInformation && //멤버 정보 배열이 존재하면 매핑 시작
-                            peopleInformation.map((item: PEOPLE_INFORMATION_TYPE, index) => {
-                                return (
-                                    <S.MemberWrapper key={index}>
-                                        {/* Image */}
-                                        <S.MemberImgBox>
-                                            {item.imgSrc ? (
-                                                <Image
-                                                    src={item.imgSrc}
-                                                    alt={item.name}
-                                                    fill
-                                                    sizes="(max-width: 700px) 45vw, 220px"
-                                                    style={{ objectFit: 'cover', objectPosition: item.imgPosition ?? 'top center' }}
-                                                />
-                                            ) : (
-                                                <div
-                                                    style={{
-                                                        backgroundColor: '#333333',
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        position: 'absolute',
-                                                        inset: 0,
-                                                    }}
-                                                />
-                                            )}
-                                        </S.MemberImgBox>
-                                        {/* Text1-2*/}
-                                        <S.MemberTextBox>
-                                            {/* Text1.이름과 배지 */}
-                                            <S.MemberName>
-                                                {/* 이름 렌더링 후, 한 칸 공백 추가 그리고 운영진이면 배지 추가 */}
-                                                {item.name}{' '}
-                                                {item.managementTeam && (
-                                                    <S.ManagementTeamBadge>{item.managementTeam}</S.ManagementTeamBadge>
-                                                )}
-                                            </S.MemberName>
-                                            {/* Text2.학과 */}
-                                            <S.MemberInfo>
-                                                {item.department}
-                                                {item.masterDegree && `(${item.masterDegree && item.masterDegree})`}
-                                                {item.secondMajor && `(${item.secondMajor && item.secondMajor})`}
-                                                {item.classOf ? ` ${item.classOf}학번` : ''}
-                                            </S.MemberInfo>
-                                        </S.MemberTextBox>
-                                    </S.MemberWrapper>
-                                );
-                            })}
-                    </>
-                </S.Container>
+                <>
+                    {(() => {
+                        const leaders = peopleInformation
+                            .filter((m) => isLeadership(m.managementTeam))
+                            .sort((a, b) => leadRank(a.managementTeam) - leadRank(b.managementTeam));
+                        const members = peopleInformation.filter((m) => !isLeadership(m.managementTeam));
+
+                        /*
+                         * 한 기수의 부원은 그 기수 활동을 마친 뒤 다음 기수의 운영진이 된다.
+                         * 그래서 14기 탭에 있는 '대표' 배지는 14기가 아니라 15기 대표를 뜻한다.
+                         * 그냥 '운영진' 이라고 쓰면 이 탭의 기수를 운영한 사람으로 읽히므로
+                         * 운영하는 기수를 제목에 명시한다. 탭은 소속 기수, 제목은 운영 기수다.
+                         */
+                        const gen = peopleInformation[0]?.gen;
+                        const leadTitle = gen ? `${gen + 1}기 운영진` : '운영진';
+
+                        const renderCard = (item: PEOPLE_INFORMATION_TYPE, index: number) => (
+                            <S.MemberWrapper key={`${item.name}-${index}`}>
+                                <S.MemberImgBox>
+                                    {item.imgSrc ? (
+                                        <Image
+                                            src={item.imgSrc}
+                                            alt={item.name}
+                                            fill
+                                            sizes="(max-width: 700px) 45vw, 220px"
+                                            style={{
+                                                objectFit: 'cover',
+                                                objectPosition: item.imgPosition ?? 'top center',
+                                            }}
+                                        />
+                                    ) : (
+                                        <div
+                                            style={{
+                                                backgroundColor: '#333333',
+                                                width: '100%',
+                                                height: '100%',
+                                                position: 'absolute',
+                                                inset: 0,
+                                            }}
+                                        />
+                                    )}
+                                </S.MemberImgBox>
+                                <S.MemberTextBox>
+                                    <S.MemberName>
+                                        {item.name}{' '}
+                                        {item.managementTeam && (
+                                            <S.ManagementTeamBadge>{item.managementTeam}</S.ManagementTeamBadge>
+                                        )}
+                                    </S.MemberName>
+                                    <S.MemberInfo>
+                                        {item.department}
+                                        {item.masterDegree && `(${item.masterDegree})`}
+                                        {item.secondMajor && `(${item.secondMajor})`}
+                                        {item.classOf ? ` ${item.classOf}학번` : ''}
+                                    </S.MemberInfo>
+                                </S.MemberTextBox>
+                            </S.MemberWrapper>
+                        );
+
+                        return (
+                            <S.Section className="mount">
+                                {leaders.length > 0 && (
+                                    <>
+                                        <S.GroupHead>
+                                            <h3>{leadTitle}</h3>
+                                            <span>{leaders.length}명</span>
+                                        </S.GroupHead>
+                                        <S.Container>{leaders.map(renderCard)}</S.Container>
+                                    </>
+                                )}
+                                {members.length > 0 && (
+                                    <>
+                                        <S.GroupHead>
+                                            <h3>학회원</h3>
+                                            <span>{members.length}명</span>
+                                        </S.GroupHead>
+                                        <S.Container>{members.map(renderCard)}</S.Container>
+                                    </>
+                                )}
+                            </S.Section>
+                        );
+                    })()}
+                </>
             )}
         </>
     );

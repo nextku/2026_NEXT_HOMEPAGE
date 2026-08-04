@@ -11,12 +11,47 @@ import styled from "styled-components";
  * 입체감은 배경이나 그라디언트가 아니라 커서를 올렸을 때 실제로 들리는 것으로 만든다.
  */
 
-export const Container = styled.div<{ isMobile?: boolean }>`
+/** 기수 한 개 분량 전체. 그룹 제목과 격자를 함께 담는다. */
+export const Section = styled.div`
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
   max-width: 128rem;
-  padding: 3rem clamp(2rem, 6vw, 8rem) 8rem;
+  padding: 2.4rem clamp(2rem, 6vw, 8rem) 8rem;
+`;
+
+/**
+ * 그룹 제목.
+ * 구분선을 길게 긋지 않는다. 제목 자체가 경계가 되고, 위쪽 여백이 그룹을 나눈다.
+ */
+export const GroupHead = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  margin: 4.8rem 0 2rem;
+
+  &:first-child {
+    margin-top: 0.6rem;
+  }
+
+  & h3 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #17150f;
+  }
+  & span {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #a09a91;
+    font-variant-numeric: tabular-nums;
+  }
+`;
+
+export const Container = styled.div<{ isMobile?: boolean }>`
+  width: 100%;
 
   /* flex-wrap 은 마지막 줄이 가운데로 몰려 격자가 무너진다. grid 로 고정한다.
      auto-fill 은 화면이 넓어지면 6개까지 들어가므로 열 수를 단계별로 못 박아
