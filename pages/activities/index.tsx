@@ -15,8 +15,9 @@ const Curriculum = dynamic(() => import("./components/curriculum"), { ssr: false
 const Session = dynamic(() => import("./components/session"), { ssr: false });
 const Project = dynamic(() => import("./components/project"), { ssr: false });
 const Demoday = dynamic(() => import("./components/demoday"), { ssr: false });
+const WhyNext = dynamic(() => import("./components/whynext"), { ssr: false });
 
-const { CURRICULUM, SESSION, PROJECT, DEMODAY } = ACTIVITY_ITEMS;
+const { CURRICULUM, SESSION, PROJECT, DEMODAY, WHY_NEXT } = ACTIVITY_ITEMS;
 
 export default function Activities() {
   const router = useRouter();
@@ -63,6 +64,15 @@ export default function Activities() {
                 label: CURRICULUM,
                 key: "1",
                 children: <Curriculum />,
+              },
+              {
+                /*
+                 * 키는 5 로 새로 붙인다. 기존 1~4 를 밀면 ?key=N 딥링크가 다른 탭을
+                 * 가리키게 된다. 표시 순서만 커리큘럼 다음으로 둔다.
+                 */
+                label: WHY_NEXT,
+                key: "5",
+                children: <WhyNext />,
               },
               {
                 label: SESSION,

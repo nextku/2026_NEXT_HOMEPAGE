@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useRecoilState } from "recoil";
 import * as S from "styles/join/style";
 import { joinModalOpen, isLaunched } from "constants/atoms";
+import RecruitTimeline, { Stage } from "components/join/RecruitTimeline";
 
 // Static Assets
 import RocketImg from "public/assets/joinus_rocket.png";
@@ -19,11 +20,43 @@ const variants = {
   closed: { opacity: 0 },
 };
 
+/** 안내문에 흩어져 있던 날짜를 한곳에 모은다. 표시 문자열과 실제 날짜가 어긋나지 않게. */
+const RECRUIT_STAGES: Stage[] = [
+  {
+    label: "서류 접수",
+    display: "8/3(월) — 8/15(토)",
+    start: new Date("2026-08-03T00:00:00"),
+    end: new Date("2026-08-15T00:00:00"),
+  },
+  {
+    label: "1차 합격자 발표",
+    display: "8/19(수)",
+    start: new Date("2026-08-19T00:00:00"),
+  },
+  {
+    label: "면접",
+    display: "8/22(토) — 8/23(일)",
+    start: new Date("2026-08-22T00:00:00"),
+    end: new Date("2026-08-23T00:00:00"),
+  },
+  {
+    label: "최종 합격자 발표",
+    display: "8/26(수)",
+    start: new Date("2026-08-26T00:00:00"),
+  },
+  {
+    label: "오리엔테이션",
+    display: "8/29(토)",
+    start: new Date("2026-08-29T00:00:00"),
+  },
+];
+
 // 동적 로딩
 const S3upload = dynamic(() => import("components/s3upload/index"), {
   ssr: false,
 });
 const AOS = dynamic(() => import("aos"), { ssr: false });
+
 
 export default function Join() {
   const [loading, setLoading] = useState(true);
@@ -31,6 +64,8 @@ export default function Join() {
   const [modalPage, setModalPage] = useState(1);
   const [modalOpen, setModalOpen] = useRecoilState(joinModalOpen);
   const [accept, setAccept] = useState(false);
+  /* 로켓 점화 연출 중인지. 연출이 끝나갈 때쯤 안내를 띄운다. */
+  const [igniting, setIgniting] = useState(false);
 
   const isMobile = useMediaQuery({ maxWidth: 1000 });
 
@@ -90,6 +125,26 @@ export default function Join() {
     };
   }, [modalOpen]);
 
+  /*
+   * 로켓을 누르면 바로 모달을 띄우지 않고 잠깐 발사 연출을 보여준다.
+   * 모션을 줄이라고 설정한 사용자에게는 연출 없이 즉시 연다.
+   */
+  const igniteAndOpen = () => {
+    if (igniting) return;
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduce) {
+      setModalOpen(true);
+      return;
+    }
+
+    setIgniting(true);
+    window.setTimeout(() => setModalOpen(true), 430);
+    window.setTimeout(() => setIgniting(false), 760);
+  };
+
   // TODO: Change download & apply link
   return (
     <div>
@@ -123,8 +178,19 @@ export default function Join() {
               <p>15기 모집</p>
               <S.RocketInfo className="rocket-info">
                 <p>
-                  <span className="rocket">로켓</span>을 눌러보세요!
+                  아래 <span>로켓</span>을 누르면 지원 안내가 열립니다
                 </p>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
               </S.RocketInfo>
             </S.TitleWrapper>
           )}
@@ -137,143 +203,225 @@ export default function Join() {
               </p>
             </S.TitleWrapper>
           )}
+          {/* 배경 가림막. 눌러도 닫힌다. */}
+          <S.Scrim
+            $open={modalOpen}
+            aria-hidden="true"
+            onClick={() => setModalOpen(false)}
+          />
           <motion.div
             animate={modalOpen ? "open" : "closed"}
             variants={variants}
-            style={{ zIndex: "10", opacity: "0" }}
+            style={{ zIndex: "1001", opacity: "0" }}
           >
             <S.ModalContainer infoOpen={modalOpen}>
-              <S.CloseBtnWrapper>
-                <div onClick={() => setModalOpen(false)}>X</div>
-              </S.CloseBtnWrapper>
+              <S.ModalHeader>
+                {/* 열릴 때 여기에 포커스를 줘야 본문이 항상 맨 위에서 시작한다 (WAI-ARIA) */}
+                <h2 id="join-info-title" tabIndex={-1}>
+                  15기 지원 안내
+                </h2>
+                <S.CloseBtnWrapper>
+                  <button
+                    type="button"
+                    aria-label="지원 안내 닫기"
+                    onClick={() => setModalOpen(false)}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M6 6l12 12M18 6L6 18" />
+                    </svg>
+                  </button>
+                </S.CloseBtnWrapper>
+              </S.ModalHeader>
               <S.ModalContentWrapper>
+                <S.ScrollProgress aria-hidden="true" />
                 {modalPage == 1 && (
                   <S.InfoModal>
-                    <h2>15기 지원 안내</h2>
-                    <br />
-                    <p>
-                      <span>1. 지원방식</span>
-                      <br /> a. 아래 <mark>[지원서 다운로드]</mark> 버튼을
-                      클릭한 후 지원서 양식 다운로드 <br />
-                      b. 서류 접수 기간 내에 지원서 작성 <br />
-                      c. 아래 <mark>[지원하기]</mark> 버튼을 클릭하여 지원서
-                      업로드
-                      <br /> <b>**</b>[지원하기] 버튼은 지원 기간 중에만 확인
-                      가능합니다.
-                      <br /> d. 모든 문항별 글자수는 공백을 포함한 글자수를
-                      기준으로 합니다.
-                      <br />
-                      e. 제출한 지원서는 수정할 수 없습니다.
-                      <br />
-                      <br />
-                      <span>2. 리크루팅 일정</span>
-                      <br />
-                      서류접수 : 8/3(월) - 8/15(토)
-                      <br />
-                      1차 합격자 발표 : 8/19(수)
-                      <br />
-                      면접 : 8/22(토) - 8/23(일)
-                      <br />
-                      최종 합격자 발표 : 8/26(수)
-                      <br />
-                      <br />
-                      <span>3. 수료 기준</span>
-                      <br />
-                      학회에서 OT부터 겨울방학 기간 동안 진행하는 모든 세션 및
-                      행사는 필참입니다.
-                      <br />
-                      불성실하게 참여하는 경우 수료에 제한이 생길 수 있음을
-                      알려드립니다.
-                      <br />
-                      <br />
-                      <span>4. 면접 촬영 및 개인정보 수집 안내</span>
-                      <br /> 면접 평가는 모두 <b>대면</b>
-                      으로 이뤄집니다.
-                      <br />
-                      원활한 스케줄 조정을 위하여 8월 22일(토), 23일(일) 중
-                      가능한 시간대를 꼭 구글폼에 체크해 주시면 감사하겠습니다.
-                      <br />
-                      공정한 면접 평가를 위해 면접 내용을 촬영 및 수집할
-                      예정입니다.
-                      <br />
-                      촬영한 면접영상 및 개인정보는 선발과정에서만 활용되며,
-                      리크루팅 이후 즉시 폐기될 예정입니다.
-                      <br />
-                      <br />
-                      <span>5. 학회비 안내</span> <br />
-                      원활한 학회 운영을 위해 학회비를 걷어 운영하고 있습니다.
-                      <br />
-                      새로 들어오시는 학회원들은 <b>10만원</b>의 학회비를
-                      납부하고, 해당 금액은 학회 운영을 위해서만 사용될
-                      예정입니다.
-                      <br />
-                      학회원들은 모든 회계 정산 내용을 활동 종료 이후 학회 노션
-                      페이지에서 확인하실 수 있습니다. <br />
-                      <br />
-                      <span>6. 오리엔테이션 필참</span>
-                      <br />
-                      최종 합격 이후 <b>8월 29일(토)</b>에 진행되는 OT는 필수
-                      참여입니다. 원활한 학회 운영을 위해, OT 일정을 고려하여
-                      개인 일정을 조정해주시면 감사하겠습니다.
-                    </p>
-                    <S.CheckContainer>
-                      <input
-                        checked={accept}
-                        type="checkbox"
-                        id="acceptCheck"
-                        onClick={() => {
-                          setAccept((prev) => !prev);
-                        }}
-                      />
-                      <label
-                        onClick={() => {
-                          setAccept((prev) => !prev);
-                        }}
-                      >
-                        위 안내사항을 확인했으며, 이에 동의합니다.
-                      </label>
-                    </S.CheckContainer>
 
-                    <S.NextBtnWrapper isMobile={isMobile} accepted={accept}>
-                      <button
-                        onClick={() =>
-                          (location.href =
-                            "https://docs.google.com/document/d/1jHm_GrZzElCt47xJIP5HQJVuElVaWb_G/export?format=docx")
-                        }
-                      >
-                        지원서 다운로드
-                      </button>
-                      <button
-                        disabled={!accept}
-                        onClick={() => {
-                          if (
-                            currentTime >= startApplicationTime &&
-                            currentTime <= endApplicationTime
-                          ) {
-                            window.open(
-                              "https://docs.google.com/forms/d/e/1FAIpQLScTXBOecHQlOOjlWGaiQNfBbcmAq0h-uEIjgZ_t4P8ReWbc8g/viewform?usp=header",
-                              "_blank",
-                            );
-                          }
-                        }}
-                      >
-                        {buttonText}
-                      </button>
-                    </S.NextBtnWrapper>
+                    <S.InfoSection>
+                      <h3>
+                        지원 방식
+                      </h3>
+                      <ol>
+                        <li>
+                          아래{' '}
+                          <S.NoteChipGhost>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 10.5L12 15l4.5-4.5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+                            지원서 다운로드
+                          </S.NoteChipGhost>{' '}
+                          버튼을 클릭한 후 지원서 양식 다운로드
+                        </li>
+                        <li>서류 접수 기간 내에 지원서 작성</li>
+                        <li>
+                          아래{' '}
+                          <S.NoteChip>
+                            지원하기
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h13M12.5 6l6 6-6 6" /></svg>
+                          </S.NoteChip>{' '}
+                          버튼을 클릭하여 지원서 업로드
+                        </li>
+                        <li>
+                          모든 문항별 글자수는 공백을 포함한 글자수를 기준으로
+                          합니다.
+                        </li>
+                        <li>제출한 지원서는 수정할 수 없습니다.</li>
+                      </ol>
+                      <S.Note>
+                        [지원하기] 버튼은 지원 기간 중에만 확인 가능합니다.
+                      </S.Note>
+                    </S.InfoSection>
+
+                    <S.InfoSection>
+                      <h3>
+                        리크루팅 일정
+                      </h3>
+                      <RecruitTimeline stages={RECRUIT_STAGES} now={currentTime} />
+                    </S.InfoSection>
+
+                    <S.InfoSection>
+                      <h3>
+                        수료 기준
+                      </h3>
+                      <p>
+                        학회에서 OT부터 겨울방학 기간 동안 진행하는 모든 세션 및
+                        행사는 필참입니다. 불성실하게 참여하는 경우 수료에 제한이
+                        생길 수 있음을 알려드립니다.
+                      </p>
+                    </S.InfoSection>
+
+                    <S.InfoSection>
+                      <h3>
+                        면접 촬영 및 개인정보 수집 안내
+                      </h3>
+                      <p>
+                        면접 평가는 모두 <b>대면</b>으로 이뤄집니다. 원활한 스케줄
+                        조정을 위하여 8월 22일(토), 23일(일) 중 가능한 시간대를 꼭
+                        구글폼에 체크해 주시면 감사하겠습니다.
+                      </p>
+                      <p>
+                        공정한 면접 평가를 위해 면접 내용을 촬영 및 수집할
+                        예정입니다. 촬영한 면접영상 및 개인정보는 선발과정에서만
+                        활용되며, 리크루팅 이후 즉시 폐기될 예정입니다.
+                      </p>
+                    </S.InfoSection>
+
+                    <S.InfoSection>
+                      <h3>
+                        학회비 안내
+                      </h3>
+                      <p>
+                        원활한 학회 운영을 위해 학회비를 걷어 운영하고 있습니다.
+                        새로 들어오시는 학회원들은 <b>10만원</b>의 학회비를
+                        납부하고, 해당 금액은 학회 운영을 위해서만 사용될
+                        예정입니다.
+                      </p>
+                      <p>
+                        학회원들은 모든 회계 정산 내용을 활동 종료 이후 학회 노션
+                        페이지에서 확인하실 수 있습니다.
+                      </p>
+                    </S.InfoSection>
+
+                    <S.InfoSection>
+                      <h3>
+                        오리엔테이션 필참
+                      </h3>
+                      <p>
+                        최종 합격 이후 <b>8월 29일(토)</b>에 진행되는 OT는 필수
+                        참여입니다. 원활한 학회 운영을 위해, OT 일정을 고려하여
+                        개인 일정을 조정해주시면 감사하겠습니다.
+                      </p>
+                    </S.InfoSection>
+
+
                   </S.InfoModal>
                 )}
                 {modalPage == 2 && <S3upload />}
               </S.ModalContentWrapper>
+              {modalPage == 1 && (
+                <S.ModalFooter>
+                  <S.CheckContainer>
+                    <input
+                      checked={accept}
+                      type="checkbox"
+                      id="acceptCheck"
+                      onChange={() => setAccept((prev) => !prev)}
+                    />
+                    <label htmlFor="acceptCheck">
+                      위 안내사항을 확인했으며, 이에 동의합니다.
+                    </label>
+                  </S.CheckContainer>
+
+                  <S.NextBtnWrapper isMobile={isMobile} accepted={accept}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        (location.href =
+                          "https://docs.google.com/document/d/1jHm_GrZzElCt47xJIP5HQJVuElVaWb_G/export?format=docx")
+                      }
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M12 3v12M7.5 10.5L12 15l4.5-4.5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                      </svg>
+                      지원서 다운로드
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!accept || disabled}
+                      onClick={() => {
+                        if (
+                          currentTime >= startApplicationTime &&
+                          currentTime <= endApplicationTime
+                        ) {
+                          window.open(
+                            "https://docs.google.com/forms/d/e/1FAIpQLScTXBOecHQlOOjlWGaiQNfBbcmAq0h-uEIjgZ_t4P8ReWbc8g/viewform?usp=header",
+                            "_blank",
+                          );
+                        }
+                      }}
+                    >
+                      {buttonText}
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M5 12h13M12.5 6l6 6-6 6" />
+                      </svg>
+                    </button>
+                  </S.NextBtnWrapper>
+                  {/*
+                    버튼이 왜 안 눌리는지 말해주지 않으면 지원자는 고장으로 받아들인다.
+                    단 조건부로 DOM 에서 빼면 모달 높이가 줄고, 모달이 가운데 정렬이라
+                    체크하는 순간 화면이 위로 튄다. 자리는 항상 잡아두고 보이기만 바꾼다.
+                  */}
+                  <S.BlockedReason aria-hidden={accept || disabled} $shown={!accept && !disabled}>
+                    안내사항에 동의하면 지원하기가 열립니다.
+                  </S.BlockedReason>
+                </S.ModalFooter>
+              )}
             </S.ModalContainer>
           </motion.div>
           <S.SpaceContainer isMobile={isMobile}>
-            <S.RocketContainer
-              onClick={() => {
-                setModalOpen((modalOpen) => !modalOpen);
-              }}
-              launched={launch}
-            >
-              <S.Rocket>
+            <S.RocketContainer onClick={igniteAndOpen} launched={launch}>
+              <S.Rocket igniting={igniting}>
                 <img src={RocketImg.src} />
               </S.Rocket>
               {/* <S.Fire launched={launch}>

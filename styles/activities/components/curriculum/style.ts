@@ -1,4 +1,5 @@
 import styled, { css, keyframes } from 'styled-components';
+import { squircle, lift } from "styles/surface";
 import { THEME } from 'styles/theme';
 
 export const Container = styled.div<{ isMobile: boolean }>`
@@ -93,6 +94,12 @@ export const LottieContainer = styled.div<{ isMobile: boolean }>`
     justify-content: space-between;
     padding: 6rem 10%;
     position: relative;
+
+    /* 커리큘럼 이미지도 다른 카드와 같은 모서리·그림자를 쓴다. */
+    & img {
+        ${squircle(24)}
+        ${lift}
+    }
     /* background: radial-gradient(
     circle farthest-side at 50% 100%,
     rgba(255, 255, 255, 0.5),

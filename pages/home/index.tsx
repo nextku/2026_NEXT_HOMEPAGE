@@ -10,6 +10,11 @@ import { useMediaQuery } from "react-responsive";
 import { Partners } from "constants/partners";
 import Sticky from "components/sticky";
 
+// 히어로 워드마크는 canvas 기반이라 서버에서 그릴 수 없다.
+const ParticleWordmark = dynamic(() => import("components/hero/ParticleWordmark"), {
+  ssr: false,
+});
+
 // AOS 동적 로드 (SSR 방지)
 const AOS = dynamic(() => import("aos"), { ssr: false });
 
@@ -43,7 +48,7 @@ const DemodayLottie = dynamic(
 
 // Static Assets
 import Logo from "public/assets/logo.png";
-import MainBG from "public/assets/Rocket_Background.png";
+import MainBG from "public/assets/Rocket_Background.jpg";
 import Text from "public/assets/Accelerate_Your_Potential_new.svg";
 import RecruitRocket from "public/assets/joinus_rocket.png";
 
@@ -116,7 +121,12 @@ export default function Main() {
                     <h2 id="recruit-popup-title">
                       세상을 바꿀 다음 여정에
                       <br />
-                      함께할 <strong>NEXT</strong>를 찾습니다
+                      함께할{" "}
+                      <S.RecruitPopupWordmark
+                        src="/assets/new_logo(wh).svg"
+                        alt="NEXT"
+                      />
+                      를 찾습니다
                     </h2>
                     <S.RecruitPopupPeriod>
                       <span>지원 기간</span>
@@ -126,7 +136,18 @@ export default function Main() {
                       type="button"
                       onClick={() => router.push("/join")}
                     >
-                      지원하기 <span aria-hidden="true">→</span>
+                      지원하기
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M5 12h13M12.5 6l6 6-6 6" />
+                      </svg>
                     </S.RecruitPopupButton>
                   </S.RecruitPopupContent>
                   <S.RecruitPopupRocket aria-hidden="true">
@@ -147,9 +168,12 @@ export default function Main() {
               <S.MainTextWrapper>
                 <Image src={Text} alt="Main Text" layout="intrinsic" />
               </S.MainTextWrapper>
-              <S.MainContainerLogo>
-                <Image src={Logo} alt="Logo" layout="intrinsic" />
-              </S.MainContainerLogo>
+              <S.VisuallyHidden>
+                NEXT · 고려대학교 소프트웨어 창업학회
+              </S.VisuallyHidden>
+              <S.ParticleMark>
+                <ParticleWordmark src={Logo.src} />
+              </S.ParticleMark>
               <S.MainTextLionWrapper>
                 <h2>고려대학교</h2>
               </S.MainTextLionWrapper>
@@ -300,14 +324,67 @@ export default function Main() {
               ))}
             </S.PartnerContainer>
           </S.Section2>
-          <S.Footer isMobile={isMobile}>
-            <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
-            <p>email | nextku.contact@gmail.com</p>
-            <S.FooterContacts>
-              <p>대표 이성민 · 010-8693-1884</p>
-              <p>부대표 박보겸 · 010-3185-7117</p>
-            </S.FooterContacts>
-            <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
+          <S.Footer>
+            <S.FooterTop>
+              <div>
+                <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
+                <p style={{ marginTop: "1rem" }}>
+                  email |{" "}
+                  <a href="mailto:nextku.contact@gmail.com">
+                    nextku.contact@gmail.com
+                  </a>
+                </p>
+              </div>
+              <S.FooterContacts>
+                <p>대표 이성민 · 010-8693-1884</p>
+                <p>부대표 박보겸 · 010-3185-7117</p>
+              </S.FooterContacts>
+            </S.FooterTop>
+
+            <S.FooterBottom>
+              <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
+              <S.FooterSocials>
+                <a
+                  href="https://www.linkedin.com/company/nextxlikelion/posts/?feedView=all"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="NEXT 링크드인"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="4" />
+                    <path d="M7.5 10.5V17M7.5 7.4v.1M11.5 17v-3.6a2.4 2.4 0 014.8 0V17" />
+                  </svg>
+                </a>
+                <a
+                  href="https://www.instagram.com/next_koreauniv/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="NEXT 인스타그램"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="3.8" />
+                    <path d="M17.3 6.8v.01" />
+                  </svg>
+                </a>
+              </S.FooterSocials>
+            </S.FooterBottom>
           </S.Footer>
         </S.Container>
       )}

@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.next-ku.com
+
+# Sitemaps
+Sitemap: https://www.next-ku.com/sitemap.xml

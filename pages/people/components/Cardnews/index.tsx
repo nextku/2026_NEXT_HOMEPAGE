@@ -45,29 +45,52 @@ const Cardnews = () => {
                 <S.Container2 className="mount" isMobile={isMobile}>
                     {ALUMNI_NEWS_INFORMATION &&
                         ALUMNI_NEWS_INFORMATION.map((item: ALUMNI_NEWS_INFORMATION_TYPE, index) => (
-                            <S.CardDiv key={index}>
-                                <S.CardTopDiv>
-                                    <S.GenerationDiv>{`${item.gen}기`}</S.GenerationDiv>
-                                    <S.OccupationDiv>{item.name}</S.OccupationDiv>
-                                </S.CardTopDiv>
-                                <S.ThumbnailImgDiv onClick={() => openPopup(item.url)}>
+                            <S.CardDiv
+                                key={index}
+                                role="link"
+                                tabIndex={0}
+                                aria-label={`${item.gen}기 ${item.name} 인터뷰 인스타그램에서 보기`}
+                                onClick={() => openPopup(item.url)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        openPopup(item.url);
+                                    }
+                                }}
+                            >
+                                <S.ThumbnailImgDiv>
                                     {item.thumbnailImgSrc ? (
                                         <Image
                                             src={item.thumbnailImgSrc}
-                                            alt={`${index}-${item.name}`}
-                                            width={300}
-                                            height={170}
+                                            alt=""
+                                            fill
+                                            sizes="(max-width: 700px) 100vw, 380px"
+                                            style={{ objectFit: 'cover' }}
                                         />
-                                    ) : (
-                                        <div
-                                            style={{
-                                                backgroundColor: '#333333',
-                                                width: '300px',
-                                                height: '170px',
-                                            }}
-                                        />
-                                    )}
+                                    ) : null}
+                                    {/* 이 카드가 인스타그램으로 나간다는 표시 */}
+                                    <S.InstaHint aria-hidden="true">
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="1.9"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <rect x="3" y="3" width="18" height="18" rx="5" />
+                                            <circle cx="12" cy="12" r="3.8" />
+                                            <path d="M17.3 6.8v.01" />
+                                        </svg>
+                                        인터뷰 보기
+                                    </S.InstaHint>
                                 </S.ThumbnailImgDiv>
+
+                                <S.CardMeta>
+                                    {`${item.gen}기`}
+                                    <span aria-hidden="true">·</span>
+                                    <b>{item.name}</b>
+                                </S.CardMeta>
                                 <S.CommentDiv>{item.comment}</S.CommentDiv>
                             </S.CardDiv>
                         ))}
