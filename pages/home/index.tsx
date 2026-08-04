@@ -48,7 +48,7 @@ const DemodayLottie = dynamic(
 
 // Static Assets
 import Logo from "public/assets/logo.png";
-import MainBG from "public/assets/Rocket_Background.png";
+import MainBG from "public/assets/Rocket_Background.jpg";
 import Text from "public/assets/Accelerate_Your_Potential_new.svg";
 import RecruitRocket from "public/assets/joinus_rocket.png";
 

@@ -99,13 +99,13 @@ export const Planet = styled.div<{ launched: boolean }>`
     bottom: 0;
     left: 50%;
     transform: translate(-50%, 100%);
-    animation: ${slideIn} 2s 2s forwards;
+    animation: ${slideIn} 1s 0.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     pointer-events: auto;
     ${(props) =>
         props.launched &&
         css`
             transform: translate(-50%, 70%);
-            animation: ${slideOut} 2s 2s forwards;
+            animation: ${slideOut} 1.1s 0.2s cubic-bezier(0.5, 0, 0.75, 0) forwards;
         `}
     & img {
         width: 100%;
@@ -130,15 +130,29 @@ export const RocketContainer = styled.div<{ launched: boolean }>`
     ${(props) =>
         props.launched &&
         css`
-            animation: ${launch} 4s 2s forwards;
+            animation: ${launch} 2.6s 0.35s forwards;
         `}
 `;
+/**
+ * 로켓을 눌렀을 때의 점화.
+ * 바로 솟구치면 튕겨나간 것처럼 보인다. 잠깐 진동하며 힘을 모으다가
+ * 밀려 올라가야 '발사'로 읽힌다.
+ */
+const ignite = keyframes`
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  12%  { transform: translate3d(-2px, 2px, 0) scale(0.985); }
+  22%  { transform: translate3d(2px, 1px, 0) scale(0.985); }
+  32%  { transform: translate3d(-2px, 2px, 0) scale(0.99); }
+  42%  { transform: translate3d(1px, 0, 0) scale(1); }
+  100% { transform: translate3d(0, -110px, 0) scale(1.04); }
+`;
+
 const hover = keyframes`
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 `;
 
-export const Rocket = styled.div`
+export const Rocket = styled.div<{ igniting?: boolean }>`
     width: 100%;
     position: absolute;
     top: 0;
@@ -168,6 +182,14 @@ export const Rocket = styled.div`
         transform: scale(0.98);
     }
 
+    /* 점화 중에는 대기 모션과 hover 를 모두 덮어쓴다 */
+    ${(props) =>
+        props.igniting &&
+        css`
+            animation: ${ignite} 0.62s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            filter: drop-shadow(0 14px 34px rgba(247, 148, 30, 0.55));
+        `}
+
     @media (prefers-reduced-motion: reduce) {
         animation: none;
     }
@@ -179,7 +201,7 @@ export const Fire = styled.div<{ launched: boolean }>`
     left: 50%;
     z-index: 4;
     transform: translateX(-50%);
-    animation: ${stanby} 4s;
+    animation: ${stanby} 2s;
     transition: 3s;
     ${(props) =>
         props.launched &&
@@ -187,6 +209,21 @@ export const Fire = styled.div<{ launched: boolean }>`
             width: 100%;
             top: 30%;
         `}
+`;
+
+/**
+ * 배경 가림막.
+ * 이게 없으면 뒤 페이지가 그대로 보여서 모달이 '떠 있는 레이어' 로 읽히지 않는다.
+ * 색만 덮고 blur 는 쓰지 않는다. 모바일에서 backdrop-filter 는 프레임을 크게 깎는다.
+ */
+export const Scrim = styled.div<{ $open: boolean }>`
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.62);
+    opacity: ${(props) => (props.$open ? 1 : 0)};
+    pointer-events: ${(props) => (props.$open ? 'auto' : 'none')};
+    transition: opacity 0.2s ease;
 `;
 
 export const ModalContainer = styled.div<{ infoOpen: boolean }>`
@@ -202,7 +239,9 @@ export const ModalContainer = styled.div<{ infoOpen: boolean }>`
     background-color: #151515;
     color: white;
     position: fixed;
-    z-index: 6;
+    /* 헤더가 z-index: 10 이라 6 으로는 로고와 햄버거가 모달을 덮어
+       상단이 잘린 것처럼 보였다. 그 위로 올린다. */
+    z-index: 1001;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -211,10 +250,22 @@ export const ModalContainer = styled.div<{ infoOpen: boolean }>`
     overflow: hidden;
     pointer-events: ${(props) => (props.infoOpen ? 'auto' : 'none')};
 
+    /*
+     * 모바일에서 화면 중앙에 띄우면 상단이 사이트 헤더와 겹쳐 잘린 것처럼 보인다.
+     * 아래에 붙이는 시트로 바꾸면 헤더와 물리적으로 만나지 않는다.
+     * 위쪽에 남는 배경 띠가 '이건 겹쳐 뜬 화면' 이라는 신호도 된다.
+     */
     @media (max-width: 640px) {
-        width: calc(100% - 2rem);
-        max-height: 88dvh;
-        border-radius: 14px;
+        width: 100%;
+        max-width: none;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        transform: none;
+        /* 헤더 높이 + 여유만큼은 항상 배경이 보이게 남긴다 */
+        max-height: calc(100dvh - 9rem);
+        border-radius: 16px 16px 0 0;
+        padding-bottom: env(safe-area-inset-bottom);
     }
 `;
 
@@ -248,7 +299,8 @@ export const ModalHeader = styled.header`
 export const ModalFooter = styled.div`
     flex: 0 0 auto;
     padding: 1.6rem 2.8rem 2.2rem;
-    border-top: 1px solid #262626;
+    /* 구분선을 그으면 끝까지 내려도 남아 있어 거슬린다.
+       배경 명도 차이와 본문 하단 그림자(끝에 닿으면 자동으로 사라짐)로 나눈다. */
     background: #171717;
 
     @media (max-width: 640px) {
@@ -372,7 +424,8 @@ export const TitleWrapper = styled.div<{ isMobile: boolean }>`
     flex-wrap: wrap;
     pointer-events: none;
     opacity: 0;
-    animation: ${fadeIn} 2s 4s forwards;
+    /* 이전: 4s 지연 + 2s 페이드 = 텍스트가 다 보이기까지 6초. 너무 느려 빈 화면으로 읽혔다. */
+    animation: ${fadeIn} 0.5s 0.25s forwards;
 
     & > img {
         width: 100%;
@@ -437,7 +490,7 @@ export const RocketInfo = styled.div`
     gap: 0.8rem;
     margin-top: 1.2rem;
     opacity: 0;
-    animation: ${fadeIn} 0.6s 2.4s forwards;
+    animation: ${fadeIn} 0.5s 1s forwards;
 
     & p {
         margin: 0;
@@ -489,9 +542,7 @@ export const InfoSection = styled.section`
     padding: 1.6rem 0 2rem;
 
     & h3 {
-        display: flex;
-        align-items: baseline;
-        gap: 0.8rem;
+        display: block;
         font-size: 2.1rem;
         font-weight: 700;
         color: #ffffff;
@@ -499,14 +550,7 @@ export const InfoSection = styled.section`
         margin-bottom: 1rem;
     }
 
-    /* 번호를 상자에 넣으면 테두리만 늘고 정보는 그대로다. 숫자만 연하게 둔다. */
-    & h3 em {
-        font-style: normal;
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #6f6a63;
-        font-variant-numeric: tabular-nums;
-    }
+
 
     & p {
         font-size: 1.5rem;
@@ -546,11 +590,56 @@ export const Chip = styled.strong`
 `;
 
 export const Note = styled.p`
+    /* 세로 컬러 바는 시선을 끌지만 정보를 더 주지 않는다.
+       들여쓰기만으로 부속 문장임을 표시한다. */
     margin-top: 1.2rem !important;
-    padding-left: 1.2rem;
-    border-left: 2px solid ${THEME.ORANGE};
+    padding-left: 2rem;
     font-size: 1.5rem !important;
     color: #a9a39a !important;
+`;
+
+/**
+ * 본문 안에서 실제 버튼을 가리키는 표시.
+ * 아래 푸터의 버튼과 같은 모양·같은 아이콘으로 두면, 문장을 읽다가
+ * 어떤 버튼을 말하는지 눈으로 바로 찾을 수 있다.
+ */
+const inlineBtnBase = css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+    /* 본문 글자보다 확실히 작아야 문장 안의 표시로 읽힌다.
+       패딩과 line-height 를 함께 조여 줄 높이를 밀어올리지 않게 한다. */
+    padding: 0.1em 0.45em;
+    margin: 0 0.15em;
+    border-radius: 4px;
+    font-size: 0.8em;
+    line-height: 1.5;
+    font-weight: 700;
+    white-space: nowrap;
+    /* baseline 정렬은 아이콘 때문에 아래로 처진다. 글줄 한가운데에 맞춘다. */
+    vertical-align: middle;
+
+    & svg {
+        width: 0.9em;
+        height: 0.9em;
+        flex: 0 0 auto;
+    }
+`;
+
+/** 주 버튼(지원하기)과 같은 오렌지 채움 */
+export const NoteChip = styled.span`
+    ${inlineBtnBase}
+    background: ${THEME.ORANGE};
+    color: #151515;
+`;
+
+/** 보조 버튼(지원서 다운로드)과 같은 회색 채움 */
+export const NoteChipGhost = styled.span`
+    ${inlineBtnBase}
+    background: #2b2b2b;
+    border: 1px solid #454545;
+    color: #f2efea;
 `;
 
 /** 버튼이 왜 비활성인지 말해주지 않으면 지원자는 고장으로 받아들인다. */
