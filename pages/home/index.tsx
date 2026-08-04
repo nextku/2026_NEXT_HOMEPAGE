@@ -10,6 +10,11 @@ import { useMediaQuery } from "react-responsive";
 import { Partners } from "constants/partners";
 import Sticky from "components/sticky";
 
+// 히어로 워드마크는 canvas 기반이라 서버에서 그릴 수 없다.
+const ParticleWordmark = dynamic(() => import("components/hero/ParticleWordmark"), {
+  ssr: false,
+});
+
 // AOS 동적 로드 (SSR 방지)
 const AOS = dynamic(() => import("aos"), { ssr: false });
 
@@ -116,7 +121,12 @@ export default function Main() {
                     <h2 id="recruit-popup-title">
                       세상을 바꿀 다음 여정에
                       <br />
-                      함께할 <strong>NEXT</strong>를 찾습니다
+                      함께할{" "}
+                      <S.RecruitPopupWordmark
+                        src="/assets/new_logo(wh).svg"
+                        alt="NEXT"
+                      />
+                      를 찾습니다
                     </h2>
                     <S.RecruitPopupPeriod>
                       <span>지원 기간</span>
@@ -126,7 +136,18 @@ export default function Main() {
                       type="button"
                       onClick={() => router.push("/join")}
                     >
-                      지원하기 <span aria-hidden="true">→</span>
+                      지원하기
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M5 12h13M12.5 6l6 6-6 6" />
+                      </svg>
                     </S.RecruitPopupButton>
                   </S.RecruitPopupContent>
                   <S.RecruitPopupRocket aria-hidden="true">
@@ -147,9 +168,12 @@ export default function Main() {
               <S.MainTextWrapper>
                 <Image src={Text} alt="Main Text" layout="intrinsic" />
               </S.MainTextWrapper>
-              <S.MainContainerLogo>
-                <Image src={Logo} alt="Logo" layout="intrinsic" />
-              </S.MainContainerLogo>
+              <S.VisuallyHidden>
+                NEXT · 고려대학교 소프트웨어 창업학회
+              </S.VisuallyHidden>
+              <S.ParticleMark>
+                <ParticleWordmark src={Logo.src} />
+              </S.ParticleMark>
               <S.MainTextLionWrapper>
                 <h2>고려대학교</h2>
               </S.MainTextLionWrapper>

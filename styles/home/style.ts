@@ -93,14 +93,13 @@ export const RecruitPopup = styled.div`
     width: 3px;
     height: 3px;
     border-radius: 50%;
-    background: #fff;
+    /* 고정 px 좌표라 카드 크기가 바뀌어도 안 따라가고, 12개가 너무 또렷해
+       배경이 산만했다. 개수를 줄이고 농도를 크게 낮춘다. */
+    background: rgba(255, 255, 255, 0.18);
     box-shadow:
-      74px 42px rgba(255, 255, 255, 0.65),
-      162px 8px rgba(255, 255, 255, 0.4),
-      282px 74px rgba(255, 255, 255, 0.6),
-      410px 22px rgba(255, 255, 255, 0.35),
-      545px 92px rgba(255, 255, 255, 0.55),
-      635px 34px rgba(255, 255, 255, 0.4);
+      162px 8px rgba(255, 255, 255, 0.14),
+      410px 22px rgba(255, 255, 255, 0.1),
+      635px 34px rgba(255, 255, 255, 0.12);
   }
 
   &::before {
@@ -110,11 +109,16 @@ export const RecruitPopup = styled.div`
   &::after {
     bottom: 54px;
     left: 96px;
-    opacity: 0.45;
+    opacity: 0.35;
   }
 
-  @media (max-width: 600px) {
-    border-radius: 16px;
+  /* 모바일: 720:430 고정 비율을 풀고 내용 높이에 맞춘다.
+     비율을 유지한 채 폭만 줄이면 글자와 여백이 통째로 축소돼
+     '데스크톱 화면을 작게 넣은' 느낌이 된다. */
+  @media (max-width: 640px) {
+    width: min(100%, calc(100vw - 2.4rem));
+    aspect-ratio: auto;
+    border-radius: 18px;
   }
 `;
 
@@ -123,6 +127,15 @@ export const RecruitPopupCanvas = styled.div`
   width: 100%;
   height: 100%;
   container-type: inline-size;
+
+  /* 모바일에서는 로켓을 절대배치에서 빼내 본문 위로 올린다.
+     같은 요소를 재배치하는 것이 '작게 줄이는' 것과의 차이다. */
+  @media (max-width: 640px) {
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 export const RecruitPopupGlow = styled.div`
@@ -171,16 +184,38 @@ export const RecruitPopupClose = styled.button`
 export const RecruitPopupContent = styled.div`
   position: relative;
   z-index: 2;
-  width: 67%;
-  padding: 8.89cqw 0 7.22cqw 7.78cqw;
+  /* 워드마크가 글자 'NEXT' 보다 넓어 헤드라인이 3줄로 늘어났고,
+     카드 높이가 720:430 으로 고정이라 늘어난 줄이 아래 여백을 먹었다.
+     본문 폭을 넓히고 글자를 조금 줄여 2줄로 되돌린다.
+
+     위아래 여백은 고정값으로 주지 않는다. 문구가 한 줄만 늘어도 다시 어긋난다.
+     내용 덩어리를 세로 중앙에 두면 위아래가 항상 같아진다. */
+  width: 72%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* flex 자식은 기본으로 가로로 늘어난다. 버튼이 본문 폭을 통째로
+     차지하지 않도록 내용 크기만큼만 잡는다. */
+  align-items: flex-start;
+  padding: 6cqw 0 6cqw 7.78cqw;
+
+  /* 모바일: 폭을 다 쓰고 크기는 cqw 가 아니라 px 로 고정한다.
+     cqw 를 그대로 두면 카드가 좁아질 때 글자까지 같이 작아진다. */
+  @media (max-width: 640px) {
+    width: 100%;
+    height: auto;
+    display: block;
+    padding: 20px 20px 24px;
+  }
 
   & h2 {
     margin: 2.5cqw 0 3.89cqw;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
       "Malgun Gothic", sans-serif;
-    font-size: 5.83cqw;
+    font-size: 5.2cqw;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.34;
     letter-spacing: -0.04em;
     word-break: keep-all;
   }
@@ -189,15 +224,49 @@ export const RecruitPopupContent = styled.div`
     color: ${THEME.ORANGE};
   }
 
+  @media (max-width: 640px) {
+    & h2 {
+      margin: 10px 0 16px;
+      font-size: clamp(21px, 6.2vw, 27px);
+      line-height: 1.34;
+    }
+  }
 `;
 
 export const RecruitPopupEyebrow = styled.p`
+  /* 이전: 오렌지 + 자간 0.16em + 1.88cqw(390px 폰에서 6.7px).
+     작고 자간 넓은 컬러 라벨은 어디서나 보이는 흔한 패턴이라 눈에 띄게 인위적이다.
+     색을 빼고 자간을 되돌리고 읽히는 크기로 고정한다. */
   margin: 0;
-  color: ${THEME.ORANGE};
-  font-size: 1.88cqw;
-  font-weight: 800;
-  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: clamp(13px, 1.6cqw, 16px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
 
+  @media (max-width: 640px) {
+    font-size: 13px;
+  }
+`;
+
+/**
+ * 팝업 헤드라인 안에 들어가는 워드마크.
+ *
+ * 기존에는 "NEXT" 를 오렌지 텍스트로만 썼는데, 실제 로고를 넣으면 X 자리의
+ * 로켓까지 살아나 브랜드가 정확해진다.
+ *
+ * 크기를 px 로 고정하면 데스크톱(cqw)과 모바일(clamp)에서 글자와 어긋난다.
+ * em 으로 잡아 주변 글자 크기를 그대로 따라가게 한다.
+ */
+export const RecruitPopupWordmark = styled.img`
+  display: inline-block;
+  /* 워드마크가 흰색이라 주변 한글과 색이 같다. 색으로 강조할 수 없으니
+     한글 글자 높이보다 확실히 크게 잡아 '마크'로 읽히게 한다. */
+  height: 0.95em;
+  width: auto;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.115em;
+  margin: 0 0.12em 0 0.06em;
 `;
 
 export const RecruitPopupPeriod = styled.p`
@@ -208,24 +277,39 @@ export const RecruitPopupPeriod = styled.p`
   color: rgba(255, 255, 255, 0.82);
   font-size: 2.22cqw;
 
+  /* 반투명 오렌지 알약 배지였다. 정보 가치는 없는데 시선만 끌고,
+     어디서나 보이는 패턴이라 인위적으로 읽힌다.
+     배경을 걷고 라벨은 연하게, 날짜를 주인공으로 둔다. */
   & span {
-    padding: 0.69cqw 1.39cqw;
-    border-radius: 999px;
-    color: #fff;
-    background: rgba(255, 106, 0, 0.18);
-    font-size: 1.67cqw;
-    font-weight: 700;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: inherit;
+    font-weight: 500;
   }
 
+  @media (max-width: 640px) {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+
+    & span {
+      padding: 0;
+      font-size: inherit;
+    }
+  }
 `;
 
 export const RecruitPopupButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 1.39cqw;
-  min-width: 26.39cqw;
-  padding: 1.67cqw 2.5cqw;
+  /* 라벨 15.5px 에 화살표 22px 이라 화살표가 주인공처럼 보였고,
+     min-width 가 내용보다 넓어 안쪽이 헐렁했다. 내용에 맞춰 조인다. */
+  gap: 1.1cqw;
+  padding: 2.15cqw 3.7cqw;
   border: 0;
   border-radius: 1.67cqw;
   color: #111;
@@ -237,15 +321,19 @@ export const RecruitPopupButton = styled.button`
     transform 0.2s,
     filter 0.2s;
 
-  & span {
-    font-size: 3.06cqw;
+  & svg {
+    /* 텍스트 글리프 → 는 굵은 한글 옆에서 얇고 어색하다.
+       획 두께를 글자에 맞출 수 있는 SVG 로 그린다. */
+    width: 1.05em;
+    height: 1.05em;
+    flex: 0 0 auto;
     transition: transform 0.2s;
   }
   &:hover {
     filter: brightness(1.08);
     transform: translateY(-2px);
   }
-  &:hover span {
+  &:hover svg {
     transform: translateX(4px);
   }
   &:focus-visible {
@@ -253,6 +341,20 @@ export const RecruitPopupButton = styled.button`
     outline-offset: 3px;
   }
 
+  @media (max-width: 640px) {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px; /* 손가락은 커서보다 무디다 */
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    gap: 8px;
+
+    & svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
 `;
 
 export const RecruitPopupRocket = styled.div`
@@ -276,6 +378,15 @@ export const RecruitPopupRocket = styled.div`
     object-fit: contain;
   }
 
+  /* 모바일: 절대배치를 풀고 본문 위 정중앙으로 올린다 */
+  @media (max-width: 640px) {
+    position: static;
+    order: -1;
+    width: 96px;
+    height: 116px;
+    margin: 22px auto 0;
+    filter: drop-shadow(0 12px 20px rgba(255, 106, 0, 0.3));
+  }
 `;
 
 export const Container = styled.div`
@@ -333,7 +444,9 @@ export const MainWrapper = styled.div<{ isMobile: boolean }>`
 `;
 export const MainTextWrapper = styled.div`
   width: 100%;
-  margin-bottom: 5rem;
+  /* 워드마크 박스를 로고 실제 비율(4.43:1)로 잡으면서 세로가 납작해졌다.
+     5rem 그대로 두면 세 요소가 뿔뿔이 떨어져 보인다. */
+  margin-bottom: 3.8rem;
   & img {
     min-width: 300px;
     width: 40%;
@@ -342,7 +455,7 @@ export const MainTextWrapper = styled.div`
   justify-content: center;
 `;
 export const MainTextLionWrapper = styled.div`
-  margin-top: 2rem;
+  margin-top: 2.4rem;
   display: flex;
   color: white;
   font-weight: 700;
@@ -509,10 +622,14 @@ export const LottieContainer = styled.div<{ isMobile: boolean }>`
 export const ArrowBG = styled.div<{ isMobile: boolean }>`
   width: 100%;
   height: 140%;
-  background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5));
+  /* 흰색 50% 삼각형이 Session/Project/Demoday 라벨 위를 덮어 글씨가 안 읽혔다.
+     브랜드 오렌지의 아주 옅은 농도로 낮추고 콘텐츠 뒤로 보낸다. */
+  background: linear-gradient(rgba(247, 148, 30, 0), rgba(247, 148, 30, 0.12));
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 0;
+  pointer-events: none;
   clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 100%, 0 50%);
   ${(props) =>
     props.isMobile &&
@@ -526,6 +643,9 @@ export const LottieWrapper = styled.div<{ isMobile: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  z-index: 1; /* ArrowBG 위로 */
+
   & h2 {
     font-weight: 700;
   }
@@ -636,4 +756,53 @@ export const FooterCopyright = styled.p`
   margin-top: 1rem !important;
   font-size: 1.2rem !important;
   opacity: 0.9;
+`;
+
+/* ------------------------------------------------------------------ */
+/* 히어로 워드마크 — 입자로 그리는 NEXT                                  */
+/* 기존 MainContainerLogo 자리를 대체한다. 나머지 섹션은 그대로 둔다.      */
+/* ------------------------------------------------------------------ */
+
+export const ParticleMark = styled.div`
+  /* 로고 원본이 7789 x 1757 이라 정확히 그 비율로 박스를 잡는다.
+     비율이 안 맞으면 캔버스 안에 위아래 빈 공간이 생겨
+     'Accelerate Your Potential' 과 '고려대학교' 사이가 벌어진다. */
+  width: 61%;
+  aspect-ratio: 7789 / 1757;
+  position: relative;
+  cursor: crosshair;
+  touch-action: pan-y; /* 세로 스크롤은 살리고 가로 제스처만 캔버스가 받는다 */
+
+  /* aspect-ratio 는 내용물의 자동 최소 높이를 이기지 못한다.
+     캔버스가 흐름 안에 있으면 자기 높이(168px)로 박스를 밀어올려
+     비율이 무시되고 위아래 빈 공간이 생긴다. 흐름에서 빼낸다. */
+  & > div {
+    position: absolute;
+    inset: 0;
+  }
+
+  & canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 좁은 화면에서는 폭을 더 넓혀 글자가 작아지지 않게 한다 */
+  @media (max-width: 820px) {
+    width: 80%;
+  }
+`;
+
+/* 화면에는 안 보이지만 스크린리더와 검색엔진에는 읽히는 실제 제목.
+   캔버스에는 텍스트가 없으므로 이게 없으면 페이지에 h1 이 사라진다. */
+export const VisuallyHidden = styled.h1`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `;
