@@ -17,11 +17,26 @@ from {
 const GlobalStyleWrapper = createGlobalStyle`
 
 
+  /*
+   * 서체는 html 에서 한 번 선언하고 나머지는 상속시킨다.
+   * antd 5 는 CSS-in-JS 를 런타임에 주입해서 styled-components 보다 늦게 들어오는데,
+   * body 셀렉터(0,0,1)가 * (0,0,0) 를 이겨 시스템 폰트로 되돌려버린다.
+   * html body 로 특이도를 한 단계 올려 그 되돌림을 막는다.
+   */
+  html,
+  html body {
+    font-family: 'Pretendard Variable', Pretendard, 'Spoqa Han Sans Neo',
+      -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+      "Malgun Gothic", system-ui, sans-serif;
+  }
+
   * {
     padding: 0px;
     margin: 0px;
     /* box-sizing: border-box; */
-    font-family:'Pretendard', 'Spoqa Han Sans Neo', 'sans-serif', "애플 SD 산돌고딕 Neo", "Apple SD Gothic Neo", "Malgun Gothic", "arial sans-serif";
+    font-family: inherit;
+    /* 요청받은 기본 자간. 한글은 이 정도 조여야 덩어리가 흩어지지 않는다. */
+    letter-spacing: -0.025em;
   }
   body, button, form, h1, h2, h3, h4, h5, h6, p, input, legend, li, ol, ul, select, table, td, textarea, th {
     margin:0;
@@ -51,8 +66,14 @@ const GlobalStyleWrapper = createGlobalStyle`
     }
   }
 
-  *:focus {
-    outline: none;
+  /*
+   * 전역 outline: none 은 키보드 사용자를 사이트에서 쫓아낸다.
+   * 마우스 클릭 때는 안 보이고 키보드 이동 때만 보이는 :focus-visible 로 되살린다.
+   */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid #F7941E;
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 
   html {
@@ -62,14 +83,25 @@ const GlobalStyleWrapper = createGlobalStyle`
   body {
   padding: 0;
   margin: 0;
+  /* keep-all 은 어절 중간에서 끊기는 걸 막고, overflow-wrap 은 끊을 데가 없는
+     긴 이메일·URL 이 컨테이너를 뚫는 걸 막는다. 둘은 반드시 짝으로 쓴다. */
   word-break: keep-all;
-  -webkit-user-select:none;
-  -moz-user-select:none;
-  -ms-user-select:none;
-  user-select:none;
+  overflow-wrap: break-word;
+  /* user-select: none 을 걷어낸다. 지원자가 모집 일정과 이메일을 복사할 수 있어야 한다. */
  -ms-overflow-style: none;
   /* overflow-x: hidden; */
-  /* font-family: -apple-system, InkLipquid; */
+  }
+
+  /* 모션을 줄이라고 설정한 사용자에게는 애니메이션을 전부 죽인다. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
 
