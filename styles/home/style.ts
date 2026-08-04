@@ -712,50 +712,121 @@ export const PartnerContainer = styled.div<{ isMobile: boolean }>`
     `}
 `;
 
-export const Footer = styled.footer<{ isMobile: boolean }>`
+/**
+ * 푸터
+ *
+ * 문구는 기존 다섯 줄 그대로 두고 구조만 바꾼다.
+ * 위쪽은 학회 정보와 연락처를 두 단으로, 아래쪽은 얇은 선으로 나눠
+ * 저작권과 소셜을 양 끝에 붙인다. 모바일에서는 한 단으로 쌓인다.
+ */
+export const Footer = styled.footer<{ isMobile?: boolean }>`
   width: 100%;
   background: #000;
   color: #fff;
-  padding: 4rem 10% 3rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.5rem;
+  padding: clamp(4rem, 6vw, 6.4rem) clamp(2.4rem, 8vw, 10rem)
+    max(clamp(3rem, 4vw, 4rem), env(safe-area-inset-bottom));
+
   & h3 {
-    font-size: 1.8rem;
+    margin: 0;
+    font-size: clamp(1.7rem, 2vw, 2rem);
     font-weight: 700;
-    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.03em;
   }
   & p {
     margin: 0;
-    font-size: 1.4rem;
-    line-height: 1.8;
+    font-size: 1.5rem;
+    line-height: 1.7;
     font-weight: 500;
+    color: rgba(255, 255, 255, 0.62);
   }
-  ${(props) =>
-    props.isMobile &&
-    css`
-      padding: 3rem 8%;
-      & h3 {
-        font-size: 1.6rem;
-      }
-      & p {
-        font-size: 1.2rem;
-      }
-    `}
+  & a {
+    color: inherit;
+    /* 긴 이메일이 좁은 화면에서 컨테이너를 뚫지 않게 */
+    overflow-wrap: anywhere;
+  }
+  @media (any-hover: hover) {
+    & a:hover {
+      color: #ffffff;
+    }
+  }
+`;
+
+export const FooterTop = styled.div`
+  display: grid;
+  gap: clamp(2.4rem, 4vw, 4rem);
+  padding-bottom: clamp(2.8rem, 4vw, 4rem);
+
+  /* 넓어지면 학회 정보와 연락처를 좌우로 나눈다 */
+  @media (min-width: 48rem) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
 `;
 
 export const FooterContacts = styled.div`
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 0.4rem;
+
+  & p {
+    /* 번호가 세로로 겹칠 때 자릿수가 흔들리지 않게 */
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 48rem) {
+    justify-items: end;
+    text-align: right;
+  }
+`;
+
+export const FooterBottom = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  padding-top: clamp(2rem, 3vw, 2.8rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+`;
+
+export const FooterSocials = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+
+  & a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* 손가락으로 누를 수 있는 최소 크기 */
+    width: 4.4rem;
+    height: 4.4rem;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.62);
+    transition:
+      background 0.16s ease,
+      color 0.16s ease;
+  }
+  & a svg {
+    width: 2rem;
+    height: 2rem;
+  }
+  @media (any-hover: hover) {
+    & a:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+  }
+  & a:focus-visible {
+    outline: 2px solid ${THEME.ORANGE};
+    outline-offset: 2px;
+  }
 `;
 
 export const FooterCopyright = styled.p`
-  align-self: flex-end;
-  margin-top: 1rem !important;
-  font-size: 1.2rem !important;
-  opacity: 0.9;
+  margin: 0 !important;
+  font-size: 1.3rem !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-variant-numeric: tabular-nums;
 `;
 
 /* ------------------------------------------------------------------ */

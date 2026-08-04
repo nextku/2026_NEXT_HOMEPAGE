@@ -324,14 +324,67 @@ export default function Main() {
               ))}
             </S.PartnerContainer>
           </S.Section2>
-          <S.Footer isMobile={isMobile}>
-            <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
-            <p>email | nextku.contact@gmail.com</p>
-            <S.FooterContacts>
-              <p>대표 이성민 · 010-8693-1884</p>
-              <p>부대표 박보겸 · 010-3185-7117</p>
-            </S.FooterContacts>
-            <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
+          <S.Footer>
+            <S.FooterTop>
+              <div>
+                <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
+                <p style={{ marginTop: "1rem" }}>
+                  email |{" "}
+                  <a href="mailto:nextku.contact@gmail.com">
+                    nextku.contact@gmail.com
+                  </a>
+                </p>
+              </div>
+              <S.FooterContacts>
+                <p>대표 이성민 · 010-8693-1884</p>
+                <p>부대표 박보겸 · 010-3185-7117</p>
+              </S.FooterContacts>
+            </S.FooterTop>
+
+            <S.FooterBottom>
+              <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
+              <S.FooterSocials>
+                <a
+                  href="https://www.linkedin.com/company/nextxlikelion/posts/?feedView=all"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="NEXT 링크드인"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="4" />
+                    <path d="M7.5 10.5V17M7.5 7.4v.1M11.5 17v-3.6a2.4 2.4 0 014.8 0V17" />
+                  </svg>
+                </a>
+                <a
+                  href="https://www.instagram.com/next_koreauniv/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="NEXT 인스타그램"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="3.8" />
+                    <path d="M17.3 6.8v.01" />
+                  </svg>
+                </a>
+              </S.FooterSocials>
+            </S.FooterBottom>
           </S.Footer>
         </S.Container>
       )}
