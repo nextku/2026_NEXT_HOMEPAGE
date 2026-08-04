@@ -13,16 +13,7 @@ export const Timeline = styled.ol`
   padding: 0;
   position: relative;
 
-  /* 점들을 잇는 세로선. 첫 점과 마지막 점 사이만 지난다. */
-  &::before {
-    content: "";
-    position: absolute;
-    left: 5px;
-    top: 1.2rem;
-    bottom: 1.2rem;
-    width: 1px;
-    background: #3a3a3a;
-  }
+
 `;
 
 export const Marker = styled.span`

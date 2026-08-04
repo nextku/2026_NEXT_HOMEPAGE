@@ -57,12 +57,15 @@ const S3upload = dynamic(() => import("components/s3upload/index"), {
 });
 const AOS = dynamic(() => import("aos"), { ssr: false });
 
+
 export default function Join() {
   const [loading, setLoading] = useState(true);
   const [launch, setLaunch] = useRecoilState(isLaunched);
   const [modalPage, setModalPage] = useState(1);
   const [modalOpen, setModalOpen] = useRecoilState(joinModalOpen);
   const [accept, setAccept] = useState(false);
+  /* 로켓 점화 연출 중인지. 연출이 끝나갈 때쯤 안내를 띄운다. */
+  const [igniting, setIgniting] = useState(false);
 
   const isMobile = useMediaQuery({ maxWidth: 1000 });
 
@@ -122,6 +125,26 @@ export default function Join() {
     };
   }, [modalOpen]);
 
+  /*
+   * 로켓을 누르면 바로 모달을 띄우지 않고 잠깐 발사 연출을 보여준다.
+   * 모션을 줄이라고 설정한 사용자에게는 연출 없이 즉시 연다.
+   */
+  const igniteAndOpen = () => {
+    if (igniting) return;
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduce) {
+      setModalOpen(true);
+      return;
+    }
+
+    setIgniting(true);
+    window.setTimeout(() => setModalOpen(true), 430);
+    window.setTimeout(() => setIgniting(false), 760);
+  };
+
   // TODO: Change download & apply link
   return (
     <div>
@@ -180,10 +203,16 @@ export default function Join() {
               </p>
             </S.TitleWrapper>
           )}
+          {/* 배경 가림막. 눌러도 닫힌다. */}
+          <S.Scrim
+            $open={modalOpen}
+            aria-hidden="true"
+            onClick={() => setModalOpen(false)}
+          />
           <motion.div
             animate={modalOpen ? "open" : "closed"}
             variants={variants}
-            style={{ zIndex: "10", opacity: "0" }}
+            style={{ zIndex: "1001", opacity: "0" }}
           >
             <S.ModalContainer infoOpen={modalOpen}>
               <S.ModalHeader>
@@ -217,17 +246,25 @@ export default function Join() {
 
                     <S.InfoSection>
                       <h3>
-                        <em>1</em>지원 방식
+                        지원 방식
                       </h3>
                       <ol>
                         <li>
-                          아래 <S.Chip>지원서 다운로드</S.Chip> 버튼을 클릭한 후
-                          지원서 양식 다운로드
+                          아래{' '}
+                          <S.NoteChipGhost>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 10.5L12 15l4.5-4.5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+                            지원서 다운로드
+                          </S.NoteChipGhost>{' '}
+                          버튼을 클릭한 후 지원서 양식 다운로드
                         </li>
                         <li>서류 접수 기간 내에 지원서 작성</li>
                         <li>
-                          아래 <S.Chip>지원하기</S.Chip> 버튼을 클릭하여 지원서
-                          업로드
+                          아래{' '}
+                          <S.NoteChip>
+                            지원하기
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h13M12.5 6l6 6-6 6" /></svg>
+                          </S.NoteChip>{' '}
+                          버튼을 클릭하여 지원서 업로드
                         </li>
                         <li>
                           모든 문항별 글자수는 공백을 포함한 글자수를 기준으로
@@ -242,14 +279,14 @@ export default function Join() {
 
                     <S.InfoSection>
                       <h3>
-                        <em>2</em>리크루팅 일정
+                        리크루팅 일정
                       </h3>
                       <RecruitTimeline stages={RECRUIT_STAGES} now={currentTime} />
                     </S.InfoSection>
 
                     <S.InfoSection>
                       <h3>
-                        <em>3</em>수료 기준
+                        수료 기준
                       </h3>
                       <p>
                         학회에서 OT부터 겨울방학 기간 동안 진행하는 모든 세션 및
@@ -260,7 +297,7 @@ export default function Join() {
 
                     <S.InfoSection>
                       <h3>
-                        <em>4</em>면접 촬영 및 개인정보 수집 안내
+                        면접 촬영 및 개인정보 수집 안내
                       </h3>
                       <p>
                         면접 평가는 모두 <b>대면</b>으로 이뤄집니다. 원활한 스케줄
@@ -276,7 +313,7 @@ export default function Join() {
 
                     <S.InfoSection>
                       <h3>
-                        <em>5</em>학회비 안내
+                        학회비 안내
                       </h3>
                       <p>
                         원활한 학회 운영을 위해 학회비를 걷어 운영하고 있습니다.
@@ -292,7 +329,7 @@ export default function Join() {
 
                     <S.InfoSection>
                       <h3>
-                        <em>6</em>오리엔테이션 필참
+                        오리엔테이션 필참
                       </h3>
                       <p>
                         최종 합격 이후 <b>8월 29일(토)</b>에 진행되는 OT는 필수
@@ -383,13 +420,8 @@ export default function Join() {
             </S.ModalContainer>
           </motion.div>
           <S.SpaceContainer isMobile={isMobile}>
-            <S.RocketContainer
-              onClick={() => {
-                setModalOpen((modalOpen) => !modalOpen);
-              }}
-              launched={launch}
-            >
-              <S.Rocket>
+            <S.RocketContainer onClick={igniteAndOpen} launched={launch}>
+              <S.Rocket igniting={igniting}>
                 <img src={RocketImg.src} />
               </S.Rocket>
               {/* <S.Fire launched={launch}>
