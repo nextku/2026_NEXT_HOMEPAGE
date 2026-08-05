@@ -12,7 +12,7 @@ import { ABOUT_HISTORY } from "constants/about";
 
 export default function History() {
   return (
-    <A.Section className="mount">
+    <A.SectionTimeline className="mount">
       <A.Intro>
         <h2>2014년부터 지금까지</h2>
         <p>
@@ -35,6 +35,6 @@ export default function History() {
           </A.Era>
         ))}
       </A.Timeline>
-    </A.Section>
+    </A.SectionTimeline>
   );
 }
