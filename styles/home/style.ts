@@ -688,6 +688,14 @@ export const ArrowBG = styled.div<{ isMobile: boolean }>`
   pointer-events: none;
   background: linear-gradient(rgba(247, 148, 30, 0), rgba(247, 148, 30, 0.1));
   clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 100%, 0 50%);
+
+  /*
+   * 모바일에서는 세 항목이 세로로 쌓여 섹션이 길어지는데, 삼각형이 그 높이를
+   * 그대로 따라가며 아래쪽에 검정 구간을 크게 만든다. 좁은 화면에서는 뺀다.
+   */
+  @media (max-width: 820px) {
+    display: none;
+  }
 `;
 
 export const LottieWrapper = styled.div<{ isMobile: boolean }>`
