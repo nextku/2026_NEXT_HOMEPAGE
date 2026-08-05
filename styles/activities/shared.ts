@@ -24,6 +24,17 @@ export const Section = styled.section`
 `;
 
 /**
+ * 연혁 전용 섹션.
+ *
+ * 연혁은 연도 열 때문에 왼쪽에 여백이 필요 없고, 목록이 길어 폭을 좁혀야
+ * 한 줄이 너무 길어지지 않는다. 제목과 목록이 같은 축에서 시작하도록
+ * 섹션 자체를 좁혀 가운데에 둔다. 다른 탭은 영향받지 않는다.
+ */
+export const SectionTimeline = styled(Section)`
+  max-width: 104rem;
+`;
+
+/**
  * 옆에 이미지가 없는 글 전용 섹션.
  * 글 덩어리를 화면 가운데에 두어 좌우 여백이 같아지게 한다.
  */
@@ -33,15 +44,8 @@ export const SectionNarrow = styled(Section)`
 
 /** 탭 맨 위에 오는 제목과 한 줄 설명. 모든 탭이 같은 형태로 시작한다. */
 export const Intro = styled.div`
-  /* 1. Timeline과 동일한 틀 크기 및 가운데 정렬 부여 */
-  width: 100%;
-  max-width: 92rem;
-  margin: 0 auto clamp(4rem, 6vw, 7rem);
-
-  /* 2. 글 텍스트가 끝없이 길어지지 않도록 내부 요소 너비만 52rem으로 제한 */
-  & h2, & p {
-    max-width: 52rem;
-  }
+  max-width: 52rem;
+  margin-bottom: clamp(4rem, 6vw, 7rem);
 
   & h2 {
     margin: 0 0 1.2rem;
@@ -72,6 +76,7 @@ export const Intro = styled.div`
     }
   }
 `;
+
 
 /** 항목 목록. 세로 간격만으로 나눈다. */
 export const List = styled.div`
@@ -443,7 +448,7 @@ export const Signature = styled.div`
  */
 export const Timeline = styled.ol`
   list-style: none;
-  margin: 0 auto;
+  margin: 0;
   padding: 0;
   display: grid;
   gap: clamp(3.2rem, 5vw, 5.6rem);
