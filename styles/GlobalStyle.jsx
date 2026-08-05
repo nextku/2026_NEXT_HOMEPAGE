@@ -77,6 +77,8 @@ const GlobalStyleWrapper = createGlobalStyle`
   }
 
   html {
+    /* 헤더가 fixed 라 앵커로 이동하면 제목이 헤더 밑에 가린다. */
+    scroll-padding-top: 12rem;
     font-size: 62.5%;
     -webkit-tap-highlight-color: transparent;
   }
@@ -187,7 +189,8 @@ const Container = styled.div`
   -ms-user-select: none;
   user-select: none;
   /* max-width: 1920px; */
-  width: 100vw;
+  /* 100vw 는 스크롤바 폭을 포함해 가로 스크롤을 만든다 */
+  width: 100%;
   /* overflow: hidden; */
   margin: 0 auto;
   font-size: 1.6rem;

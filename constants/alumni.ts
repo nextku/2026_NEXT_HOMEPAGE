@@ -13,8 +13,10 @@ import sparta from "public/images/alumni/sparta.png";
 import swmaestro from "public/images/alumni/swmaestro.jpeg";
 import google from "public/images/alumni/google.png";
 import ncsoft from "public/images/alumni/ncsoft.png";
+import sume from "public/images/alumni/sume.png";
 
 export const Alumni = [
+  { name: "sume", src: sume },
   { name: "google", src: google },
   { name: "ncsoft", src: ncsoft },
   { name: "mesher", src: mesher },

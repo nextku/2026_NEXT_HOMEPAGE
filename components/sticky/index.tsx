@@ -8,7 +8,8 @@ import { useMediaQuery } from "react-responsive";
 import Demoday from "public/images/activities/demoday/demoday-2.jpg";
 import { Fade } from "react-awesome-reveal";
 import Slick from "components/slick/index";
-import Logo from "public/assets/logo.png";
+// 밝은 면으로 바뀌어 흰 로고는 배경에 묻힌다. 검정 버전을 쓴다.
+import Logo from "public/assets/new_logo(bl).svg";
 import { useRouter } from "next/router";
 export default function Sticky() {
     const isDesktop = useMediaQuery({ minDeviceWidth: 820 });
@@ -32,7 +33,7 @@ export default function Sticky() {
                         </span>
                         <br />
                         <span data-aos="fade" style={{ fontWeight: "500" }}>
-                            10년 안에 이곳에서 <b style={{ color: "white", fontWeight: "900" }}>유니콘</b> 🦄이 탄생할
+                            10년 안에 이곳에서 <b style={{ color: "#17150f", fontWeight: "900" }}>유니콘</b> 🦄이 탄생할
                             것이라고.
                         </span>
                     </p>

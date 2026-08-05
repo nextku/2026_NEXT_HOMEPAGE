@@ -11,8 +11,8 @@ import { PEOPLE_ITEMS, PEOPLE_INFORMATION } from "constants/people";
 const AOS = dynamic(() => import("aos"), { ssr: false });
 
 // 멤버 및 카드뉴스 컴포넌트 동적 로딩
-const Member = dynamic(() => import("./components/Member"), { ssr: false });
-const Cardnews = dynamic(() => import("./components/Cardnews"), { ssr: false });
+const Member = dynamic(() => import("components/people/Member"), { ssr: false });
+const Cardnews = dynamic(() => import("components/people/Cardnews"), { ssr: false });
 
 const { TEN, ELEVEN, TWELVE, THIRTEEN, FOURTEEN } = PEOPLE_ITEMS;
 
