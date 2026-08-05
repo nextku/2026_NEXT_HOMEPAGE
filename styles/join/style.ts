@@ -245,8 +245,22 @@ export const ModalContainer = styled.div<{ infoOpen: boolean }>`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    border-radius: 16px;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+    /*
+     * 어두운 배경 위의 어두운 카드는 그림자가 묻혀 납작해 보인다.
+     * 위쪽 가장자리에 아주 옅은 밝은 선을 얹으면 위에서 빛이 닿은 것처럼 읽혀
+     * 카드가 떠오른다. 아래쪽은 반대로 어둡게 눌러 두께를 만든다.
+     */
+    border-radius: 18px;
+    @supports (corner-shape: squircle) {
+        corner-shape: squircle;
+        border-radius: 26px;
+    }
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.09),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.6),
+        0 2px 6px rgba(0, 0, 0, 0.4),
+        0 18px 40px rgba(0, 0, 0, 0.55),
+        0 40px 90px rgba(0, 0, 0, 0.45);
     overflow: hidden;
     pointer-events: ${(props) => (props.infoOpen ? 'auto' : 'none')};
 
@@ -264,7 +278,14 @@ export const ModalContainer = styled.div<{ infoOpen: boolean }>`
         transform: none;
         /* 헤더 높이 + 여유만큼은 항상 배경이 보이게 남긴다 */
         max-height: calc(100dvh - 9rem);
-        border-radius: 16px 16px 0 0;
+        border-radius: 20px 20px 0 0;
+        @supports (corner-shape: squircle) {
+            corner-shape: squircle;
+            border-radius: 28px 28px 0 0;
+        }
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.09),
+            0 -8px 32px rgba(0, 0, 0, 0.5);
         padding-bottom: env(safe-area-inset-bottom);
     }
 `;
@@ -299,9 +320,9 @@ export const ModalHeader = styled.header`
 export const ModalFooter = styled.div`
     flex: 0 0 auto;
     padding: 1.6rem 2.8rem 2.2rem;
-    /* 구분선을 그으면 끝까지 내려도 남아 있어 거슬린다.
-       배경 명도 차이와 본문 하단 그림자(끝에 닿으면 자동으로 사라짐)로 나눈다. */
-    background: #171717;
+    /* 명도 차이를 크게 두면 회색 띠가 따로 얹힌 것처럼 보인다.
+       거의 같은 톤으로 두고 본문 하단 그림자가 경계를 만들게 한다. */
+    background: #161616;
 
     @media (max-width: 640px) {
         padding: 1.2rem 2rem 1.8rem;
@@ -684,15 +705,19 @@ export const NextBtnWrapper = styled.div<{
             color 0.16s;
     }
 
-    /* 보조: 조용하되 분명히 읽혀야 한다.
-       갈색기가 도는 중립색(#262119)은 탁해 보인다. 순수한 회색 계열로 올린다. */
+    /*
+     * 보조 버튼을 회색으로 채우면 주 버튼과 나란히 놓였을 때 '회색 사각형 두 개' 가
+     * 되어 흔한 인상이 된다. 채움을 걷고 테두리만 남긴다.
+     * 어두운 면에서는 위쪽 안쪽 하이라이트가 있어야 눌리는 물체로 읽힌다.
+     */
     & button:first-child {
-        color: #f2efea;
-        background: #2b2b2b;
-        border: 1px solid #454545;
+        color: #efece7;
+        background: transparent;
+        border: 1px solid #3f3f3f;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
     & button:first-child:hover {
-        background: #363636;
+        background: rgba(255, 255, 255, 0.04);
         border-color: #6b6b6b;
         color: #ffffff;
     }
@@ -702,6 +727,7 @@ export const NextBtnWrapper = styled.div<{
         color: #151515;
         background: ${THEME.ORANGE};
         border: 1px solid ${THEME.ORANGE};
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
         flex: 1.3 1 0;
     }
     & button:last-child:hover:not(:disabled) {
@@ -717,9 +743,10 @@ export const NextBtnWrapper = styled.div<{
     }
 
     & button:last-child:disabled {
-        background: #242424;
-        border-color: #3a3a3a;
-        color: #6e6e6e;
+        background: transparent;
+        border-color: #333333;
+        color: #6b6b6b;
+        box-shadow: none;
         cursor: not-allowed;
     }
 
