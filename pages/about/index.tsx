@@ -11,11 +11,11 @@ import { ABOUT_ITEMS } from "constants/about";
 const AOS = dynamic(() => import("aos"), { ssr: false });
 
 // 각 섹션을 `dynamic import`로 최적화
-const Partners = dynamic(() => import("pages/about/components/partners"), { ssr: false });
-const Introduction = dynamic(() => import("pages/about/components/introduction"), { ssr: false });
-const Greeting = dynamic(() => import("pages/about/components/greeting"), { ssr: false });
-const History = dynamic(() => import("pages/about/components/history"), { ssr: false });
-const Achievement = dynamic(() => import("pages/about/components/achievement"), { ssr: false });
+const Partners = dynamic(() => import("components/about/partners"), { ssr: false });
+const Introduction = dynamic(() => import("components/about/introduction"), { ssr: false });
+const Greeting = dynamic(() => import("components/about/greeting"), { ssr: false });
+const History = dynamic(() => import("components/about/history"), { ssr: false });
+const Achievement = dynamic(() => import("components/about/achievement"), { ssr: false });
 
 const { GREETING, HISTORY, ACHIEVEMENT, PARTNERS } = ABOUT_ITEMS;
 

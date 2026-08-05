@@ -18,8 +18,10 @@ import au from "public/images/startups/au.png";
 import abovetech from "public/images/startups/abovetech.png";
 import lucktime from "public/images/startups/lucktime.png";
 import loanfra from "public/images/startups/loanfra.svg";
+import sume from "public/images/startups/sume.png";
 
 export const Startups = [
+    { name: "sume", src: sume },
     { name: "ailo", src: ailo },
     { name: "chunmyung", src: chunmyung },
     { name: "taling", src: taling },

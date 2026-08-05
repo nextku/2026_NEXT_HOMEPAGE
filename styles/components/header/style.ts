@@ -6,28 +6,53 @@ export const NavBarContainer = styled.div<{
     scroll: boolean;
     pathname: string;
 }>`
-    padding: 34px 68px;
+    /*
+     * 배경이 스크롤 상태에서만 붙어서, 판정이 어긋나면 글자가 뒤 콘텐츠와 겹쳐
+     * 메뉴가 읽히지 않았다. 배경을 항상 두고 투명도만 바꾼다.
+     * 위로 갈수록 옅어지는 그라디언트라 히어로에서는 띠가 보이지 않으면서도
+     * 글자 뒤에는 항상 어두운 바탕이 깔린다.
+     */
+    padding: 28px clamp(2.4rem, 5vw, 6.8rem);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100vw;
-    /* max-width: 1920px; */
+    /*
+     * 100vw 는 스크롤바 폭을 포함해 실제 콘텐츠 영역보다 넓다. fixed 요소에 쓰면
+     * 오른쪽으로 그만큼 밀려 마지막 메뉴(JOIN US)가 잘린다. left/right 로 고정한다.
+     */
+    left: 0;
+    right: 0;
+    width: auto;
     z-index: 10;
     position: fixed;
     box-sizing: border-box;
-    background-color: transparent;
-    transition: 1s;
+    transition: background-color 0.4s ease;
+
+    ${(props) =>
+        props.pathname === '/home' || props.pathname === '/join'
+            ? css`
+                  background: linear-gradient(
+                      to bottom,
+                      rgba(0, 0, 0, 0.72) 0%,
+                      rgba(0, 0, 0, 0.42) 60%,
+                      rgba(0, 0, 0, 0) 100%
+                  );
+              `
+            : css`
+                  background: linear-gradient(
+                      to bottom,
+                      rgba(255, 255, 255, 0.94) 0%,
+                      rgba(255, 255, 255, 0.82) 60%,
+                      rgba(255, 255, 255, 0) 100%
+                  );
+              `}
+
     ${(props) =>
         props.scroll &&
-        props.pathname === '/home' &&
         css`
-            background-color: rgba(0, 0, 0, 0.85);
-        `}
-    ${(props) =>
-        props.scroll &&
-        props.pathname !== '/home' &&
-        css`
-            background-color: rgba(255, 255, 255, 0.85);
+            background: ${props.pathname === '/home' || props.pathname === '/join'
+                ? 'rgba(0, 0, 0, 0.9)'
+                : 'rgba(255, 255, 255, 0.94)'};
         `}
 `;
 
@@ -48,22 +73,62 @@ export const StyledNav = styled.nav<{
     selected: boolean;
     key: any;
 }>`
+    /*
+     * 이전에는 활성 항목에만 정적인 오렌지 밑줄이 있고 hover 는 글자색만 바뀌었다.
+     * 밑줄을 글자 폭만큼만 그리고, 커서를 올리면 왼쪽에서 자라나게 한다.
+     * border 대신 ::after 를 쓰는 이유는 border 로는 폭이 자라는 연출이 안 되기 때문.
+     */
+    position: relative;
     text-decoration: none;
     color: ${({ isWhite }) => (isWhite ? THEME.WHITE : THEME.BLACK)};
     font-size: 1.6rem;
-    padding: 10px;
-    transition: all 0.3s;
+    letter-spacing: -0.02em;
+    padding: 10px 2px;
+    cursor: pointer;
+    transition: color 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        height: 2px;
+        background: ${THEME.ORANGE};
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
     ${(props) =>
         props.selected &&
         css`
-            margin-bottom: -2px;
-            border-bottom: 2px solid ${THEME.ORANGE};
             color: ${THEME.ORANGE};
+            &::after {
+                transform: scaleX(1);
+            }
         `}
-    cursor: pointer;
-    &:hover {
-        color: ${THEME.ORANGE};
+
+    @media (any-hover: hover) {
+        &:hover {
+            color: ${THEME.ORANGE};
+        }
+        &:hover::after {
+            transform: scaleX(1);
+        }
     }
+
+    /* 현재 페이지에서 커서를 떼면 밑줄이 오른쪽으로 접힌다 */
+    ${(props) =>
+        !props.selected &&
+        css`
+            &::after {
+                transform-origin: right center;
+            }
+            &:hover::after {
+                transform-origin: left center;
+            }
+        `}
 
     & + & {
         margin-left: 5%;
@@ -73,7 +138,9 @@ export const StyledNav = styled.nav<{
 export const Container = styled.div<{ isOpen: boolean }>`
     position: fixed;
     top: 0;
-    width: 100vw;
+    left: 0;
+    right: 0;
+    width: auto;
     z-index: 10000;
     .ant-menu-dark {
         background-color: black;

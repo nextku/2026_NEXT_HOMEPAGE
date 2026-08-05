@@ -11,11 +11,11 @@ import { ACTIVITY_ITEMS } from "constants/activities";
 const AOS = dynamic(() => import("aos"), { ssr: false });
 
 // 각 섹션을 `dynamic import`로 최적화
-const Curriculum = dynamic(() => import("./components/curriculum"), { ssr: false });
-const Session = dynamic(() => import("./components/session"), { ssr: false });
-const Project = dynamic(() => import("./components/project"), { ssr: false });
-const Demoday = dynamic(() => import("./components/demoday"), { ssr: false });
-const WhyNext = dynamic(() => import("./components/whynext"), { ssr: false });
+const Curriculum = dynamic(() => import("components/activities/curriculum"), { ssr: false });
+const Session = dynamic(() => import("components/activities/session"), { ssr: false });
+const Project = dynamic(() => import("components/activities/project"), { ssr: false });
+const Demoday = dynamic(() => import("components/activities/demoday"), { ssr: false });
+const WhyNext = dynamic(() => import("components/activities/whynext"), { ssr: false });
 
 const { CURRICULUM, SESSION, PROJECT, DEMODAY, WHY_NEXT } = ACTIVITY_ITEMS;
 
