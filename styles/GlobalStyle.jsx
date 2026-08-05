@@ -77,6 +77,8 @@ const GlobalStyleWrapper = createGlobalStyle`
   }
 
   html {
+    /* 헤더가 fixed 라 앵커로 이동하면 제목이 헤더 밑에 가린다. */
+    scroll-padding-top: 12rem;
     font-size: 62.5%;
     -webkit-tap-highlight-color: transparent;
   }

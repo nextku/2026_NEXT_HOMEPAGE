@@ -179,11 +179,16 @@ export default function Main() {
               </S.MainTextLionWrapper>
             </S.MainWrapper>
             {/* 배경 이미지 최적화 */}
+            {/*
+              모바일에서 contain 이면 사진이 화면을 못 채워 위아래에 검정 띠가 남고
+              텍스트가 사진 안에 갇혀 화면 중앙과 어긋난다. 항상 채운다.
+            */}
             <Image
               src={MainBG}
-              alt="Background"
+              alt=""
               layout="fill"
-              objectFit={isMobile ? "contain" : "cover"}
+              objectFit="cover"
+              objectPosition="center"
               priority
             />
           </S.MainContainer>
@@ -259,16 +264,11 @@ export default function Main() {
               <S.ArrowBG isMobile={isMobile}></S.ArrowBG>
             </S.LottieContainer>
 
-            <S.LottieWrapper
-              isMobile={isMobile}
-              data-aos="zoom-in"
-              data-aos-delay="100"
-            >
+            <S.FinaleWrapper data-aos="zoom-in" data-aos-delay="100">
               <RocketLottie />
-
               <p>창업 경진대회 및 VC 투자 유치</p>
-              <h2 style={{ fontSize: "3rem" }}>"창업"</h2>
-            </S.LottieWrapper>
+              <h2>"창업"</h2>
+            </S.FinaleWrapper>
             <div
               style={{
                 width: "100%",
@@ -281,7 +281,18 @@ export default function Main() {
                 isMobile={isMobile}
                 onClick={() => router.push("activities")}
               >
-                &gt;&gt;&nbsp; Activities 자세히 보기
+                <span>Activities 자세히 보기</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h13M12.5 6l6 6-6 6" />
+                </svg>
               </S.MoreBtn>
             </div>
           </S.Section2>

@@ -401,13 +401,20 @@ export const Container = styled.div`
 `;
 
 export const MainContainer = styled.div`
+  /*
+   * 100vh - 112px 에 margin-top: 112px 조합이라 모바일에서 헤더 높이(약 60px)와
+   * 어긋나 위아래 여백이 맞지 않았다. 화면 전체를 쓰고 내용은 가운데에 둔다.
+   * iOS 는 100vh 가 주소창을 포함해 잘리므로 dvh 를 함께 쓴다.
+   */
   width: 100%;
-  min-height: calc(100vh - 112px);
-  margin-top: 112px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 `;
 export const MainContainerBG = styled.img<{ isMobile: boolean }>`
   width: 100%;
@@ -496,9 +503,10 @@ export const Section1 = styled.div<{ isMobile: boolean }>`
     margin-top: 1rem;
     margin-bottom: 2rem;
   }
+  /* 본문 강조는 색이 아니라 굵기로. 오렌지는 누를 수 있는 것에만 남긴다. */
   & div:last-child p b {
-    color: ${THEME.ORANGE};
-    /* font-weight: 700; */
+    color: #ffffff;
+    font-weight: 700;
   }
   ${(props) =>
     props.isMobile &&
@@ -521,9 +529,13 @@ export const Section1 = styled.div<{ isMobile: boolean }>`
     `}
 `;
 export const Section2 = styled.div`
+  /*
+   * #1b1b1b 은 검정(#000)과 차이가 작아 '띠를 깔다 만' 것처럼 보였다.
+   * 배경을 걷고 간격으로만 나눈다.
+   */
   width: 100%;
-  background-color: ${THEME.LIGHT_BLACK};
-  padding: 10rem 10%;
+  background-color: transparent;
+  padding: clamp(6rem, 10vw, 11rem) clamp(2.4rem, 8vw, 10rem);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -531,39 +543,39 @@ export const Section2 = styled.div`
   color: white;
 `;
 export const TextWrapper = styled.div<{ isMobile: boolean }>`
+  /*
+   * 섹션 제목이 오렌지 + 가운데 정렬이라 홈만 다른 문법을 쓰고 있었다.
+   * 다른 페이지는 이미 흰/검정 + 왼쪽 정렬이라 홈에 들어오면 톤이 튄다.
+   * 색으로 만든 위계를 크기와 굵기로 옮긴다.
+   */
   width: 100%;
-  font-size: 2.4rem;
+  max-width: 132rem;
+  margin: 0 auto;
   word-break: keep-all;
   color: #fff;
-  overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
-  & p {
-    line-height: 150%;
-  }
-  // & img {
-  //     width: 47%;
-  //     margin-top: 4rem;
-  // }
+  align-items: flex-start;
+  text-align: left;
+
   & > span {
-    font-size: 3.6rem;
-    font-weight: 600;
+    font-size: clamp(2.6rem, 4vw, 4.2rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
   }
   & span b {
-    color: ${THEME.ORANGE};
+    color: #ffffff;
+    font-weight: inherit;
   }
-  ${(props) =>
-    props.isMobile &&
-    css`
-      font-size: 1.8rem;
-      & img {
-        // width: 100%;
-      }
-      & p {
-        width: 100%;
-      }
-    `}
+  & p {
+    font-size: clamp(1.6rem, 1.8vw, 1.9rem);
+    line-height: 1.75;
+    letter-spacing: -0.025em;
+    color: rgba(255, 255, 255, 0.62);
+    margin-top: 1.4rem;
+  }
 `;
 
 interface NextInlineLogoProps {
@@ -601,115 +613,208 @@ export const NextInlineLogo2 = styled.img<NextInlineLogoProps2>`
 `;
 
 export const LottieContainer = styled.div<{ isMobile: boolean }>`
-  width: 125%;
-  display: flex;
-  justify-content: space-between;
-  padding: 6rem 10%;
-  position: relative;
-  /* background: radial-gradient(
-    circle farthest-side at 50% 100%,
-    rgba(255, 255, 255, 0.5),
-    rgba(255, 255, 255, 0)
-  ); */
-  /* background: linear-gradient(); */
-  ${(props) =>
-    props.isMobile &&
-    css`
-      flex-direction: column;
-      align-items: center;
-    `}
-`;
-export const ArrowBG = styled.div<{ isMobile: boolean }>`
+  /*
+   * width: 125% 라 부모보다 넓어져 화면 밖으로 55px 삐져나오고 가로 스크롤이 생겼다.
+   * 세 항목을 고른 격자로 두면 폭을 넘길 이유가 없다.
+   */
   width: 100%;
-  height: 140%;
-  /* 흰색 50% 삼각형이 Session/Project/Demoday 라벨 위를 덮어 글씨가 안 읽혔다.
-     브랜드 오렌지의 아주 옅은 농도로 낮추고 콘텐츠 뒤로 보낸다. */
-  background: linear-gradient(rgba(247, 148, 30, 0), rgba(247, 148, 30, 0.12));
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 0;
-  pointer-events: none;
-  clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 100%, 0 50%);
-  ${(props) =>
-    props.isMobile &&
-    css`
-      height: 110%;
-    `}
-`;
+  max-width: 116rem;
+  margin: 0 auto;
+  padding: clamp(3.2rem, 5vw, 6rem) 0;
+  position: relative;
 
-export const LottieWrapper = styled.div<{ isMobile: boolean }>`
-  width: 30%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(2rem, 3vw, 4rem);
+  align-items: start;
+
+  @media (max-width: 820px) {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+`;
+/**
+ * '창업' 마무리 블록.
+ * LottieWrapper 를 그대로 재사용하면 세 항목용으로 잡은 최소 높이가 걸려
+ * 로켓 아래에 큰 빈 공간이 생긴다. 이 블록만 높이를 내용에 맡긴다.
+ */
+export const FinaleWrapper = styled.div`
+  width: 100%;
+  max-width: 116rem;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
-  z-index: 1; /* ArrowBG 위로 */
+  z-index: 1;
+
+  & > div:first-child {
+    width: auto;
+    min-height: 0;
+  }
+  & > div:first-child svg,
+  & > div:first-child canvas {
+    max-height: clamp(14rem, 18vw, 20rem);
+    width: auto;
+  }
+
+  & p {
+    margin-top: 1.2rem;
+    font-size: clamp(1.45rem, 1.6vw, 1.6rem);
+    letter-spacing: -0.025em;
+    color: rgba(255, 255, 255, 0.62);
+  }
+  & h2 {
+    margin-top: 0.6rem;
+    font-size: clamp(2.4rem, 3.4vw, 3.4rem) !important;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    color: #ffffff;
+  }
+`;
+
+export const ArrowBG = styled.div<{ isMobile: boolean }>`
+  /*
+   * 부모(LottieContainer)가 max-width: 116rem 으로 좁아지면서 삼각형이
+   * 그 폭에 갇혀 좌우가 잘렸다. 화면 폭 전체로 펴서 꼭짓점이 살아 있게 한다.
+   */
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(rgba(247, 148, 30, 0), rgba(247, 148, 30, 0.1));
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 100%, 0 50%);
+`;
+
+export const LottieWrapper = styled.div<{ isMobile: boolean }>`
+  /*
+   * 로티마다 원본 여백이 달라 그대로 두면 아래 라벨이 계단처럼 어긋난다.
+   * 그림 영역 높이를 고정해 세 항목의 제목이 같은 선에서 시작하게 한다.
+   */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+
+  /*
+   * 로티마다 감싸는 DOM 구조가 달라 특정 자식을 지정하면 어떤 건 뭉개진다.
+   * 높이를 강제하지 않고 최소 높이만 확보해 라벨 줄을 맞춘다.
+   */
+  & > div:first-child {
+    width: 100%;
+    min-height: clamp(16rem, 20vw, 22rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  & > div:first-child svg,
+  & > div:first-child canvas {
+    max-height: clamp(16rem, 20vw, 22rem);
+    width: auto;
+  }
 
   & h2 {
-    font-weight: 700;
+    margin-top: 1.6rem;
+    font-size: clamp(1.7rem, 2vw, 2rem);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    color: #ffffff;
   }
   & p {
-    font-size: 1.8rem;
-    line-height: 150%;
-    margin: 1rem;
+    margin-top: 0.8rem;
+    font-size: clamp(1.45rem, 1.6vw, 1.6rem);
+    line-height: 1.6;
+    letter-spacing: -0.025em;
+    color: rgba(255, 255, 255, 0.62);
   }
-  ${(props) =>
-    props.isMobile &&
-    css`
-      width: 80%;
-      margin-bottom: 6rem;
-    `}
 `;
 
 export const MoreBtn = styled.div<{ isMobile: boolean }>`
-  /* width: 8rem; */
-  height: 4rem;
-  cursor: pointer;
-  border: 1px solid transparent;
-  display: flex;
-  justify-content: center;
+  /* '>>' 는 텍스트 기호라 폰트마다 모양이 달라진다. 화살표는 SVG 로 그린다. */
+  display: inline-flex;
   align-items: center;
+  gap: 0.8rem;
+  min-height: 4.4rem;
+  padding: 0 0.2rem;
+  cursor: pointer;
   color: ${THEME.WHITE};
-  transition: 0.5s;
-  ${(props) =>
-    !props.isMobile &&
-    css`
-      &:hover {
-        /* background-color: ${THEME.LIGHT_ORANGE}; */
-        border-bottom: 1px solid ${THEME.WHITE};
-      }
-    `}
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+
+  & span:first-child {
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.32);
+    transition: box-shadow 0.18s ease;
+  }
+  & svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (any-hover: hover) {
+    &:hover span:first-child {
+      box-shadow: inset 0 -1px 0 ${THEME.ORANGE};
+    }
+    &:hover svg {
+      transform: translateX(4px);
+    }
+  }
 `;
 
 export const PartnerContainer = styled.div<{ isMobile: boolean }>`
+  /*
+   * 이전에는 로고를 20% 폭 flex 로 늘어놓아 원본 비율에 따라 크기가 요동쳤고
+   * 마지막 줄이 어색하게 남았다. 같은 크기의 칸을 주고 그 안에서 맞춘다.
+   */
   width: 100%;
-  padding: 5rem;
-  background: white;
-  border-radius: 5rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  max-width: 116rem;
+  margin: 0 auto;
+  padding: clamp(3.2rem, 5vw, 5.6rem) clamp(2.4rem, 4vw, 4.8rem);
+  background: #fff;
+  border-radius: 24px;
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    border-radius: 34px;
+  }
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2.4rem, 3.5vw, 4rem) clamp(2rem, 3vw, 3.2rem);
   align-items: center;
+  justify-items: center;
+
+  @media (min-width: 36rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (min-width: 56rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  @media (min-width: 76rem) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
 
   & div {
-    width: 20%;
-    margin: 2rem;
+    width: 100%;
+    max-width: 15rem;
+    margin: 0;
+    aspect-ratio: 3 / 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   & div img {
     width: 100%;
-    min-height: 140px;
+    height: 100%;
+    min-height: 0;
     object-fit: contain;
   }
-  ${(props) =>
-    props.isMobile &&
-    css`
-      padding: 2rem;
-      & div {
-        width: 40%;
-        margin: 1rem;
-      }
-    `}
 `;
 
 /**
