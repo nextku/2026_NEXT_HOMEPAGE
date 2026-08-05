@@ -16,7 +16,13 @@ export const NavBarContainer = styled.div<{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 100vw;
+    /*
+     * 100vw 는 스크롤바 폭을 포함해 실제 콘텐츠 영역보다 넓다. fixed 요소에 쓰면
+     * 오른쪽으로 그만큼 밀려 마지막 메뉴(JOIN US)가 잘린다. left/right 로 고정한다.
+     */
+    left: 0;
+    right: 0;
+    width: auto;
     z-index: 10;
     position: fixed;
     box-sizing: border-box;
@@ -132,7 +138,9 @@ export const StyledNav = styled.nav<{
 export const Container = styled.div<{ isOpen: boolean }>`
     position: fixed;
     top: 0;
-    width: 100vw;
+    left: 0;
+    right: 0;
+    width: auto;
     z-index: 10000;
     .ant-menu-dark {
         background-color: black;

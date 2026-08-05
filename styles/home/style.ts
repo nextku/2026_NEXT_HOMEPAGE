@@ -682,7 +682,9 @@ export const ArrowBG = styled.div<{ isMobile: boolean }>`
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 100vw;
+  /* 화면 폭을 의도적으로 쓰지만 스크롤바만큼 넘치지 않게 실제 폭을 쓴다 */
+  width: 100%;
+  max-width: 100vw;
   height: 100%;
   z-index: 0;
   pointer-events: none;

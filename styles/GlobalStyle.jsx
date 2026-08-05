@@ -189,7 +189,8 @@ const Container = styled.div`
   -ms-user-select: none;
   user-select: none;
   /* max-width: 1920px; */
-  width: 100vw;
+  /* 100vw 는 스크롤바 폭을 포함해 가로 스크롤을 만든다 */
+  width: 100%;
   /* overflow: hidden; */
   margin: 0 auto;
   font-size: 1.6rem;
