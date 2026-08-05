@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import * as S from "styles/home/style";
 import { useMediaQuery } from "react-responsive";
 import { Partners } from "constants/partners";
+import { RECRUIT, isRecruiting } from "constants/recruit";
 import Sticky from "components/sticky";
 
 // 히어로 워드마크는 canvas 기반이라 서버에서 그릴 수 없다.
@@ -55,7 +56,16 @@ import RecruitRocket from "public/assets/joinus_rocket.png";
 export default function Main() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [recruitPopupOpen, setRecruitPopupOpen] = useState(true);
+  /*
+   * 이전에는 true 로 시작해 모집이 끝난 뒤에도 '지원하기' 팝업이 계속 떴다.
+   * 서버와 브라우저의 시각이 다르면 hydration 이 어긋나므로 첫 렌더에서는 닫아두고
+   * 마운트된 뒤 기간을 확인해 연다.
+   */
+  const [recruitPopupOpen, setRecruitPopupOpen] = useState(false);
+
+  useEffect(() => {
+    if (isRecruiting()) setRecruitPopupOpen(true);
+  }, []);
 
   const isMobile = useMediaQuery({ query: "(max-width: 820px)" });
 
@@ -116,7 +126,7 @@ export default function Main() {
                   </S.RecruitPopupClose>
                   <S.RecruitPopupContent>
                     <S.RecruitPopupEyebrow>
-                      Who's NEXT? - 15th Recruiting
+                      Who's NEXT? - {RECRUIT.generation}th Recruiting
                     </S.RecruitPopupEyebrow>
                     <h2 id="recruit-popup-title">
                       세상을 바꿀 다음 여정에
@@ -130,13 +140,13 @@ export default function Main() {
                     </h2>
                     <S.RecruitPopupPeriod>
                       <span>지원 기간</span>
-                      2026. 08. 03 — 08. 15
+                      {RECRUIT.display}
                     </S.RecruitPopupPeriod>
                     <S.RecruitPopupButton
                       type="button"
                       onClick={() => router.push("/join")}
                     >
-                      지원하기
+                      {RECRUIT.generation}기 지원하기
                       <svg
                         viewBox="0 0 24 24"
                         fill="none"
