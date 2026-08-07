@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PEOPLE_INFORMATION } from "constants/people";
 import { POST_CATEGORIES } from "constants/member";
+import DailyChart from "components/member/DailyChart";
 import { parseRoster, type RosterParse } from "lib/roster";
 import { createClient } from "lib/supabase/client";
 import { signOut, useAuth, type Profile } from "lib/supabase/useAuth";
@@ -328,11 +329,29 @@ function MemberRow({
   onDone: () => void;
 }) {
   const [busy, setBusy] = useState(false);
+  const [title, setTitle] = useState(row.title ?? "");
 
   const setRole = async (role: "member" | "admin") => {
     setBusy(true);
     await createClient().from("profiles").update({ role }).eq("id", row.id);
     onDone();
+  };
+
+  /*
+   * 직책은 정해진 목록이 없다. 기수마다 팀 이름이 바뀌고 새 직책이 생긴다.
+   * 목록으로 묶어두면 그때마다 코드를 고쳐야 하므로 그냥 적게 둔다.
+   * 비우면 일반 학회원이다.
+   */
+  const saveTitle = async () => {
+    const next = title.trim();
+    if (next === (row.title ?? "")) return;
+    setBusy(true);
+    await createClient()
+      .from("profiles")
+      .update({ title: next || null })
+      .eq("id", row.id);
+    onDone();
+    setBusy(false);
   };
 
   return (
@@ -348,6 +367,17 @@ function MemberRow({
       </S.Who>
 
       <S.Actions>
+        <S.TitleInput
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={saveTitle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.currentTarget.blur();
+          }}
+          placeholder="직책 없음"
+          maxLength={20}
+          aria-label={`${row.name} 직책`}
+        />
         {row.role === "admin" ? (
           <>
             <S.Badge $tone="approved">운영진</S.Badge>
@@ -389,6 +419,7 @@ type Stats = {
   pages: { path: string; views: number; visitors: number }[];
   tabs: { path: string; tab: string; views: number; visitors: number }[];
   sources: { source: string; visits: number }[];
+  daily: { day: string; visitors: number }[];
 };
 
 const RANGES = [
@@ -493,6 +524,11 @@ function Stats() {
               );
             })}
           </S.Funnel>
+
+          <S.StatBlock style={{ marginBottom: "clamp(2.4rem, 4vw, 3.6rem)" }}>
+            <h2>일별 방문자</h2>
+            <DailyChart rows={data.daily ?? []} days={data.days} />
+          </S.StatBlock>
 
           <S.StatGrid>
             <S.StatBlock>
