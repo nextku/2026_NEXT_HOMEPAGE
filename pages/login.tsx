@@ -41,7 +41,7 @@ export default function Login() {
         <meta name="robots" content="noindex" />
       </Head>
 
-      <S.Page>
+      <S.PageCenter>
         <S.Narrow>
           <S.Intro>
             <h1>학회원 로그인</h1>
@@ -78,7 +78,7 @@ export default function Login() {
             </S.AuthNote>
           </S.AuthCard>
         </S.Narrow>
-      </S.Page>
+      </S.PageCenter>
     </>
   );
 }

@@ -18,6 +18,19 @@ export const Page = styled.main`
   padding-bottom: clamp(6rem, 10vw, 12rem);
 `;
 
+/**
+ * 카드 하나로 끝나는 화면(로그인 · 신청서 · 승인 대기)용.
+ *
+ * 내용이 짧은데 위에 붙여두면 아래가 텅 비어 위로 쏠려 보인다. 세로 가운데로
+ * 두되, 헤더가 위쪽 100px 가량을 가리므로 아래 여백을 덜어 시각적 중심을
+ * 화면 중앙에 맞춘다. 내용이 길어지면 가운데 정렬은 저절로 풀린다.
+ */
+export const PageCenter = styled(Page)`
+  display: grid;
+  align-content: center;
+  padding-bottom: clamp(4rem, 6vw, 7rem);
+`;
+
 export const Wrap = styled.div`
   width: 100%;
   max-width: 108rem;
