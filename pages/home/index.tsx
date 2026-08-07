@@ -116,6 +116,19 @@ export default function Main() {
         />
       </Head>
       {/* <Intro></Intro> */}
+      {loading && (
+        <S.Booting>
+          <h1>고려대학교 소프트웨어 창업학회 NEXT</h1>
+          <p>
+            다양한 전공과 경험을 가진 사람들이 모여 소프트웨어·IT 창업으로
+            세상의 여러 문제를 해결해 나가는 학회입니다.
+          </p>
+          <p>
+            이 웹사이트는 학회 소개와 활동, 신입 부원 모집을 안내합니다. 학회원은
+            구글 계정으로 로그인해 채용·투자·행사 정보를 확인할 수 있습니다.
+          </p>
+        </S.Booting>
+      )}
       {!loading && (
         <S.Container>
           {recruitPopupOpen && (
