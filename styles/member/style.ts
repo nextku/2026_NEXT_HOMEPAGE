@@ -143,6 +143,71 @@ export const AuthNote = styled.p`
   }
 `;
 
+/* ─── 비밀번호 규칙 표시 ──────────────────────────────────────────────── */
+
+/** 라벨 줄 오른쪽에 붙는 보기/숨기기. 붙임말이라 작고 조용하게 둔다. */
+export const FieldHead = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+
+  & > span {
+    font-size: 1.4rem;
+    font-weight: 650;
+    letter-spacing: -0.025em;
+    color: #17150f;
+  }
+`;
+
+export const Reveal = styled.button`
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #8d877f;
+  cursor: pointer;
+
+  @media (any-hover: hover) {
+    &:hover {
+      color: #17150f;
+    }
+  }
+`;
+
+/**
+ * 규칙 목록.
+ *
+ * 못 지킨 것만 보여주면 뭐가 남았는지 세어야 한다. 전부 늘어놓고 지킨 것에
+ * 표시를 남기는 편이 진행 상황이 보인다. 색으로만 구분하지 않고 부호도 함께
+ * 바꾼다 — 색을 구분하기 어려운 사람에게 색만으로는 아무 정보가 없다.
+ */
+export const Rules = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+`;
+
+export const Rule = styled.li<{ $ok: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+  color: ${({ $ok }) => ($ok ? "#1d7a3e" : "#8d877f")};
+  transition: color 0.16s ease;
+
+  & svg {
+    width: 1.4rem;
+    height: 1.4rem;
+    flex: 0 0 auto;
+  }
+`;
+
 /** 문장 안에 섞이는 동작. 버튼이지만 링크처럼 읽혀야 흐름이 안 끊긴다. */
 export const LinkButton = styled.button`
   padding: 0;

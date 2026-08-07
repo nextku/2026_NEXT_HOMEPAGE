@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
+import PasswordFields from "components/member/PasswordFields";
 import { updatePassword, useAuth } from "lib/supabase/useAuth";
 import * as S from "styles/member/style";
 
@@ -13,14 +14,13 @@ import * as S from "styles/member/style";
  * 주소만 치고 들어온 경우에는 세션이 없으므로 안내하고 돌려보낸다.
  */
 
-const MIN_PASSWORD = 8;
-
 export default function ResetPassword() {
   const router = useRouter();
   const { session, loading } = useAuth();
 
   const [password, setPassword] = useState("");
   const [again, setAgain] = useState("");
+  const [pwValid, setPwValid] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
@@ -36,12 +36,9 @@ export default function ResetPassword() {
     e.preventDefault();
     if (busy) return;
 
-    if (password.length < MIN_PASSWORD) {
-      setError(`비밀번호는 ${MIN_PASSWORD}자 이상이어야 합니다.`);
-      return;
-    }
-    if (password !== again) {
-      setError("두 번 입력한 비밀번호가 서로 다릅니다.");
+    // 규칙과 일치 여부는 아래 칸들이 실시간으로 판단한다. 여기서는 그 결과만 본다.
+    if (!pwValid) {
+      setError("아래 조건을 모두 채운 뒤 다시 눌러주세요.");
       return;
     }
 
@@ -98,33 +95,18 @@ export default function ResetPassword() {
         </S.Intro>
 
         <S.AuthCard as="form" onSubmit={submit}>
-          <S.Field>
-            <span>새 비밀번호</span>
-            <S.Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              minLength={MIN_PASSWORD}
-              required
-            />
-            <small>{MIN_PASSWORD}자 이상</small>
-          </S.Field>
-
-          <S.Field>
-            <span>한 번 더</span>
-            <S.Input
-              type="password"
-              value={again}
-              onChange={(e) => setAgain(e.target.value)}
-              autoComplete="new-password"
-              required
-            />
-          </S.Field>
+          <PasswordFields
+            email={session?.user?.email ?? undefined}
+            password={password}
+            onPassword={setPassword}
+            again={again}
+            onAgain={setAgain}
+            onValidChange={setPwValid}
+          />
 
           {error && <S.Notice $bad>{error}</S.Notice>}
 
-          <S.Submit type="submit" disabled={busy}>
+          <S.Submit type="submit" disabled={busy || !pwValid}>
             {busy ? "저장 중" : "비밀번호 바꾸기"}
           </S.Submit>
         </S.AuthCard>
