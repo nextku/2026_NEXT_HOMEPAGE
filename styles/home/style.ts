@@ -436,6 +436,42 @@ export const PageShell = styled.div`
   background-color: #000;
 `;
 
+/**
+ * 본문이 그려지기 전에 잠깐 보이는 자리.
+ *
+ * 두 가지 일을 한다. 사용자에게는 검은 화면 대신 학회 이름이 보이고,
+ * 자바스크립트를 실행하지 않는 크롤러에게는 이 페이지가 무엇인지 알려준다.
+ * 아래 본문(Section1)에 있는 문장과 같은 내용이라 서로 어긋나지 않는다.
+ *
+ * 구글 OAuth 심사가 "홈페이지에 앱의 목적 설명이 없다" 로 본 것이 이 지점이다.
+ * 설명은 있었지만 마운트 뒤에야 그려져서 HTML 에는 없었다.
+ */
+export const Booting = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(3rem, 8vw, 10rem) clamp(2.4rem, 8vw, 10rem);
+  color: #fff;
+
+  & h1 {
+    margin: 0 0 1.4rem;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.3;
+  }
+  & p {
+    margin: 0 0 0.8rem;
+    max-width: 46ch;
+    font-size: clamp(1.5rem, 1.7vw, 1.7rem);
+    line-height: 1.75;
+    letter-spacing: -0.025em;
+    color: rgba(255, 255, 255, 0.62);
+    word-break: keep-all;
+  }
+`;
+
 export const Container = styled.div`
   width: 100%;
   min-height: 100vh;
