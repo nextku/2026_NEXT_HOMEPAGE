@@ -9,6 +9,8 @@ import {
   resendSignupCode,
   sendPasswordReset,
   signInWithPassword,
+  updatePassword,
+  verifyRecoveryCode,
   signUpWithPassword,
   useAuth,
   verifySignupCode,
@@ -29,7 +31,7 @@ import * as S from "styles/member/style";
  * 대조하거나 운영진이 승인한다.
  */
 
-type Mode = "signin" | "signup" | "verify" | "forgot";
+type Mode = "signin" | "signup" | "verify" | "forgot" | "reset";
 
 export default function Login() {
   const router = useRouter();
@@ -117,10 +119,33 @@ export default function Login() {
     e.preventDefault();
     run(
       () => sendPasswordReset(email),
-      () =>
-        setNotice(
-          "재설정 링크를 보냈습니다. 메일함을 확인해 주세요. 안 보이면 스팸함도 봐주세요.",
-        ),
+      () => {
+        setCode("");
+        setPassword("");
+        setAgain("");
+        setMode("reset");
+      },
+    );
+  };
+
+  /*
+   * 코드를 확인해 잠깐의 세션을 얻은 뒤 곧바로 새 비밀번호를 저장한다.
+   * 두 단계를 한 화면에서 처리하는 이유는, 코드만 넣고 멈추면 그 세션으로
+   * 로그인된 채 비밀번호는 그대로인 어정쩡한 상태가 남기 때문이다.
+   */
+  const onReset = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pwValid) {
+      setError("아래 조건을 모두 채운 뒤 다시 눌러주세요.");
+      return;
+    }
+    run(
+      async () => {
+        const bad = await verifyRecoveryCode(email, code);
+        if (bad) return bad;
+        return updatePassword(password);
+      },
+      () => router.replace("/members"),
     );
   };
 
@@ -131,7 +156,9 @@ export default function Login() {
         ? "메일 확인"
         : mode === "forgot"
           ? "비밀번호 재설정"
-          : "학회원 로그인";
+          : mode === "reset"
+            ? "새 비밀번호"
+            : "학회원 로그인";
 
   const lead =
     mode === "signup"
@@ -139,8 +166,10 @@ export default function Login() {
       : mode === "verify"
         ? `${email} 로 여섯 자리 코드를 보냈습니다.`
         : mode === "forgot"
-          ? "가입한 주소를 적어주시면 재설정 링크를 보내드립니다."
-          : "NEXT 학회원에게만 공개되는 채용·투자·행사 정보를 보려면 로그인이 필요합니다.";
+          ? "가입한 주소를 적어주시면 재설정 코드를 보내드립니다."
+          : mode === "reset"
+            ? `${email} 로 여섯 자리 코드를 보냈습니다.`
+            : "NEXT 학회원에게만 공개되는 채용·투자·행사 정보를 보려면 로그인이 필요합니다.";
 
   const emailField = (
     <S.Field>
@@ -291,12 +320,56 @@ export default function Login() {
               {notice && <S.Notice>{notice}</S.Notice>}
 
               <S.Submit type="submit" disabled={busy || !isSupabaseConfigured}>
-                {busy ? "보내는 중" : "재설정 링크 받기"}
+                {busy ? "보내는 중" : "재설정 코드 받기"}
               </S.Submit>
 
               <S.AuthNote>
                 <S.LinkButton type="button" onClick={() => go("signin")}>
                   로그인으로 돌아가기
+                </S.LinkButton>
+              </S.AuthNote>
+            </S.AuthCard>
+          )}
+
+          {mode === "reset" && (
+            <S.AuthCard as="form" onSubmit={onReset}>
+              <S.Field>
+                <span>인증 코드</span>
+                <S.CodeInput
+                  value={code}
+                  onChange={(e) =>
+                    setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
+                  placeholder="000000"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  required
+                />
+                <small>메일이 안 보이면 스팸함도 확인해 주세요.</small>
+              </S.Field>
+
+              <PasswordFields
+                email={email}
+                password={password}
+                onPassword={setPassword}
+                again={again}
+                onAgain={setAgain}
+                onValidChange={setPwValid}
+              />
+
+              {error && <S.Notice $bad>{error}</S.Notice>}
+
+              <S.Submit
+                type="submit"
+                disabled={busy || code.length < 6 || !pwValid}
+              >
+                {busy ? "바꾸는 중" : "비밀번호 바꾸기"}
+              </S.Submit>
+
+              <S.AuthNote>
+                <S.LinkButton type="button" onClick={() => go("forgot")}>
+                  코드 다시 받기
                 </S.LinkButton>
               </S.AuthNote>
             </S.AuthCard>
