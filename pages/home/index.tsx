@@ -96,7 +96,7 @@ export default function Main() {
   }, [recruitPopupOpen]);
 
   return (
-    <div>
+    <S.PageShell>
       <Head>
         <title>고려대학교 소프트웨어 창업학회 NEXT</title>
         {/*
@@ -358,88 +358,95 @@ export default function Main() {
               ))}
             </S.PartnerContainer>
           </S.Section2>
-          <S.Footer>
-            <S.FooterTop>
-              <div>
-                <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
-                {/*
+        </S.Container>
+      )}
+      {/*
+        푸터는 loading 조건 밖에 둔다.
+
+        위 본문은 useMediaQuery 로 모바일 여부를 판단하기 때문에 마운트 전에는
+        그리지 못한다. 그 결과 서버가 내려주는 HTML 은 빈 div 하나뿐이었고,
+        JS 를 실행하지 않는 크롤러 눈에는 아무 글도 없는 페이지였다. 구글
+        OAuth 심사가 "홈페이지에 앱의 목적 설명이 없다" 로 반려한 실제 원인이다.
+        푸터는 isMobile 에 의존하지 않으므로 서버에서 그대로 그릴 수 있다.
+      */}
+      <S.Footer>
+        <S.FooterTop>
+          <div>
+            <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
+            {/*
                   구글 OAuth 심사가 "홈페이지에 앱의 목적 설명이 없다" 로
                   반려한 자리다. 설명은 있어야 하되 푸터에 문단이 들어가면
                   읽히지 않으므로 학회명 바로 아래 한 줄로 붙인다.
                   방침 링크는 아래 줄에 이미 있으므로 여기서 또 걸지 않는다.
                 */}
-                <S.FooterAbout>
-                  학회 소개와 신입 부원 모집 안내 · 학회원은 구글 로그인으로
-                  채용·투자·행사 정보 확인
-                </S.FooterAbout>
-                <p style={{ marginTop: "1rem" }}>
-                  email |{" "}
-                  <a href="mailto:nextku.contact@gmail.com">
-                    nextku.contact@gmail.com
-                  </a>
-                </p>
-              </div>
-              <S.FooterContacts>
-                <p>대표 이성민 · 010-8693-1884</p>
-                <p>부대표 박보겸 · 010-3185-7117</p>
-              </S.FooterContacts>
-            </S.FooterTop>
+            <S.FooterAbout>
+              학회 소개와 신입 부원 모집 안내 · 학회원은 구글 로그인으로
+              채용·투자·행사 정보 확인
+            </S.FooterAbout>
+            <p style={{ marginTop: "1rem" }}>
+              email |{" "}
+              <a href="mailto:nextku.contact@gmail.com">
+                nextku.contact@gmail.com
+              </a>
+            </p>
+          </div>
+          <S.FooterContacts>
+            <p>대표 이성민 · 010-8693-1884</p>
+            <p>부대표 박보겸 · 010-3185-7117</p>
+          </S.FooterContacts>
+        </S.FooterTop>
 
-            <S.FooterBottom>
-              <S.FooterMeta>
-                <S.FooterCopyright>
-                  NEXT 2026 All Rights Reserved
-                </S.FooterCopyright>
-                <S.FooterLegal>
-                  <a href="/privacy">개인정보처리방침</a>
-                  <a href="/terms">이용약관</a>
-                </S.FooterLegal>
-              </S.FooterMeta>
-              <S.FooterSocials>
-                <a
-                  href="https://www.linkedin.com/company/nextxlikelion/posts/?feedView=all"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="NEXT 링크드인"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="4" />
-                    <path d="M7.5 10.5V17M7.5 7.4v.1M11.5 17v-3.6a2.4 2.4 0 014.8 0V17" />
-                  </svg>
-                </a>
-                <a
-                  href="https://www.instagram.com/next_koreauniv/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="NEXT 인스타그램"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="5" />
-                    <circle cx="12" cy="12" r="3.8" />
-                    <path d="M17.3 6.8v.01" />
-                  </svg>
-                </a>
-              </S.FooterSocials>
-            </S.FooterBottom>
-          </S.Footer>
-        </S.Container>
-      )}
-    </div>
+        <S.FooterBottom>
+          <S.FooterMeta>
+            <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
+            <S.FooterLegal>
+              <a href="/privacy">개인정보처리방침</a>
+              <a href="/terms">이용약관</a>
+            </S.FooterLegal>
+          </S.FooterMeta>
+          <S.FooterSocials>
+            <a
+              href="https://www.linkedin.com/company/nextxlikelion/posts/?feedView=all"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="NEXT 링크드인"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="4" />
+                <path d="M7.5 10.5V17M7.5 7.4v.1M11.5 17v-3.6a2.4 2.4 0 014.8 0V17" />
+              </svg>
+            </a>
+            <a
+              href="https://www.instagram.com/next_koreauniv/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="NEXT 인스타그램"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="3.8" />
+                <path d="M17.3 6.8v.01" />
+              </svg>
+            </a>
+          </S.FooterSocials>
+        </S.FooterBottom>
+      </S.Footer>
+    </S.PageShell>
   );
 }
