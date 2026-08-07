@@ -386,6 +386,22 @@ export const RecruitPopupRocket = styled.div`
   }
 `;
 
+/**
+ * 홈 전체를 감싸는 껍데기.
+ *
+ * 본문은 마운트 뒤에야 그려지므로 그 전에는 푸터만 남는다. 세로 flex 로 두고
+ * 아래로 밀어 두면 그 사이에도 검은 화면 아래에 푸터가 있는 모습이 되어,
+ * 흰 바탕에 푸터만 떠 있는 상태를 피한다. 본문이 그려지면 100vh 를 넘기므로
+ * 정렬은 저절로 무의미해진다.
+ */
+export const PageShell = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100dvh;
+  background-color: #000;
+`;
+
 export const Container = styled.div`
   width: 100%;
   min-height: 100vh;
