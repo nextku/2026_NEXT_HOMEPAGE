@@ -67,10 +67,39 @@ sitemap 에도 올라간다(예전에 `/about/components/greeting` 같은 URL �
 구글 로그인 → 기수·이름 입력 → 승인 대기 → 운영진 승인 → 학회원 탭 접근
 ```
 
+### 화면
+
+| 주소 | 하는 일 |
+| --- | --- |
+| `/login` | 구글 로그인. 이미 로그인했으면 `/members` 로 보낸다. |
+| `/members` | 상태에 따라 신청서 · 승인 대기 · 거절 안내 · 라운지 중 하나를 보여준다. |
+| `/admin` | 승인 대기 목록, 학회원 목록, 게시물 작성. 운영진만. |
+
+세 화면 모두 `noindex` 이고 `robots.txt` · sitemap 에서도 뺀다
+(`next-sitemap.config.js`).
+
+`/admin` 이 열린다고 권한이 생기는 것은 아니다. 화면 분기는 표시용이고 승인·거절
+쿼리는 RLS 의 `is_admin()` 을 통과해야 반영된다.
+
+### 승인 대기 목록의 명단 대조
+
+운영진이 빨리 판단하도록 `constants/people.ts` 명단과 이름·기수를 자동으로
+대조해 행마다 결과를 붙인다. 명단은 10~14기만 담고 있으므로 **대조 실패가 곧
+가짜라는 뜻은 아니다.** 참고 자료일 뿐 최종 판단은 사람이 한다.
+
 ### DB 적용
 
 `supabase/migrations/` 의 SQL 을 순서대로 실행한다. Supabase 대시보드의
 SQL Editor 에 붙여넣으면 된다.
+
+- `0001_member_auth.sql` — 테이블, 트리거, RLS 정책
+- `0002_bootstrap_admin.sql` — 최초 운영진 자동 승인
+- `0003_submit_profile.sql` — 신청서 제출 함수
+
+`0003` 이 필요한 이유: 거절당한 사람이 고쳐서 다시 내려면 `status` 가
+`rejected` → `pending` 으로 돌아가야 하는데, 그걸 RLS 로 열면 `pending` 인
+사람이 스스로를 `approved` 로 만들 수 있다. 그래서 update 정책은 잠가두고
+허용된 전이만 하는 `security definer` 함수를 따로 뒀다.
 
 ### 첫 운영진 등록
 
