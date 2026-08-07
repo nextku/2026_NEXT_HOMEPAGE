@@ -100,14 +100,35 @@ export function useAuth() {
   };
 }
 
-export async function signInWithGoogle(redirectTo = "/members") {
+/**
+ * 로그인 코드 보내기.
+ *
+ * 비밀번호를 받지 않는다. 받는 순간 학회가 비밀번호를 보관하고 재설정까지
+ * 책임져야 한다. 메일로 보낸 코드를 입력했다는 것 자체가 그 주소의 주인이라는
+ * 증명이므로, 별도의 '인증 메일 확인' 단계도 필요 없다.
+ *
+ * 매직 링크가 아니라 코드를 쓰는 이유: 링크는 메일 앱이 자체 브라우저로 열어
+ * 세션이 원래 창에 붙지 않는 일이 잦다. 코드는 어디서 열든 옮겨 적으면 된다.
+ * (Supabase 의 Magic Link 템플릿에 {{ .Token }} 이 들어 있어야 코드가 간다.)
+ */
+export async function sendEmailCode(email: string) {
   const supabase = createClient();
-  await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${window.location.origin}${redirectTo}`,
-    },
+  const { error } = await supabase.auth.signInWithOtp({
+    email: email.trim().toLowerCase(),
+    options: { shouldCreateUser: true },
   });
+  return error?.message ?? null;
+}
+
+/** 받은 코드로 로그인. 성공하면 세션이 생긴다. */
+export async function verifyEmailCode(email: string, code: string) {
+  const supabase = createClient();
+  const { error } = await supabase.auth.verifyOtp({
+    email: email.trim().toLowerCase(),
+    token: code.trim(),
+    type: "email",
+  });
+  return error?.message ?? null;
 }
 
 export async function signOut(to = "/home") {

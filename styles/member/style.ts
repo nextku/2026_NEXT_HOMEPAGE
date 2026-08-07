@@ -72,6 +72,16 @@ export const AuthCard = styled.div`
   background: #ffffff;
   ${squircle(18)}
   ${lift}
+
+  /* 폼으로 쓰이므로 간격은 여기서 한 번에 준다. 요소마다 margin 을 주면
+     항목이 늘 때마다 위아래가 어긋난다. */
+  display: grid;
+  gap: 1.8rem;
+
+  /* 안내문은 본문에 붙는 주석이라 사이를 좁게 둔다. */
+  & > p + p {
+    margin-top: -1rem;
+  }
 `;
 
 export const GoogleButton = styled.button`
@@ -113,7 +123,8 @@ export const GoogleButton = styled.button`
 `;
 
 export const AuthNote = styled.p`
-  margin: 1.8rem 0 0;
+  /* 간격은 AuthCard 의 gap 이 준다. 여기서 margin 을 또 주면 두 번 벌어진다. */
+  margin: 0;
   font-size: 1.4rem;
   line-height: 1.7;
   letter-spacing: -0.02em;
@@ -212,6 +223,23 @@ const controlBase = css`
 export const Input = styled.input`
   ${controlBase}
   font-variant-numeric: tabular-nums;
+`;
+
+/** 여섯 자리 인증 코드. 자릿수를 눈으로 세기 쉽게 크고 넓게 둔다. */
+export const CodeInput = styled.input`
+  ${controlBase}
+  min-height: 5.6rem;
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+
+  &::placeholder {
+    letter-spacing: 0.4em;
+    font-weight: 500;
+    color: #ddd7cd;
+  }
 `;
 
 export const Select = styled.select`
