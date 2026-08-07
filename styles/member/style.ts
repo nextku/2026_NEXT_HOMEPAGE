@@ -948,6 +948,78 @@ export const FunnelDrop = styled.p`
   }
 `;
 
+/* ─── 일별 추이 ───────────────────────────────────────────────────────── */
+
+export const Chart = styled.div`
+  position: relative;
+  margin-bottom: clamp(3.2rem, 5vw, 4.4rem);
+  /* 커서를 얹는 곳이 곧 값을 읽는 곳이다. 텍스트 선택이 끼어들면 방해가 된다. */
+  user-select: none;
+  touch-action: pan-y;
+
+  & svg {
+    display: block;
+  }
+`;
+
+export const ChartAxis = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: -0.6rem;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: #a9a196;
+  font-variant-numeric: tabular-nums;
+`;
+
+/** 값 말풍선. 선 위에 떠서 가리지 않도록 위쪽에 둔다. */
+export const ChartTip = styled.div`
+  position: absolute;
+  top: -0.4rem;
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 8px;
+  background: #17150f;
+  color: #fbf8f3;
+  white-space: nowrap;
+  pointer-events: none;
+
+  & strong {
+    font-size: 1.4rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  & span {
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+    color: rgba(251, 248, 243, 0.6);
+  }
+`;
+
+/** 운영진이 직접 적는 직책. 정해진 목록이 없어 자유 입력으로 둔다. */
+export const TitleInput = styled.input`
+  min-width: 0;
+  width: 12rem;
+  min-height: 4.2rem;
+  padding: 0 1rem;
+  border: 1px solid #ddd7cd;
+  border-radius: 7px;
+  background: #fdfcfa;
+  color: #17150f;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+
+  &::placeholder {
+    color: #a9a196;
+  }
+  &:focus {
+    outline: none;
+    border-color: #17150f;
+  }
+`;
+
 export const StatGrid = styled.div`
   display: grid;
   gap: clamp(2.4rem, 4vw, 3.6rem);
