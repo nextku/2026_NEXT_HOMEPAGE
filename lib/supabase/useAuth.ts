@@ -115,7 +115,15 @@ export function useAuth() {
  */
 
 function ko(message: string | undefined, fallback: string) {
-  const m = (message ?? "").toLowerCase();
+  const raw = (message ?? "").trim();
+  const m = raw.toLowerCase();
+
+  // "For security purposes, you can only request this after 41 seconds."
+  const wait = /after (\d+) seconds?/.exec(m);
+  if (wait) {
+    return `너무 자주 요청했습니다. ${wait[1]}초 후에 다시 시도해 주세요.`;
+  }
+
   if (m.includes("invalid login credentials"))
     return "이메일 또는 비밀번호가 맞지 않습니다.";
   if (m.includes("email not confirmed"))
@@ -126,11 +134,30 @@ function ko(message: string | undefined, fallback: string) {
     return "코드가 맞지 않거나 만료됐습니다. 다시 받아주세요.";
   if (m.includes("password should be at least"))
     return "비밀번호가 너무 짧습니다.";
-  if (m.includes("rate limit") || m.includes("too many"))
-    return "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.";
   if (m.includes("new password should be different"))
     return "이전과 다른 비밀번호를 정해주세요.";
-  return fallback;
+  if (m.includes("rate limit") || m.includes("too many"))
+    return "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.";
+  if (m.includes("user not found") || m.includes("no user found"))
+    return "가입되지 않은 주소입니다.";
+  if (m.includes("signups not allowed") || m.includes("signup is disabled"))
+    return "지금은 가입을 받고 있지 않습니다. 운영진에게 문의해 주세요.";
+
+  // 메일 발송 자체가 실패하는 경우. 대부분 SMTP 설정 문제라 원문이 필요하다.
+  if (
+    m.includes("error sending") ||
+    m.includes("smtp") ||
+    m.includes("535") ||
+    m.includes("relay")
+  ) {
+    return `메일 발송에 실패했습니다. 운영진에게 알려주세요. (${raw})`;
+  }
+
+  /*
+   * 여기까지 왔다는 것은 우리가 모르는 오류다. 원문을 감추면 무엇이 잘못됐는지
+   * 아무도 알 수 없다. 읽기 좋은 문장 뒤에 원문을 괄호로 남긴다.
+   */
+  return raw ? `${fallback} (${raw})` : fallback;
 }
 
 /** 가입. 성공하면 그 주소로 확인 코드가 간다. */
