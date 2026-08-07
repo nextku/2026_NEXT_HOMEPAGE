@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
 import PasswordFields from "components/member/PasswordFields";
+import { formatLeft, useAttemptLimit, useCooldown } from "lib/cooldown";
 import { MIN_PASSWORD } from "lib/password";
 import { isSupabaseConfigured } from "lib/supabase/client";
 import {
@@ -48,6 +49,19 @@ export default function Login() {
   const [notice, setNotice] = useState("");
   const codeRef = useRef<HTMLInputElement>(null);
 
+  /*
+   * 연타와 무차별 대입 막기.
+   *
+   * 발송은 주소마다 60초를 둔다. 같은 주소로 메일이 쏟아지는 것을 막기 위해
+   * 주소를 키로 삼는다 — 화면 단위로 두면 주소만 바꿔 계속 보낼 수 있다.
+   * 이 값들은 Supabase 의 Rate limits 와 SMTP 최소 간격이 실제로 강제하는
+   * 것을 화면에 미리 비춰줄 뿐이다.
+   */
+  const mailKey = `send_${email.trim().toLowerCase()}`;
+  const sendCool = useCooldown(mailKey, 60);
+  const codeTries = useAttemptLimit("code", 5, 120);
+  const loginTries = useAttemptLimit("signin", 5, 60);
+
   useEffect(() => {
     if (!loading && isLoggedIn) router.replace("/members");
   }, [loading, isLoggedIn, router]);
@@ -74,8 +88,18 @@ export default function Login() {
 
   const onSignIn = (e: React.FormEvent) => {
     e.preventDefault();
+    if (loginTries.locked) return;
     run(
-      () => signInWithPassword(email, password),
+      async () => {
+        const err = await signInWithPassword(email, password);
+        if (err) {
+          const n = loginTries.fail();
+          if (n >= 3) return `${err} (${n}번 틀렸습니다)`;
+          return err;
+        }
+        loginTries.reset();
+        return null;
+      },
       () => router.replace("/members"),
     );
   };
@@ -94,6 +118,7 @@ export default function Login() {
     run(
       () => signUpWithPassword(email, password),
       () => {
+        sendCool.start();
         setCode("");
         setMode("verify");
         setNotice("");
@@ -103,23 +128,38 @@ export default function Login() {
 
   const onVerify = (e: React.FormEvent) => {
     e.preventDefault();
+    if (codeTries.locked) return;
     run(
-      () => verifySignupCode(email, code),
+      async () => {
+        const err = await verifySignupCode(email, code);
+        if (err) {
+          codeTries.fail();
+          return err;
+        }
+        codeTries.reset();
+        return null;
+      },
       () => router.replace("/members"),
     );
   };
 
-  const onResend = () =>
+  const onResend = () => {
+    if (!sendCool.ready) return;
     run(
       () => resendSignupCode(email),
-      () => setNotice("코드를 다시 보냈습니다."),
+      () => {
+        sendCool.start();
+        setNotice("코드를 다시 보냈습니다.");
+      },
     );
+  };
 
   const onForgot = (e: React.FormEvent) => {
     e.preventDefault();
     run(
       () => sendPasswordReset(email),
       () => {
+        sendCool.start();
         setCode("");
         setPassword("");
         setAgain("");
@@ -222,8 +262,22 @@ export default function Login() {
               {error && <S.Notice $bad>{error}</S.Notice>}
               {notice && <S.Notice>{notice}</S.Notice>}
 
-              <S.Submit type="submit" disabled={busy || !isSupabaseConfigured}>
-                {busy ? "확인 중" : "로그인"}
+              {loginTries.locked && (
+                <S.Notice $bad>
+                  여러 번 틀렸습니다. {formatLeft(loginTries.left)} 후에 다시
+                  시도해 주세요.
+                </S.Notice>
+              )}
+
+              <S.Submit
+                type="submit"
+                disabled={busy || !isSupabaseConfigured || loginTries.locked}
+              >
+                {busy
+                  ? "확인 중"
+                  : loginTries.locked
+                    ? `${formatLeft(loginTries.left)} 후 다시 시도`
+                    : "로그인"}
               </S.Submit>
 
               <S.AuthNote>
@@ -255,9 +309,15 @@ export default function Login() {
 
               <S.Submit
                 type="submit"
-                disabled={busy || !isSupabaseConfigured || !pwValid}
+                disabled={
+                  busy || !isSupabaseConfigured || !pwValid || !sendCool.ready
+                }
               >
-                {busy ? "보내는 중" : "가입하고 인증 코드 받기"}
+                {busy
+                  ? "보내는 중"
+                  : !sendCool.ready
+                    ? `${formatLeft(sendCool.left)} 후 다시 보낼 수 있습니다`
+                    : "가입하고 인증 코드 받기"}
               </S.Submit>
 
               <S.AuthNote>
@@ -295,14 +355,33 @@ export default function Login() {
 
               {error && <S.Notice $bad>{error}</S.Notice>}
               {notice && <S.Notice>{notice}</S.Notice>}
+              {codeTries.locked && (
+                <S.Notice $bad>
+                  여러 번 틀렸습니다. {formatLeft(codeTries.left)} 후에 다시
+                  시도해 주세요.
+                </S.Notice>
+              )}
 
-              <S.Submit type="submit" disabled={busy || code.length < 6}>
-                {busy ? "확인 중" : "확인하고 시작하기"}
+              <S.Submit
+                type="submit"
+                disabled={busy || code.length < 6 || codeTries.locked}
+              >
+                {busy
+                  ? "확인 중"
+                  : codeTries.locked
+                    ? `${formatLeft(codeTries.left)} 후 다시 시도`
+                    : "확인하고 시작하기"}
               </S.Submit>
 
               <S.AuthNote>
-                <S.LinkButton type="button" onClick={onResend} disabled={busy}>
-                  코드 다시 받기
+                <S.LinkButton
+                  type="button"
+                  onClick={onResend}
+                  disabled={busy || !sendCool.ready}
+                >
+                  {sendCool.ready
+                    ? "코드 다시 받기"
+                    : `${formatLeft(sendCool.left)} 후 다시 받기`}
                 </S.LinkButton>
                 {" · "}
                 <S.LinkButton type="button" onClick={() => go("signup")}>
@@ -319,8 +398,15 @@ export default function Login() {
               {error && <S.Notice $bad>{error}</S.Notice>}
               {notice && <S.Notice>{notice}</S.Notice>}
 
-              <S.Submit type="submit" disabled={busy || !isSupabaseConfigured}>
-                {busy ? "보내는 중" : "재설정 코드 받기"}
+              <S.Submit
+                type="submit"
+                disabled={busy || !isSupabaseConfigured || !sendCool.ready}
+              >
+                {busy
+                  ? "보내는 중"
+                  : !sendCool.ready
+                    ? `${formatLeft(sendCool.left)} 후 다시 보낼 수 있습니다`
+                    : "재설정 코드 받기"}
               </S.Submit>
 
               <S.AuthNote>
@@ -360,16 +446,35 @@ export default function Login() {
 
               {error && <S.Notice $bad>{error}</S.Notice>}
 
+              {codeTries.locked && (
+                <S.Notice $bad>
+                  여러 번 틀렸습니다. {formatLeft(codeTries.left)} 후에 다시
+                  시도해 주세요.
+                </S.Notice>
+              )}
+
               <S.Submit
                 type="submit"
-                disabled={busy || code.length < 6 || !pwValid}
+                disabled={
+                  busy || code.length < 6 || !pwValid || codeTries.locked
+                }
               >
-                {busy ? "바꾸는 중" : "비밀번호 바꾸기"}
+                {busy
+                  ? "바꾸는 중"
+                  : codeTries.locked
+                    ? `${formatLeft(codeTries.left)} 후 다시 시도`
+                    : "비밀번호 바꾸기"}
               </S.Submit>
 
               <S.AuthNote>
-                <S.LinkButton type="button" onClick={() => go("forgot")}>
-                  코드 다시 받기
+                <S.LinkButton
+                  type="button"
+                  onClick={() => go("forgot")}
+                  disabled={!sendCool.ready}
+                >
+                  {sendCool.ready
+                    ? "코드 다시 받기"
+                    : `${formatLeft(sendCool.left)} 후 다시 받기`}
                 </S.LinkButton>
               </S.AuthNote>
             </S.AuthCard>
