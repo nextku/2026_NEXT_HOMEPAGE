@@ -110,6 +110,17 @@ export default function Main() {
           하나 더 쓰면 태그가 둘이 되고, 검색엔진이 어느 쪽을 쓸지 알 수 없어진다.
         */}
         <title>고려대 소프트웨어 창업 학회 | NEXT : HOME</title>
+        {/*
+          홈에서만 description 을 덮어쓴다. 전역 문구는 홍보 문장이라 "이 앱이
+          무엇을 하는가" 를 답하지 않는데, 구글 OAuth 브랜딩 검사가 그것을 본다.
+          _app.tsx 와 같은 key 를 써야 태그가 하나로 합쳐진다.
+          기존 검색 키워드(고려대학교·소프트웨어·창업학회·NEXT)는 그대로 담았다.
+        */}
+        <meta
+          key="description"
+          name="description"
+          content="고려대학교 소프트웨어 창업학회 NEXT 공식 웹사이트입니다. 다양한 전공과 경험을 가진 학생들이 모여 소프트웨어·IT 창업으로 세상의 문제를 해결합니다. 학회 소개와 활동, 신입 부원 모집을 안내하며 학회원은 구글 계정으로 로그인해 채용·투자·행사 정보를 확인할 수 있습니다."
+        />
         <meta
           name="google-site-verification"
           content="YdrWjel7OcCUGNmuvaV86uwaB_ZEqJsOqOoV-rKi6vA"
