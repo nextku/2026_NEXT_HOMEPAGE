@@ -32,6 +32,8 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  // 쿼리가 실패한 것인지, 행이 없는 것인지 화면이 구분해서 안내해야 한다.
+  const [profileError, setProfileError] = useState<string | null>(null);
   // 신청서를 내면 status 가 바뀌므로 프로필만 다시 읽을 방법이 필요하다.
   const [reloadKey, setReloadKey] = useState(0);
 
@@ -47,12 +49,20 @@ export function useAuth() {
     let alive = true;
 
     const loadProfile = async (userId: string) => {
-      const { data } = await supabase
+      /*
+       * maybeSingle 을 쓴다. single 은 행이 없을 때도 오류를 만들어서,
+       * "행이 없음" 과 "쿼리가 실패함" 이 구분되지 않는다. 이 둘은 원인이
+       * 전혀 다르다 — 앞은 세션이 낡은 것이고, 뒤는 정책이나 테이블 문제다.
+       */
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single();
-      if (alive) setProfile((data as Profile) ?? null);
+        .maybeSingle();
+
+      if (!alive) return;
+      setProfile((data as Profile) ?? null);
+      setProfileError(error ? error.message : null);
     };
 
     supabase.auth.getSession().then(async ({ data }) => {
@@ -81,6 +91,7 @@ export function useAuth() {
   return {
     session,
     profile,
+    profileError,
     loading,
     refresh: () => setReloadKey((n) => n + 1),
     isLoggedIn: !!session,
@@ -99,8 +110,14 @@ export async function signInWithGoogle(redirectTo = "/members") {
   });
 }
 
-export async function signOut() {
+export async function signOut(to = "/home") {
   const supabase = createClient();
-  await supabase.auth.signOut();
-  window.location.href = "/home";
+  // 서버 세션이 이미 사라진 경우에도 브라우저에 남은 토큰은 지워야 한다.
+  await supabase.auth.signOut().catch(() => undefined);
+  window.location.href = to;
+}
+
+/** 낡은 세션을 버리고 로그인 화면으로. 재로그인 안내에서 쓴다. */
+export function signOutAndLogin() {
+  return signOut("/login");
 }

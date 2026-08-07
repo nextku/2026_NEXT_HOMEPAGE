@@ -557,6 +557,28 @@ export const MainTextLionWrapper = styled.div`
     width: 200px;
   }
 `;
+
+/**
+ * 히어로 안의 한 줄 소개.
+ *
+ * 첫 화면에 글자가 '고려대학교' 네 자밖에 없었다. 나머지는 전부 이미지와
+ * canvas 라, 페이지를 렌더링해서 읽는 쪽(구글 OAuth 브랜딩 검사, 요약 크롤러,
+ * 화면을 못 보는 사용자)에게는 여기가 무엇을 하는 곳인지 알 방법이 없었다.
+ *
+ * 로고 밑을 채우는 대신 조용히 둔다 — 흰 글자를 옅게 깔아 사진을 가리지 않는다.
+ */
+export const HeroTagline = styled.p`
+  margin: 1.4rem 0 0;
+  max-width: 54ch;
+  text-align: center;
+  font-size: clamp(1.4rem, 1.6vw, 1.7rem);
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: -0.025em;
+  color: rgba(255, 255, 255, 0.78);
+  word-break: keep-all;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+`;
 export const HomeTwoTextWrapper = styled.span`
   & img {
     width: 380px;
