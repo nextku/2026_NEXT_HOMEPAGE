@@ -8,6 +8,7 @@ import { useRouter, Router } from "next/router";
 import { ChakraProvider } from "@chakra-ui/react";
 import Loading from "components/loading/index";
 import * as gtag from "lib/gtag";
+import { track } from "lib/analytics";
 import Head from "next/head";
 import Header from "components/header";
 import Script from "next/script";
@@ -17,10 +18,14 @@ import "nprogress/nprogress.css";
 const defaultTitle = "NEXT - 고려대 | 고려대학교 소프트웨어 창업학회";
 const defaultDescription =
   "고려대 소프트웨어 창업학회 NEXT에서는 혁신적인 아이디어를 현실로 만들어갈 창업가 인재를 모집합니다.";
-const defaultImage = "https://next-recruit.s3.ap-northeast-2.amazonaws.com/assets/mail-main.png";
+const defaultImage =
+  "https://next-recruit.s3.ap-northeast-2.amazonaws.com/assets/mail-main.png";
 const defaultUrl = "https://www.next-ku.com/";
 
-export default function App({ Component, pageProps }: AppProps<{ session: Session }>) {
+export default function App({
+  Component,
+  pageProps,
+}: AppProps<{ session: Session }>) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -58,6 +63,25 @@ export default function App({ Component, pageProps }: AppProps<{ session: Sessio
     };
   }, [router.events]);
   // GA 설정 끝
+
+  /*
+   * 운영진 화면에 바로 보여줄 방문 기록. GA4 와 별개로 쌓는다.
+   * 첫 진입은 이벤트가 안 오므로 여기서 한 번 남기고, 이후 이동은 라우터가 알린다.
+   * 로그인해야 보이는 화면은 세지 않는다 — 사이트 유입과 성격이 다르다.
+   */
+  useEffect(() => {
+    const PRIVATE = ["/login", "/members", "/admin"];
+    const log = (path: string) => {
+      const clean = path.split("?")[0];
+      if (PRIVATE.includes(clean)) return;
+      track("page_view", { path: clean });
+    };
+
+    log(window.location.pathname);
+    const onRoute = (url: string) => log(url);
+    router.events.on("routeChangeComplete", onRoute);
+    return () => router.events.off("routeChangeComplete", onRoute);
+  }, [router.events]);
   return (
     <SessionProvider session={pageProps.session}>
       <RecoilRoot>
@@ -68,7 +92,10 @@ export default function App({ Component, pageProps }: AppProps<{ session: Sessio
               {/* Open Graph (Facebook, LinkedIn, etc.) */}
               <meta property="og:type" content="website" />
               <meta property="og:url" content="https://www.next-ku.com/" />
-              <meta property="og:title" content="고려대 소프트웨어 창업 학회 | NEXT" />
+              <meta
+                property="og:title"
+                content="고려대 소프트웨어 창업 학회 | NEXT"
+              />
               <meta
                 property="og:description"
                 content="고려대 소프트웨어 창업 학회 | NEXT에서 개발자 & 스타트업 창업의 허브 🚀 혁신적인 아이디어를 현실로 만들어 보세요."
@@ -81,7 +108,10 @@ export default function App({ Component, pageProps }: AppProps<{ session: Sessio
               <meta property="og:image:height" content="630" />
               {/* Twitter Meta Tags */}
               <meta name="twitter:card" content="summary_large_image" />
-              <meta name="twitter:title" content="고려대 소프트웨어 창업 학회 | NEXT" />
+              <meta
+                name="twitter:title"
+                content="고려대 소프트웨어 창업 학회 | NEXT"
+              />
               <meta
                 name="twitter:description"
                 content="고려대 소프트웨어 창업 학회 | NEXT에서 개발자 & 스타트업 창업의 허브 🚀 혁신적인 아이디어를 현실로 만들어 보세요."
@@ -92,7 +122,10 @@ export default function App({ Component, pageProps }: AppProps<{ session: Sessio
               />
               <meta name="twitter:url" content="https://www.next-ku.com/" />
               {/* SEO Meta Tags */}
-              <meta name="keywords" content="NEXT, 고려대학교, 창업, 학회, 소프트웨어" />
+              <meta
+                name="keywords"
+                content="NEXT, 고려대학교, 창업, 학회, 소프트웨어"
+              />
               <meta
                 name="description"
                 content="고려대 소프트웨어 창업 학회 | NEXT에서 개발자 & 스타트업 창업의 허브 🚀 혁신적인 아이디어를 현실로 만들어 보세요."

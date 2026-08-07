@@ -267,6 +267,71 @@ export const Submit = styled.button`
   }
 `;
 
+export const FileInput = styled.input`
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+  color: #57524a;
+
+  &::file-selector-button {
+    margin-right: 1rem;
+    min-height: 3.8rem;
+    padding: 0 1.4rem;
+    border: 1px solid #ddd7cd;
+    border-radius: 7px;
+    background: #fdfcfa;
+    color: #17150f;
+    font-size: 1.4rem;
+    font-weight: 650;
+    letter-spacing: -0.025em;
+    cursor: pointer;
+  }
+`;
+
+/** 저장 전에 몇 줄이 읽혔고 몇 줄이 왜 빠졌는지 그 자리에서 보여준다. */
+export const Preview = styled.div`
+  padding: 1.6rem 1.8rem;
+  border: 1px solid #e7e2d8;
+  border-radius: 10px;
+  background: #fdfcfa;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+
+  & > strong {
+    display: block;
+    margin-bottom: 0.8rem;
+    color: #17150f;
+    font-weight: 700;
+  }
+  & ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.4rem;
+  }
+  & li {
+    color: #57524a;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+`;
+
+export const PreviewSkipped = styled.div`
+  margin-top: 1.4rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid #e7e2d8;
+
+  & > strong {
+    display: block;
+    margin-bottom: 0.8rem;
+    color: #9a2c1e;
+    font-weight: 700;
+  }
+  & li {
+    color: #8d877f;
+  }
+`;
+
 export const Notice = styled.p<{ $bad?: boolean }>`
   margin: 0;
   font-size: 1.4rem;
@@ -624,6 +689,171 @@ export const Promote = styled.button`
   border: 1px solid #ddd7cd;
   color: #57524a;
   font-size: 1.35rem;
+`;
+
+/* ─── 운영진: 통계 ────────────────────────────────────────────────────── */
+
+export const StatBar = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: clamp(2.4rem, 3.5vw, 3.2rem);
+`;
+
+/**
+ * 지원 퍼널.
+ *
+ * 막대 길이는 첫 단계 대비 비율이다. 숫자만 나열하면 "1200 → 180" 이 큰 낙차인지
+ * 눈으로 안 잡히는데, 길이로 두면 어디서 빠지는지 한눈에 보인다.
+ */
+export const Funnel = styled.ol`
+  list-style: none;
+  margin: 0 0 clamp(3.2rem, 5vw, 4.8rem);
+  padding: 0;
+  display: grid;
+  gap: 1.2rem;
+`;
+
+export const FunnelStep = styled.li<{ $ratio: number; $last: boolean }>`
+  display: grid;
+  gap: 0.7rem;
+
+  & > div:first-child {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.6rem;
+  }
+
+  & .label {
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.025em;
+    color: #17150f;
+  }
+  & .count {
+    font-size: 1.9rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: #17150f;
+  }
+  & .count small {
+    margin-left: 0.6rem;
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #8d877f;
+  }
+
+  /* 막대. 마지막 단계만 오렌지로 두어 목표 지점을 표시한다. */
+  & .track {
+    height: 1rem;
+    border-radius: 3px;
+    background: #eee9df;
+    overflow: hidden;
+  }
+  & .fill {
+    display: block;
+    height: 100%;
+    width: ${({ $ratio }) => Math.max($ratio * 100, 1.2)}%;
+    border-radius: 3px;
+    background: ${({ $last }) => ($last ? "#f7941e" : "#17150f")};
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    & .fill {
+      transition: none;
+    }
+  }
+`;
+
+/** 단계 사이에서 몇 %가 남았는지. 퍼널에서 가장 중요한 숫자다. */
+export const FunnelDrop = styled.p`
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: #8d877f;
+  font-variant-numeric: tabular-nums;
+
+  & b {
+    color: #57524a;
+    font-weight: 700;
+  }
+`;
+
+export const StatGrid = styled.div`
+  display: grid;
+  gap: clamp(2.4rem, 4vw, 3.6rem);
+
+  @media (min-width: 62rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`;
+
+export const StatBlock = styled.section`
+  min-width: 0;
+
+  & > h2 {
+    margin: 0 0 1.2rem;
+    font-size: 1.7rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+  }
+`;
+
+/** 순위표. 막대를 셀 배경으로 깔아 숫자와 크기를 같은 줄에서 읽게 한다. */
+export const StatRows = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+`;
+
+export const StatRow = styled.li<{ $ratio: number }>`
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.2rem;
+  padding: 0.9rem 1rem;
+  border-radius: 6px;
+  font-size: 1.45rem;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: ${({ $ratio }) => Math.max($ratio * 100, 0.8)}%;
+    background: #f1ece2;
+    border-radius: 6px;
+  }
+
+  & span,
+  & strong {
+    position: relative;
+  }
+  & span {
+    color: #57524a;
+    overflow-wrap: anywhere;
+  }
+  & strong {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #17150f;
+    white-space: nowrap;
+  }
+  & strong em {
+    margin-left: 0.5rem;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 1.3rem;
+    color: #8d877f;
+  }
 `;
 
 /* ─── 운영진: 탭 ──────────────────────────────────────────────────────── */
