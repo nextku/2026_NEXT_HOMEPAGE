@@ -11,6 +11,8 @@ export type Profile = {
   name: string;
   generation: number | null;
   department: string | null;
+  /** 학회 내 직책. 비어 있으면 일반 학회원. */
+  title: string | null;
   status: MemberStatus;
   role: MemberRole;
   created_at: string;
