@@ -54,15 +54,24 @@ export default function Admin() {
     [rows],
   );
 
-  if (loading || !session) return null;
+  /*
+   * 아직 판단이 안 선 동안에도 Head 는 내보낸다. 여기서 통째로 null 을
+   * 돌려주면 정적 HTML 에 noindex 가 빠지는데, 이 주소가 그대로 색인되면
+   * 곤란하다. robots.txt 로도 막고 있지만 두 겹으로 둔다.
+   */
+  const head = (
+    <Head>
+      <title>운영진 | NEXT</title>
+      <meta name="robots" content="noindex" />
+    </Head>
+  );
+
+  if (loading || !session) return head;
 
   if (!isAdmin) {
     return (
       <>
-        <Head>
-          <title>운영진 | NEXT</title>
-          <meta name="robots" content="noindex" />
-        </Head>
+        {head}
         <S.Page>
           <S.Narrow>
             <S.Intro>
@@ -85,10 +94,7 @@ export default function Admin() {
 
   return (
     <>
-      <Head>
-        <title>운영진 | NEXT</title>
-        <meta name="robots" content="noindex" />
-      </Head>
+      {head}
 
       <S.Page>
         <S.Wrap>
