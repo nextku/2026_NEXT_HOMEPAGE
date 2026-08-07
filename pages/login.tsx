@@ -3,72 +3,157 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
 import { isSupabaseConfigured } from "lib/supabase/client";
-import { sendEmailCode, useAuth, verifyEmailCode } from "lib/supabase/useAuth";
+import {
+  resendSignupCode,
+  sendPasswordReset,
+  signInWithPassword,
+  signUpWithPassword,
+  useAuth,
+  verifySignupCode,
+} from "lib/supabase/useAuth";
 import * as S from "styles/member/style";
 
 /**
- * 학회원 로그인.
+ * 로그인 · 가입 · 비밀번호 재설정.
  *
- * 메일로 여섯 자리 코드를 보내고 그 코드를 받는다. 비밀번호는 받지 않는다 —
- * 받는 순간 학회가 그것을 보관하고 재설정까지 책임져야 한다. 코드를 옮겨
- * 적었다는 사실이 그 주소의 주인이라는 증명이므로 인증 단계도 이것 하나면 된다.
+ * 화면 하나가 네 가지 모드를 갖는다. 각각을 따로 만들면 주소가 늘고 뒤로가기가
+ * 어색해지는데, 사용자가 하는 일은 결국 "들어가기" 하나다.
  *
- * 로그인은 "이 주소의 주인"까지만 증명한다. 학회원인지는 그다음 화면에서
- * 명단과 대조하거나 운영진이 승인한다.
+ * 가입할 때 확인 코드를 받는 이유는 아무 주소나 적을 수 있기 때문이다. 코드를
+ * 옮겨 적었다는 사실이 그 주소의 주인이라는 증명이 된다. 확인 전에는 로그인이
+ * 막힌다(Supabase 의 Confirm email 설정).
+ *
+ * 로그인은 "이 주소의 주인"까지만 증명한다. 학회원인지는 다음 화면에서 명단과
+ * 대조하거나 운영진이 승인한다.
  */
+
+type Mode = "signin" | "signup" | "verify" | "forgot";
+
+const MIN_PASSWORD = 8;
+
 export default function Login() {
   const router = useRouter();
   const { isLoggedIn, loading } = useAuth();
 
-  const [step, setStep] = useState<"email" | "code">("email");
+  const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const codeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!loading && isLoggedIn) router.replace("/members");
   }, [loading, isLoggedIn, router]);
 
-  // 코드 화면으로 넘어가면 바로 칠 수 있게 커서를 옮긴다.
   useEffect(() => {
-    if (step === "code") codeRef.current?.focus();
-  }, [step]);
+    if (mode === "verify") codeRef.current?.focus();
+  }, [mode]);
 
-  const requestCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const go = (next: Mode) => {
+    setMode(next);
+    setError("");
+    setNotice("");
+  };
+
+  const run = async (fn: () => Promise<string | null>, after?: () => void) => {
     if (busy) return;
     setBusy(true);
     setError("");
-
-    const err = await sendEmailCode(email);
-    if (err) {
-      setError(
-        "코드를 보내지 못했습니다. 주소를 확인하고 잠시 후 다시 시도해 주세요.",
-      );
-    } else {
-      setStep("code");
-      setCode("");
-    }
+    const err = await fn();
+    if (err) setError(err);
+    else after?.();
     setBusy(false);
   };
 
-  const submitCode = async (e: React.FormEvent) => {
+  const onSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy) return;
-    setBusy(true);
-    setError("");
+    run(
+      () => signInWithPassword(email, password),
+      () => router.replace("/members"),
+    );
+  };
 
-    const err = await verifyEmailCode(email, code);
-    if (err) {
-      setError("코드가 맞지 않거나 만료됐습니다. 다시 받아주세요.");
-      setBusy(false);
+  const onSignUp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < MIN_PASSWORD) {
+      setError(`비밀번호는 ${MIN_PASSWORD}자 이상이어야 합니다.`);
       return;
     }
-    // 세션이 생기면 위 useEffect 가 /members 로 보낸다.
-    router.replace("/members");
+    run(
+      () => signUpWithPassword(email, password),
+      () => {
+        setCode("");
+        setMode("verify");
+        setNotice("");
+      },
+    );
   };
+
+  const onVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    run(
+      () => verifySignupCode(email, code),
+      () => router.replace("/members"),
+    );
+  };
+
+  const onResend = () =>
+    run(
+      () => resendSignupCode(email),
+      () => setNotice("코드를 다시 보냈습니다."),
+    );
+
+  const onForgot = (e: React.FormEvent) => {
+    e.preventDefault();
+    run(
+      () => sendPasswordReset(email),
+      () =>
+        setNotice(
+          "재설정 링크를 보냈습니다. 메일함을 확인해 주세요. 안 보이면 스팸함도 봐주세요.",
+        ),
+    );
+  };
+
+  const heading =
+    mode === "signup"
+      ? "학회원 가입"
+      : mode === "verify"
+        ? "메일 확인"
+        : mode === "forgot"
+          ? "비밀번호 재설정"
+          : "학회원 로그인";
+
+  const lead =
+    mode === "signup"
+      ? "가입 후 메일로 보내는 코드를 입력하면 계정이 만들어집니다."
+      : mode === "verify"
+        ? `${email} 로 여섯 자리 코드를 보냈습니다.`
+        : mode === "forgot"
+          ? "가입한 주소를 적어주시면 재설정 링크를 보내드립니다."
+          : "NEXT 학회원에게만 공개되는 채용·투자·행사 정보를 보려면 로그인이 필요합니다.";
+
+  const emailField = (
+    <S.Field>
+      <span>이메일</span>
+      <S.Input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="name@example.com"
+        autoComplete="email"
+        required
+        disabled={!isSupabaseConfigured}
+      />
+      {mode === "signup" && (
+        <small>
+          졸업 후에도 쓰는 주소로 넣어주세요. 학교 메일은 졸업하면 사라집니다.
+        </small>
+      )}
+    </S.Field>
+  );
 
   return (
     <>
@@ -80,41 +165,71 @@ export default function Login() {
       <S.PageCenter>
         <S.Narrow>
           <S.Intro>
-            <h1>학회원 로그인</h1>
-            <p>
-              {step === "email"
-                ? "NEXT 학회원에게만 공개되는 채용·투자·행사 정보를 보려면 로그인이 필요합니다."
-                : `${email} 로 여섯 자리 코드를 보냈습니다.`}
-            </p>
+            <h1>{heading}</h1>
+            <p>{lead}</p>
           </S.Intro>
 
-          {step === "email" ? (
-            <S.AuthCard as="form" onSubmit={requestCode}>
+          {mode === "signin" && (
+            <S.AuthCard as="form" onSubmit={onSignIn}>
+              {emailField}
               <S.Field>
-                <span>이메일</span>
+                <span>비밀번호</span>
                 <S.Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  autoComplete="email"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
                   required
-                  disabled={!isSupabaseConfigured}
                 />
-                <small>
-                  졸업 후에도 쓰는 주소로 넣어주세요. 학교 메일은 졸업하면
-                  사라집니다.
-                </small>
+              </S.Field>
+
+              {error && <S.Notice $bad>{error}</S.Notice>}
+              {notice && <S.Notice>{notice}</S.Notice>}
+
+              <S.Submit type="submit" disabled={busy || !isSupabaseConfigured}>
+                {busy ? "확인 중" : "로그인"}
+              </S.Submit>
+
+              <S.AuthNote>
+                계정이 없으신가요?{" "}
+                <S.LinkButton type="button" onClick={() => go("signup")}>
+                  가입하기
+                </S.LinkButton>
+                {" · "}
+                <S.LinkButton type="button" onClick={() => go("forgot")}>
+                  비밀번호를 잊으셨나요?
+                </S.LinkButton>
+              </S.AuthNote>
+            </S.AuthCard>
+          )}
+
+          {mode === "signup" && (
+            <S.AuthCard as="form" onSubmit={onSignUp}>
+              {emailField}
+              <S.Field>
+                <span>비밀번호</span>
+                <S.Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={MIN_PASSWORD}
+                  required
+                />
+                <small>{MIN_PASSWORD}자 이상</small>
               </S.Field>
 
               {error && <S.Notice $bad>{error}</S.Notice>}
 
               <S.Submit type="submit" disabled={busy || !isSupabaseConfigured}>
-                {busy ? "보내는 중" : "인증 코드 받기"}
+                {busy ? "보내는 중" : "가입하고 인증 코드 받기"}
               </S.Submit>
 
               <S.AuthNote>
-                비밀번호는 없습니다. 로그인할 때마다 메일로 코드를 보냅니다.
+                이미 계정이 있으신가요?{" "}
+                <S.LinkButton type="button" onClick={() => go("signin")}>
+                  로그인
+                </S.LinkButton>
               </S.AuthNote>
               <S.AuthNote>
                 계속하면 <a href="/terms">이용약관</a>과{" "}
@@ -122,8 +237,10 @@ export default function Login() {
                 봅니다.
               </S.AuthNote>
             </S.AuthCard>
-          ) : (
-            <S.AuthCard as="form" onSubmit={submitCode}>
+          )}
+
+          {mode === "verify" && (
+            <S.AuthCard as="form" onSubmit={onVerify}>
               <S.Field>
                 <span>인증 코드</span>
                 <S.CodeInput
@@ -142,22 +259,40 @@ export default function Login() {
               </S.Field>
 
               {error && <S.Notice $bad>{error}</S.Notice>}
+              {notice && <S.Notice>{notice}</S.Notice>}
 
               <S.Submit type="submit" disabled={busy || code.length < 6}>
-                {busy ? "확인 중" : "로그인"}
+                {busy ? "확인 중" : "확인하고 시작하기"}
               </S.Submit>
 
-              <S.Foot>
-                <S.SignOut
-                  type="button"
-                  onClick={() => {
-                    setStep("email");
-                    setError("");
-                  }}
-                >
-                  다른 주소로 받기
-                </S.SignOut>
-              </S.Foot>
+              <S.AuthNote>
+                <S.LinkButton type="button" onClick={onResend} disabled={busy}>
+                  코드 다시 받기
+                </S.LinkButton>
+                {" · "}
+                <S.LinkButton type="button" onClick={() => go("signup")}>
+                  주소 고치기
+                </S.LinkButton>
+              </S.AuthNote>
+            </S.AuthCard>
+          )}
+
+          {mode === "forgot" && (
+            <S.AuthCard as="form" onSubmit={onForgot}>
+              {emailField}
+
+              {error && <S.Notice $bad>{error}</S.Notice>}
+              {notice && <S.Notice>{notice}</S.Notice>}
+
+              <S.Submit type="submit" disabled={busy || !isSupabaseConfigured}>
+                {busy ? "보내는 중" : "재설정 링크 받기"}
+              </S.Submit>
+
+              <S.AuthNote>
+                <S.LinkButton type="button" onClick={() => go("signin")}>
+                  로그인으로 돌아가기
+                </S.LinkButton>
+              </S.AuthNote>
             </S.AuthCard>
           )}
         </S.Narrow>

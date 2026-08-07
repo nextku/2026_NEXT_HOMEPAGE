@@ -143,6 +143,28 @@ export const AuthNote = styled.p`
   }
 `;
 
+/** 문장 안에 섞이는 동작. 버튼이지만 링크처럼 읽혀야 흐름이 안 끊긴다. */
+export const LinkButton = styled.button`
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: #57524a;
+  font-weight: 600;
+  box-shadow: inset 0 -1px 0 #cfc8bc;
+  cursor: pointer;
+
+  @media (any-hover: hover) {
+    &:hover:not(:disabled) {
+      box-shadow: inset 0 -1px 0 #f7941e;
+    }
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+`;
+
 /* ─── 신청서 · 게시물 작성 폼 ─────────────────────────────────────────── */
 
 export const FormCard = styled.form`

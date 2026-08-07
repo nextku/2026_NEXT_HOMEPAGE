@@ -101,34 +101,105 @@ export function useAuth() {
 }
 
 /**
- * 로그인 코드 보내기.
+ * 인증 관련 동작 모음.
  *
- * 비밀번호를 받지 않는다. 받는 순간 학회가 비밀번호를 보관하고 재설정까지
- * 책임져야 한다. 메일로 보낸 코드를 입력했다는 것 자체가 그 주소의 주인이라는
- * 증명이므로, 별도의 '인증 메일 확인' 단계도 필요 없다.
+ * 가입은 이메일 + 비밀번호로 한다. 그런데 아무 주소나 적어서 가입할 수 있으면
+ * 남의 메일로 계정을 만들 수 있으므로, 가입 직후 그 주소로 여섯 자리 코드를
+ * 보내 주인임을 확인한다. 확인 전에는 로그인되지 않는다.
  *
- * 매직 링크가 아니라 코드를 쓰는 이유: 링크는 메일 앱이 자체 브라우저로 열어
- * 세션이 원래 창에 붙지 않는 일이 잦다. 코드는 어디서 열든 옮겨 적으면 된다.
- * (Supabase 의 Magic Link 템플릿에 {{ .Token }} 이 들어 있어야 코드가 간다.)
+ * 링크가 아니라 코드를 쓰는 이유: 메일 앱이 링크를 자체 브라우저로 열어서
+ * 가입은 됐는데 원래 보던 창에는 세션이 안 붙는 일이 잦다.
+ *
+ * 오류 메시지는 Supabase 가 영어로 준다. 그대로 보여주면 읽히지 않으므로
+ * 자주 나오는 것만 우리말로 바꾸고 나머지는 일반 문구로 덮는다.
  */
-export async function sendEmailCode(email: string) {
-  const supabase = createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email: email.trim().toLowerCase(),
-    options: { shouldCreateUser: true },
-  });
-  return error?.message ?? null;
+
+function ko(message: string | undefined, fallback: string) {
+  const m = (message ?? "").toLowerCase();
+  if (m.includes("invalid login credentials"))
+    return "이메일 또는 비밀번호가 맞지 않습니다.";
+  if (m.includes("email not confirmed"))
+    return "메일 확인이 아직 끝나지 않았습니다. 받은 코드를 입력해 주세요.";
+  if (m.includes("already registered") || m.includes("already been registered"))
+    return "이미 가입된 주소입니다. 로그인하거나 비밀번호를 재설정해 주세요.";
+  if (m.includes("token has expired") || m.includes("invalid token"))
+    return "코드가 맞지 않거나 만료됐습니다. 다시 받아주세요.";
+  if (m.includes("password should be at least"))
+    return "비밀번호가 너무 짧습니다.";
+  if (m.includes("rate limit") || m.includes("too many"))
+    return "요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.";
+  if (m.includes("new password should be different"))
+    return "이전과 다른 비밀번호를 정해주세요.";
+  return fallback;
 }
 
-/** 받은 코드로 로그인. 성공하면 세션이 생긴다. */
-export async function verifyEmailCode(email: string, code: string) {
+/** 가입. 성공하면 그 주소로 확인 코드가 간다. */
+export async function signUpWithPassword(email: string, password: string) {
+  const supabase = createClient();
+  const { error } = await supabase.auth.signUp({
+    email: email.trim().toLowerCase(),
+    password,
+  });
+  return error
+    ? ko(error.message, "가입에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+    : null;
+}
+
+/** 가입 확인 코드 검증. 통과하면 곧바로 로그인 상태가 된다. */
+export async function verifySignupCode(email: string, code: string) {
   const supabase = createClient();
   const { error } = await supabase.auth.verifyOtp({
     email: email.trim().toLowerCase(),
     token: code.trim(),
-    type: "email",
+    type: "signup",
   });
-  return error?.message ?? null;
+  return error
+    ? ko(error.message, "코드가 맞지 않거나 만료됐습니다. 다시 받아주세요.")
+    : null;
+}
+
+/** 확인 코드 다시 보내기. */
+export async function resendSignupCode(email: string) {
+  const supabase = createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: email.trim().toLowerCase(),
+  });
+  return error
+    ? ko(error.message, "코드를 다시 보내지 못했습니다. 잠시 후 시도해 주세요.")
+    : null;
+}
+
+export async function signInWithPassword(email: string, password: string) {
+  const supabase = createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password,
+  });
+  return error
+    ? ko(error.message, "로그인하지 못했습니다. 잠시 후 다시 시도해 주세요.")
+    : null;
+}
+
+/** 비밀번호 재설정 메일. 링크를 누르면 /reset-password 로 온다. */
+export async function sendPasswordReset(email: string) {
+  const supabase = createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    email.trim().toLowerCase(),
+    { redirectTo: `${window.location.origin}/reset-password` },
+  );
+  return error
+    ? ko(error.message, "메일을 보내지 못했습니다. 주소를 확인해 주세요.")
+    : null;
+}
+
+/** 재설정 링크로 들어온 상태에서 새 비밀번호를 저장한다. */
+export async function updatePassword(password: string) {
+  const supabase = createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  return error
+    ? ko(error.message, "비밀번호를 바꾸지 못했습니다. 잠시 후 시도해 주세요.")
+    : null;
 }
 
 export async function signOut(to = "/home") {
