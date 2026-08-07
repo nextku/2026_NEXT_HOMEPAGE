@@ -310,13 +310,35 @@ export const RecruitPopupButton = styled.button`
   border: 0;
   border-radius: 1.67cqw;
   color: #111;
-  background: ${THEME.ORANGE};
+
+  /* 유리 질감.
+     오렌지를 살짝 뚫어 뒤 카드가 배어 나오게 하고, 위에서 빛이 떨어진 것처럼
+     흰 그라디언트를 얹는다. 색을 통째로 반투명하게만 두면 CTA 가 흐려지므로
+     불투명도는 0.88 까지만 내리고 나머지는 하이라이트로 만든다. */
+  background:
+    linear-gradient(
+      152deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.08) 38%,
+      rgba(255, 255, 255, 0) 62%
+    ),
+    rgba(247, 148, 30, 0.88);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  /* 테두리 대신 안쪽 링. border 를 새로 주면 버튼 크기가 1px 씩 밀린다.
+     위는 밝게, 아래는 어둡게 해서 두께가 있는 유리처럼 보이게 한다. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.16),
+    0 0.83cqw 2.2cqw rgba(247, 148, 30, 0.28);
   font-size: 2.15cqw;
   font-weight: 800;
   cursor: pointer;
   transition:
     transform 0.2s,
-    filter 0.2s;
+    filter 0.2s,
+    box-shadow 0.2s;
 
   & svg {
     /* 텍스트 글리프 → 는 굵은 한글 옆에서 얇고 어색하다.
@@ -329,6 +351,12 @@ export const RecruitPopupButton = styled.button`
   &:hover {
     filter: brightness(1.08);
     transform: translateY(-2px);
+    /* 떠오른 만큼 아래 빛도 넓어져야 들린 것처럼 보인다. */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.16),
+      0 1.4cqw 3cqw rgba(247, 148, 30, 0.36);
   }
   &:hover svg {
     transform: translateX(4px);
@@ -346,6 +374,12 @@ export const RecruitPopupButton = styled.button`
     border-radius: 10px;
     font-size: 16px;
     gap: 8px;
+    /* cqw 그림자는 모바일에서 컨테이너 폭을 따라 과하게 번진다. px 로 고정한다. */
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.16),
+      0 6px 18px rgba(247, 148, 30, 0.28);
 
     & svg {
       width: 18px;
