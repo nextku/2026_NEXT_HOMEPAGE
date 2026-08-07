@@ -1,17 +1,21 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import PasswordFields from "components/member/PasswordFields";
+import { createClient } from "lib/supabase/client";
 import { updatePassword, useAuth } from "lib/supabase/useAuth";
 import * as S from "styles/member/style";
 
 /**
  * 새 비밀번호 정하기.
  *
- * 재설정 메일의 링크로 들어오면 Supabase 가 그 자리에서 임시 세션을 만들어준다.
- * 그래서 여기서는 따로 본인 확인을 하지 않고 새 비밀번호만 받는다. 링크 없이
- * 주소만 치고 들어온 경우에는 세션이 없으므로 안내하고 돌려보낸다.
+ * 메일의 링크는 ?token_hash=... 를 달고 들어온다. 그 값을 verifyOtp 에 넘기면
+ * 서버가 검증해 세션을 만들어준다. 브라우저에 미리 저장된 것이 필요 없으므로
+ * 컴퓨터에서 요청하고 휴대폰에서 열어도 그대로 열린다.
+ *
+ * 처음에는 이것을 PKCE 링크로 두었는데, 그 방식은 요청한 브라우저에만 있는
+ * 검증값을 쓴다. 메일을 다른 기기에서 여는 흔한 경우에 반드시 실패했다.
  */
 
 export default function ResetPassword() {
@@ -24,15 +28,26 @@ export default function ResetPassword() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  // 주소에 토큰이 실려 왔다면 그것부터 검증한다. 끝나기 전에는 판단하지 않는다.
+  const [exchanging, setExchanging] = useState(true);
 
-  /*
-   * 주소창을 건드리지 않는다.
-   *
-   * 예전에는 마운트하자마자 해시를 지웠는데, 재설정 링크의 토큰이 바로 그
-   * 해시에 실려 온다. Supabase 클라이언트가 그것을 읽어 세션을 만들기 전에
-   * 지워버려서, 링크를 누른 순간 "유효하지 않다" 가 떴다.
-   * 정리는 클라이언트가 알아서 한다.
-   */
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const tokenHash = url.searchParams.get("token_hash");
+
+    if (!tokenHash) {
+      setExchanging(false);
+      return;
+    }
+
+    createClient()
+      .auth.verifyOtp({ token_hash: tokenHash, type: "recovery" })
+      .then(() => {
+        // 검증이 끝난 뒤에 지운다. 먼저 지우면 읽을 것이 없어진다.
+        window.history.replaceState(null, "", url.pathname);
+        setExchanging(false);
+      });
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +68,7 @@ export default function ResetPassword() {
   };
 
   const body = () => {
-    if (loading) return null;
+    if (loading || exchanging) return null;
 
     if (!session) {
       return (
