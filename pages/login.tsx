@@ -2,6 +2,8 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
+import PasswordFields from "components/member/PasswordFields";
+import { MIN_PASSWORD } from "lib/password";
 import { isSupabaseConfigured } from "lib/supabase/client";
 import {
   resendSignupCode,
@@ -29,8 +31,6 @@ import * as S from "styles/member/style";
 
 type Mode = "signin" | "signup" | "verify" | "forgot";
 
-const MIN_PASSWORD = 8;
-
 export default function Login() {
   const router = useRouter();
   const { isLoggedIn, loading } = useAuth();
@@ -38,6 +38,8 @@ export default function Login() {
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [again, setAgain] = useState("");
+  const [pwValid, setPwValid] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -78,8 +80,13 @@ export default function Login() {
 
   const onSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < MIN_PASSWORD) {
-      setError(`비밀번호는 ${MIN_PASSWORD}자 이상이어야 합니다.`);
+    /*
+     * 화면의 규칙 표시와 같은 판단을 여기서 한 번 더 한다. 표시는 안내일 뿐
+     * 제출을 막지는 않기 때문이다. 물론 이것도 방어선은 아니다 —
+     * 최소 길이는 Supabase 설정이 최종적으로 강제한다.
+     */
+    if (!pwValid) {
+      setError("아래 조건을 모두 채운 뒤 다시 눌러주세요.");
       return;
     }
     run(
@@ -206,22 +213,21 @@ export default function Login() {
           {mode === "signup" && (
             <S.AuthCard as="form" onSubmit={onSignUp}>
               {emailField}
-              <S.Field>
-                <span>비밀번호</span>
-                <S.Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="new-password"
-                  minLength={MIN_PASSWORD}
-                  required
-                />
-                <small>{MIN_PASSWORD}자 이상</small>
-              </S.Field>
+              <PasswordFields
+                email={email}
+                password={password}
+                onPassword={setPassword}
+                again={again}
+                onAgain={setAgain}
+                onValidChange={setPwValid}
+              />
 
               {error && <S.Notice $bad>{error}</S.Notice>}
 
-              <S.Submit type="submit" disabled={busy || !isSupabaseConfigured}>
+              <S.Submit
+                type="submit"
+                disabled={busy || !isSupabaseConfigured || !pwValid}
+              >
                 {busy ? "보내는 중" : "가입하고 인증 코드 받기"}
               </S.Submit>
 
