@@ -61,10 +61,12 @@ export default class MyDocument extends Document {
 
           {/* SEO Meta Tags */}
           <meta name="keywords" content="NEXT, 고려대학교, 창업, 학회, 소프트웨어" />
-          <meta
-            name="description"
-            content="고려대 소프트웨어 창업 학회 | NEXT 개발자 & 스타트업 창업의 허브 🚀 혁신적인 아이디어를 현실로 만들어 보세요."
-          />
+          {/*
+            description 은 여기 두지 않는다. _app.tsx 에도 있어서 태그가 둘로
+            나가고 있었고, 문구까지 미묘하게 달랐다('NEXT 개발자' / 'NEXT에서 개발자').
+            검색엔진이 어느 쪽을 쓸지는 보장되지 않는다.
+            실제로 노출되는 쪽이 _app.tsx 의 문구라 그것만 남긴다.
+          */}
 
           {/* Lazy load external styles */}
           <link

@@ -98,17 +98,18 @@ export default function Main() {
   return (
     <S.PageShell>
       <Head>
-        <title>고려대학교 소프트웨어 창업학회 NEXT</title>
         {/*
-          구글 OAuth 심사는 이 페이지를 읽고 두 가지를 확인한다 —
-          동의 화면의 앱 이름과 같은 이름이 여기 있는지, 그리고 앱이 무엇을
-          하는지 설명돼 있는지. 제목과 설명의 이름 표기를 동의 화면과
-          똑같이 맞춰야 한다.
+          이 제목은 건드리지 않는다. 이미 검색 순위가 잡힌 문구다.
+
+          한때 구글 OAuth 동의 화면의 앱 이름과 맞추려고 바꿨었는데, 심사가
+          보는 것은 title 이 아니라 홈페이지에 '보이는' 이름과 설명이다.
+          푸터의 <h3>고려대학교 소프트웨어 창업학회 NEXT</h3> 와 그 아래 한 줄이
+          그 몫을 하므로 제목을 손댈 이유가 없다.
+
+          description 도 여기에 두지 않는다. _app.tsx 에 전역으로 이미 있어서
+          하나 더 쓰면 태그가 둘이 되고, 검색엔진이 어느 쪽을 쓸지 알 수 없어진다.
         */}
-        <meta
-          name="description"
-          content="고려대학교 소프트웨어 창업학회 NEXT의 공식 웹사이트입니다. 학회 소개와 활동, 신입 부원 모집을 안내하고, 학회원은 구글 계정으로 로그인해 채용·투자·행사 정보를 확인합니다."
-        />
+        <title>고려대 소프트웨어 창업 학회 | NEXT : HOME</title>
         <meta
           name="google-site-verification"
           content="YdrWjel7OcCUGNmuvaV86uwaB_ZEqJsOqOoV-rKi6vA"
