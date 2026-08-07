@@ -181,7 +181,14 @@ export async function signInWithPassword(email: string, password: string) {
     : null;
 }
 
-/** 비밀번호 재설정 메일. 링크를 누르면 /reset-password 로 온다. */
+/**
+ * 비밀번호 재설정 메일.
+ *
+ * 메일에는 코드와 링크가 함께 간다. 링크는 요청한 그 브라우저에서만 통한다 —
+ * PKCE 의 검증값이 그 브라우저에만 있기 때문이다. 데스크톱에서 요청하고
+ * 휴대폰 메일 앱에서 열면 반드시 실패한다. 그래서 화면은 코드를 기본으로
+ * 두고, 링크는 같은 기기에서 열었을 때를 위한 보조 경로로만 남긴다.
+ */
 export async function sendPasswordReset(email: string) {
   const supabase = createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(
@@ -193,6 +200,19 @@ export async function sendPasswordReset(email: string) {
     : null;
 }
 
+/** 재설정 코드 확인. 통과하면 비밀번호를 바꿀 수 있는 세션이 생긴다. */
+export async function verifyRecoveryCode(email: string, code: string) {
+  const supabase = createClient();
+  const { error } = await supabase.auth.verifyOtp({
+    email: email.trim().toLowerCase(),
+    token: code.trim(),
+    type: "recovery",
+  });
+  return error
+    ? ko(error.message, "코드가 맞지 않거나 만료됐습니다. 다시 받아주세요.")
+    : null;
+}
+
 /** 재설정 링크로 들어온 상태에서 새 비밀번호를 저장한다. */
 export async function updatePassword(password: string) {
   const supabase = createClient();
@@ -200,6 +220,47 @@ export async function updatePassword(password: string) {
   return error
     ? ko(error.message, "비밀번호를 바꾸지 못했습니다. 잠시 후 시도해 주세요.")
     : null;
+}
+
+/**
+ * 로그인한 상태에서 비밀번호 바꾸기.
+ *
+ * 현재 비밀번호를 먼저 확인한다. 세션만 있으면 바꿀 수 있게 두면, 잠기지 않은
+ * 노트북 앞에 잠깐 앉은 사람이 계정을 가져갈 수 있다.
+ */
+export async function changePassword(
+  email: string,
+  current: string,
+  next: string,
+) {
+  const supabase = createClient();
+
+  const { error: checkError } = await supabase.auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password: current,
+  });
+  if (checkError) return "현재 비밀번호가 맞지 않습니다.";
+
+  const { error } = await supabase.auth.updateUser({ password: next });
+  return error
+    ? ko(error.message, "비밀번호를 바꾸지 못했습니다. 잠시 후 시도해 주세요.")
+    : null;
+}
+
+/** 이름·학과 고치기. 기수는 승인 뒤 정책이 막는다(0006). */
+export async function updateProfile(
+  id: string,
+  fields: { name: string; department: string },
+) {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      name: fields.name.trim(),
+      department: fields.department.trim(),
+    })
+    .eq("id", id);
+  return error ? "저장하지 못했습니다. 잠시 후 다시 시도해 주세요." : null;
 }
 
 export async function signOut(to = "/home") {

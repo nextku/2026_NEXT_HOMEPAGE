@@ -45,6 +45,7 @@ def code_block(_label=None):
 def button(text):
     """링크형 메일에서만 쓴다. 오렌지는 누를 수 있는 것에만."""
     return f"""
+              <div style="height:18px;font-size:0;line-height:0;">&nbsp;</div>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="border-radius:8px;background:{ORANGE};">
@@ -141,11 +142,13 @@ TEMPLATES = {
         code_block("확인 코드"),
         "이 변경을 요청하지 않았다면 코드를 입력하지 마시고 학회 메일로 알려주세요. 주소는 그대로 유지됩니다.",
     ),
+    # 코드를 먼저 둔다. 링크는 요청한 그 브라우저에서만 열리기 때문에,
+    # 컴퓨터에서 요청하고 휴대폰에서 메일을 여는 흔한 경우에 실패한다.
     "05-reset-password.html": page(
         "비밀번호 재설정",
-        "비밀번호 재설정이 요청되었습니다. 아래 버튼에서 새 비밀번호를 정할 수 있습니다.",
-        button("새 비밀번호 정하기"),
-        "NEXT 는 평소 비밀번호 없이 메일로 받은 코드로 로그인합니다. 이 메일을 요청한 적이 없다면 무시하셔도 됩니다.",
+        "아래 여섯 자리 숫자를 재설정 화면에 입력해 주세요.",
+        code_block() + button("같은 기기라면 이 버튼으로도 됩니다"),
+        "코드는 잠시 뒤 만료됩니다. " + IGNORE,
     ),
     "06-reauthentication.html": page(
         "본인 확인",

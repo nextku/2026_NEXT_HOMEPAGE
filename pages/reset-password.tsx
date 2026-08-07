@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import PasswordFields from "components/member/PasswordFields";
 import { updatePassword, useAuth } from "lib/supabase/useAuth";
@@ -25,12 +25,14 @@ export default function ResetPassword() {
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
 
-  // 링크에 담겨 온 토큰은 주소창에 남는다. 어깨너머로 보이지 않게 지운다.
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.hash) {
-      window.history.replaceState(null, "", window.location.pathname);
-    }
-  }, []);
+  /*
+   * 주소창을 건드리지 않는다.
+   *
+   * 예전에는 마운트하자마자 해시를 지웠는데, 재설정 링크의 토큰이 바로 그
+   * 해시에 실려 온다. Supabase 클라이언트가 그것을 읽어 세션을 만들기 전에
+   * 지워버려서, 링크를 누른 순간 "유효하지 않다" 가 떴다.
+   * 정리는 클라이언트가 알아서 한다.
+   */
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,14 +59,19 @@ export default function ResetPassword() {
       return (
         <>
           <S.Intro>
-            <h1>링크가 유효하지 않습니다</h1>
+            <h1>이 링크로는 열 수 없습니다</h1>
             <p>
-              재설정 링크가 만료됐거나 이미 사용된 것 같습니다. 다시 받아주세요.
+              재설정 링크는 요청한 그 브라우저에서만 열립니다. 컴퓨터에서
+              요청하고 휴대폰 메일 앱에서 열면 이 화면이 나옵니다.
+            </p>
+            <p>
+              메일에 함께 적힌 <b>여섯 자리 코드</b>를 쓰면 어느 기기에서든 바꿀
+              수 있습니다.
             </p>
           </S.Intro>
           <S.Actions>
             <S.Approve type="button" onClick={() => router.replace("/login")}>
-              재설정 링크 다시 받기
+              코드로 비밀번호 바꾸기
             </S.Approve>
           </S.Actions>
         </>
