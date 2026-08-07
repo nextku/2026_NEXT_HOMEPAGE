@@ -5,4 +5,5 @@ export const URLS = {
   ACTIVITIES: "/activities",
   PEOPLE: "/people",
   JOIN_US: "/join",
+  MEMBERS: "/members",
 };

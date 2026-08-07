@@ -944,6 +944,39 @@ export const FooterCopyright = styled.p`
   font-variant-numeric: tabular-nums;
 `;
 
+/** 저작권 표기와 약관 링크를 한 덩어리로 묶는다. 좁아지면 아래로 접힌다. */
+export const FooterMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.6rem;
+`;
+
+export const FooterLegal = styled.nav`
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+
+  & a {
+    font-size: 1.3rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.16s ease;
+  }
+  /* 두 링크 사이 구분은 점 하나로 충분하다 */
+  & a + a::before {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    margin-right: 1.4rem;
+    vertical-align: 0.4em;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.24);
+  }
+`;
+
 /* ------------------------------------------------------------------ */
 /* 히어로 워드마크 — 입자로 그리는 NEXT                                  */
 /* 기존 MainContainerLogo 자리를 대체한다. 나머지 섹션은 그대로 둔다.      */
