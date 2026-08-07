@@ -226,14 +226,6 @@ export default function Main() {
               <S.MainTextLionWrapper>
                 <h2>고려대학교</h2>
               </S.MainTextLionWrapper>
-              {/*
-                첫 화면에서 유일하게 읽히는 문장. 위쪽은 전부 이미지와 canvas 라
-                여기가 무엇을 하는 곳인지 글로 남는 자리가 없었다.
-              */}
-              <S.HeroTagline>
-                소프트웨어·IT 창업에 도전하는 학생들의 학회입니다. 학회 소개와
-                부원 모집을 안내하고, 학회원에게 채용·투자·행사 정보를 전합니다.
-              </S.HeroTagline>
             </S.MainWrapper>
             {/* 배경 이미지 최적화 */}
             {/*
@@ -407,16 +399,6 @@ export default function Main() {
         <S.FooterTop>
           <div>
             <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
-            {/*
-                  구글 OAuth 심사가 "홈페이지에 앱의 목적 설명이 없다" 로
-                  반려한 자리다. 설명은 있어야 하되 푸터에 문단이 들어가면
-                  읽히지 않으므로 학회명 바로 아래 한 줄로 붙인다.
-                  방침 링크는 아래 줄에 이미 있으므로 여기서 또 걸지 않는다.
-                */}
-            <S.FooterAbout>
-              학회 소개와 신입 부원 모집 안내 · 학회원은 구글 로그인으로
-              채용·투자·행사 정보 확인
-            </S.FooterAbout>
             <p style={{ marginTop: "1rem" }}>
               email |{" "}
               <a href="mailto:nextku.contact@gmail.com">
