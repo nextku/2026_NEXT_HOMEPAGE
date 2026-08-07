@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useRecoilState } from "recoil";
 import * as S from "styles/join/style";
 import { joinModalOpen, isLaunched } from "constants/atoms";
+import { track } from "lib/analytics";
 import RecruitTimeline, { Stage } from "components/join/RecruitTimeline";
 
 // Static Assets
@@ -56,7 +57,6 @@ const S3upload = dynamic(() => import("components/s3upload/index"), {
   ssr: false,
 });
 const AOS = dynamic(() => import("aos"), { ssr: false });
-
 
 export default function Join() {
   const [loading, setLoading] = useState(true);
@@ -243,27 +243,44 @@ export default function Join() {
                 <S.ScrollProgress aria-hidden="true" />
                 {modalPage == 1 && (
                   <S.InfoModal>
-
                     <S.InfoSection>
-                      <h3>
-                        지원 방식
-                      </h3>
+                      <h3>지원 방식</h3>
                       <ol>
                         <li>
-                          아래{' '}
+                          아래{" "}
                           <S.NoteChipGhost>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 10.5L12 15l4.5-4.5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M12 3v12M7.5 10.5L12 15l4.5-4.5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                            </svg>
                             지원서 다운로드
-                          </S.NoteChipGhost>{' '}
+                          </S.NoteChipGhost>{" "}
                           버튼을 클릭한 후 지원서 양식 다운로드
                         </li>
                         <li>서류 접수 기간 내에 지원서 작성</li>
                         <li>
-                          아래{' '}
+                          아래{" "}
                           <S.NoteChip>
                             지원하기
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h13M12.5 6l6 6-6 6" /></svg>
-                          </S.NoteChip>{' '}
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M5 12h13M12.5 6l6 6-6 6" />
+                            </svg>
+                          </S.NoteChip>{" "}
                           버튼을 클릭하여 지원서 업로드
                         </li>
                         <li>
@@ -278,31 +295,28 @@ export default function Join() {
                     </S.InfoSection>
 
                     <S.InfoSection>
-                      <h3>
-                        리크루팅 일정
-                      </h3>
-                      <RecruitTimeline stages={RECRUIT_STAGES} now={currentTime} />
+                      <h3>리크루팅 일정</h3>
+                      <RecruitTimeline
+                        stages={RECRUIT_STAGES}
+                        now={currentTime}
+                      />
                     </S.InfoSection>
 
                     <S.InfoSection>
-                      <h3>
-                        수료 기준
-                      </h3>
+                      <h3>수료 기준</h3>
                       <p>
                         학회에서 OT부터 겨울방학 기간 동안 진행하는 모든 세션 및
-                        행사는 필참입니다. 불성실하게 참여하는 경우 수료에 제한이
-                        생길 수 있음을 알려드립니다.
+                        행사는 필참입니다. 불성실하게 참여하는 경우 수료에
+                        제한이 생길 수 있음을 알려드립니다.
                       </p>
                     </S.InfoSection>
 
                     <S.InfoSection>
-                      <h3>
-                        면접 촬영 및 개인정보 수집 안내
-                      </h3>
+                      <h3>면접 촬영 및 개인정보 수집 안내</h3>
                       <p>
-                        면접 평가는 모두 <b>대면</b>으로 이뤄집니다. 원활한 스케줄
-                        조정을 위하여 8월 22일(토), 23일(일) 중 가능한 시간대를 꼭
-                        구글폼에 체크해 주시면 감사하겠습니다.
+                        면접 평가는 모두 <b>대면</b>으로 이뤄집니다. 원활한
+                        스케줄 조정을 위하여 8월 22일(토), 23일(일) 중 가능한
+                        시간대를 꼭 구글폼에 체크해 주시면 감사하겠습니다.
                       </p>
                       <p>
                         공정한 면접 평가를 위해 면접 내용을 촬영 및 수집할
@@ -312,9 +326,7 @@ export default function Join() {
                     </S.InfoSection>
 
                     <S.InfoSection>
-                      <h3>
-                        학회비 안내
-                      </h3>
+                      <h3>학회비 안내</h3>
                       <p>
                         원활한 학회 운영을 위해 학회비를 걷어 운영하고 있습니다.
                         새로 들어오시는 학회원들은 <b>10만원</b>의 학회비를
@@ -322,23 +334,19 @@ export default function Join() {
                         예정입니다.
                       </p>
                       <p>
-                        학회원들은 모든 회계 정산 내용을 활동 종료 이후 학회 노션
-                        페이지에서 확인하실 수 있습니다.
+                        학회원들은 모든 회계 정산 내용을 활동 종료 이후 학회
+                        노션 페이지에서 확인하실 수 있습니다.
                       </p>
                     </S.InfoSection>
 
                     <S.InfoSection>
-                      <h3>
-                        오리엔테이션 필참
-                      </h3>
+                      <h3>오리엔테이션 필참</h3>
                       <p>
                         최종 합격 이후 <b>8월 29일(토)</b>에 진행되는 OT는 필수
                         참여입니다. 원활한 학회 운영을 위해, OT 일정을 고려하여
                         개인 일정을 조정해주시면 감사하겠습니다.
                       </p>
                     </S.InfoSection>
-
-
                   </S.InfoModal>
                 )}
                 {modalPage == 2 && <S3upload />}
@@ -360,10 +368,11 @@ export default function Join() {
                   <S.NextBtnWrapper isMobile={isMobile} accepted={accept}>
                     <button
                       type="button"
-                      onClick={() =>
-                        (location.href =
-                          "https://docs.google.com/document/d/1jHm_GrZzElCt47xJIP5HQJVuElVaWb_G/export?format=docx")
-                      }
+                      onClick={() => {
+                        track("download_click", { path: "/join" });
+                        location.href =
+                          "https://docs.google.com/document/d/1jHm_GrZzElCt47xJIP5HQJVuElVaWb_G/export?format=docx";
+                      }}
                     >
                       <svg
                         viewBox="0 0 24 24"
@@ -386,6 +395,7 @@ export default function Join() {
                           currentTime >= startApplicationTime &&
                           currentTime <= endApplicationTime
                         ) {
+                          track("apply_click", { path: "/join" });
                           window.open(
                             "https://docs.google.com/forms/d/e/1FAIpQLScTXBOecHQlOOjlWGaiQNfBbcmAq0h-uEIjgZ_t4P8ReWbc8g/viewform?usp=header",
                             "_blank",
@@ -412,7 +422,10 @@ export default function Join() {
                     단 조건부로 DOM 에서 빼면 모달 높이가 줄고, 모달이 가운데 정렬이라
                     체크하는 순간 화면이 위로 튄다. 자리는 항상 잡아두고 보이기만 바꾼다.
                   */}
-                  <S.BlockedReason aria-hidden={accept || disabled} $shown={!accept && !disabled}>
+                  <S.BlockedReason
+                    aria-hidden={accept || disabled}
+                    $shown={!accept && !disabled}
+                  >
                     안내사항에 동의하면 지원하기가 열립니다.
                   </S.BlockedReason>
                 </S.ModalFooter>

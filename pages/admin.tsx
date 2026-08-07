@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PEOPLE_INFORMATION } from "constants/people";
 import { POST_CATEGORIES } from "constants/member";
+import { parseRoster, type RosterParse } from "lib/roster";
 import { createClient } from "lib/supabase/client";
 import { signOut, useAuth, type Profile } from "lib/supabase/useAuth";
 import * as S from "styles/member/style";
@@ -20,7 +21,7 @@ import * as S from "styles/member/style";
  * is_admin() 을 통과해야만 반영된다.
  */
 
-type Tab = "pending" | "members" | "write";
+type Tab = "pending" | "members" | "roster" | "stats" | "write";
 
 export default function Admin() {
   const router = useRouter();
@@ -123,6 +124,20 @@ export default function Admin() {
             </S.Tab>
             <S.Tab
               type="button"
+              $on={tab === "stats"}
+              onClick={() => setTab("stats")}
+            >
+              통계
+            </S.Tab>
+            <S.Tab
+              type="button"
+              $on={tab === "roster"}
+              onClick={() => setTab("roster")}
+            >
+              명단
+            </S.Tab>
+            <S.Tab
+              type="button"
               $on={tab === "write"}
               onClick={() => setTab("write")}
             >
@@ -132,6 +147,10 @@ export default function Admin() {
 
           {tab === "write" ? (
             <PostForm authorId={profile!.id} />
+          ) : tab === "roster" ? (
+            <RosterForm onSaved={load} />
+          ) : tab === "stats" ? (
+            <Stats />
           ) : rows === null ? null : tab === "pending" ? (
             pending.length === 0 ? (
               <S.Empty>확인할 신청이 없습니다.</S.Empty>
@@ -315,6 +334,7 @@ function MemberRow({
       <S.Who>
         <strong>
           {row.generation}기 {row.name}
+          {row.title ? ` · ${row.title}` : ""}
         </strong>
         <p>
           {row.department} · {row.email}
@@ -347,6 +367,316 @@ function MemberRow({
         )}
       </S.Actions>
     </S.Row>
+  );
+}
+
+/* ─── 통계 ────────────────────────────────────────────────────────────── */
+
+type Stats = {
+  days: number;
+  funnel: {
+    visitors: number;
+    join_page: number;
+    download: number;
+    apply: number;
+  };
+  pages: { path: string; views: number; visitors: number }[];
+  tabs: { path: string; tab: string; views: number; visitors: number }[];
+  sources: { source: string; visits: number }[];
+};
+
+const RANGES = [
+  { days: 7, label: "7일" },
+  { days: 30, label: "30일" },
+  { days: 90, label: "90일" },
+];
+
+/** 홈 방문에서 지원까지 어디서 사람이 빠지는지가 이 화면의 전부다. */
+function funnelSteps(f: Stats["funnel"]) {
+  return [
+    { label: "사이트 방문", value: f.visitors },
+    { label: "JOIN US 열람", value: f.join_page },
+    { label: "지원서 다운로드", value: f.download },
+    { label: "지원하기", value: f.apply },
+  ];
+}
+
+function Stats() {
+  const [days, setDays] = useState(30);
+  const [data, setData] = useState<Stats | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    setData(null);
+    setFailed(false);
+    createClient()
+      .rpc("admin_stats", { p_days: days })
+      .then(({ data: d, error }) => {
+        if (!alive) return;
+        if (error) setFailed(true);
+        else setData(d as Stats);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [days]);
+
+  const steps = data ? funnelSteps(data.funnel) : [];
+  const top = steps[0]?.value ?? 0;
+  const pageMax = Math.max(1, ...(data?.pages ?? []).map((p) => p.views));
+  const tabMax = Math.max(1, ...(data?.tabs ?? []).map((t) => t.views));
+  const srcMax = Math.max(1, ...(data?.sources ?? []).map((s) => s.visits));
+
+  return (
+    <>
+      <S.StatBar>
+        {RANGES.map((r) => (
+          <S.Chip
+            key={r.days}
+            type="button"
+            $on={days === r.days}
+            onClick={() => setDays(r.days)}
+          >
+            최근 {r.label}
+          </S.Chip>
+        ))}
+      </S.StatBar>
+
+      {failed ? (
+        <S.Empty>
+          통계를 불러오지 못했습니다. 마이그레이션 0005 가 적용됐는지 확인해
+          주세요.
+        </S.Empty>
+      ) : !data ? null : steps[0].value === 0 ? (
+        <S.Empty>이 기간에 쌓인 기록이 없습니다.</S.Empty>
+      ) : (
+        <>
+          <S.Funnel>
+            {steps.map((s, i) => {
+              const prev = i === 0 ? null : steps[i - 1];
+              const rate =
+                prev && prev.value > 0
+                  ? Math.round((s.value / prev.value) * 100)
+                  : null;
+              return (
+                <S.FunnelStep
+                  key={s.label}
+                  $ratio={top > 0 ? s.value / top : 0}
+                  $last={i === steps.length - 1}
+                >
+                  <div>
+                    <span className="label">{s.label}</span>
+                    <span className="count">
+                      {s.value.toLocaleString()}
+                      <small>명</small>
+                    </span>
+                  </div>
+                  <div className="track">
+                    <span className="fill" />
+                  </div>
+                  {rate !== null && (
+                    <S.FunnelDrop>
+                      앞 단계에서 <b>{rate}%</b> 이어짐
+                      {prev && (
+                        <> · {(prev.value - s.value).toLocaleString()}명 이탈</>
+                      )}
+                    </S.FunnelDrop>
+                  )}
+                </S.FunnelStep>
+              );
+            })}
+          </S.Funnel>
+
+          <S.StatGrid>
+            <S.StatBlock>
+              <h2>페이지</h2>
+              {data.pages.length === 0 ? (
+                <S.Empty>기록 없음</S.Empty>
+              ) : (
+                <S.StatRows>
+                  {data.pages.map((p) => (
+                    <S.StatRow key={p.path} $ratio={p.views / pageMax}>
+                      <span>{p.path}</span>
+                      <strong>
+                        {p.views.toLocaleString()}
+                        <em>{p.visitors.toLocaleString()}명</em>
+                      </strong>
+                    </S.StatRow>
+                  ))}
+                </S.StatRows>
+              )}
+            </S.StatBlock>
+
+            <S.StatBlock>
+              <h2>탭</h2>
+              {data.tabs.length === 0 ? (
+                <S.Empty>기록 없음</S.Empty>
+              ) : (
+                <S.StatRows>
+                  {data.tabs.map((t) => (
+                    <S.StatRow
+                      key={`${t.path}-${t.tab}`}
+                      $ratio={t.views / tabMax}
+                    >
+                      <span>
+                        {t.path.replace("/", "")} · {t.tab}
+                      </span>
+                      <strong>
+                        {t.views.toLocaleString()}
+                        <em>{t.visitors.toLocaleString()}명</em>
+                      </strong>
+                    </S.StatRow>
+                  ))}
+                </S.StatRows>
+              )}
+            </S.StatBlock>
+
+            <S.StatBlock>
+              <h2>유입 경로</h2>
+              {data.sources.length === 0 ? (
+                <S.Empty>기록 없음</S.Empty>
+              ) : (
+                <S.StatRows>
+                  {data.sources.map((s) => (
+                    <S.StatRow key={s.source} $ratio={s.visits / srcMax}>
+                      <span>{s.source}</span>
+                      <strong>
+                        {s.visits.toLocaleString()}
+                        <em>명</em>
+                      </strong>
+                    </S.StatRow>
+                  ))}
+                </S.StatRows>
+              )}
+            </S.StatBlock>
+          </S.StatGrid>
+        </>
+      )}
+    </>
+  );
+}
+
+/* ─── 명단 등록 ───────────────────────────────────────────────────────── */
+
+/**
+ * 명단을 올려두면 그 메일로 가입한 사람은 승인 없이 통과한다.
+ *
+ * 형식을 강요하지 않는다. 엑셀에서 복사하면 탭, 손으로 적으면 쉼표로 나뉘고
+ * 열 순서도 제각각이라, 붙여넣은 것을 그대로 받아 화면에서 해석한다. 저장 전에
+ * 몇 줄이 읽혔고 몇 줄이 왜 빠졌는지 보여주는 편이 형식을 설명하는 것보다 빠르다.
+ */
+function RosterForm({ onSaved }: { onSaved: () => void }) {
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [bad, setBad] = useState(false);
+
+  const parsed: RosterParse = useMemo(() => parseRoster(text), [text]);
+
+  const readFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => setText(String(reader.result ?? ""));
+    reader.readAsText(file);
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (busy || parsed.rows.length === 0) return;
+    setBusy(true);
+    setMsg("");
+
+    const { error } = await createClient().rpc("upsert_roster", {
+      p_rows: parsed.rows,
+    });
+
+    if (error) {
+      setBad(true);
+      setMsg("저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } else {
+      setBad(false);
+      setMsg(
+        `${parsed.rows.length}명 저장했습니다. 이미 가입해 대기 중이던 사람은 함께 승인됐습니다.`,
+      );
+      setText("");
+      onSaved();
+    }
+    setBusy(false);
+  };
+
+  return (
+    <S.FormWide onSubmit={save}>
+      <S.Field>
+        <span>명단 붙여넣기</span>
+        <S.Textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={
+            "hong@gmail.com, 14, 홍길동\nkim@gmail.com, 13, 김철수, 부대표"
+          }
+          rows={10}
+        />
+        <small>
+          엑셀에서 복사해 붙여넣어도 됩니다. 메일·기수·이름 순서는 상관없고, 네
+          번째 칸에 직책을 적으면 함께 저장됩니다.
+        </small>
+      </S.Field>
+
+      <S.Field>
+        <span>파일에서 불러오기</span>
+        <S.FileInput
+          type="file"
+          accept=".csv,.tsv,.txt,text/csv,text/plain"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) readFile(f);
+            e.target.value = "";
+          }}
+        />
+        <small>
+          엑셀은 &lsquo;다른 이름으로 저장 &rarr; CSV&rsquo; 로 내보낸 뒤
+          올려주세요.
+        </small>
+      </S.Field>
+
+      {text.trim() !== "" && (
+        <S.Preview>
+          <strong>{parsed.rows.length}명 인식</strong>
+          {parsed.rows.length > 0 && (
+            <ul>
+              {parsed.rows.slice(0, 5).map((r) => (
+                <li key={r.email}>
+                  {r.generation}기 {r.name}
+                  {r.title ? ` · ${r.title}` : ""} — {r.email}
+                </li>
+              ))}
+              {parsed.rows.length > 5 && <li>외 {parsed.rows.length - 5}명</li>}
+            </ul>
+          )}
+          {parsed.skipped.length > 0 && (
+            <S.PreviewSkipped>
+              <strong>{parsed.skipped.length}줄 건너뜀</strong>
+              <ul>
+                {parsed.skipped.slice(0, 5).map((s, i) => (
+                  <li key={i}>
+                    {s.reason} — {s.line}
+                  </li>
+                ))}
+                {parsed.skipped.length > 5 && (
+                  <li>외 {parsed.skipped.length - 5}줄</li>
+                )}
+              </ul>
+            </S.PreviewSkipped>
+          )}
+        </S.Preview>
+      )}
+
+      {msg && <S.Notice $bad={bad}>{msg}</S.Notice>}
+
+      <S.Submit type="submit" disabled={busy || parsed.rows.length === 0}>
+        {busy ? "저장 중" : `${parsed.rows.length}명 명단에 등록`}
+      </S.Submit>
+    </S.FormWide>
   );
 }
 

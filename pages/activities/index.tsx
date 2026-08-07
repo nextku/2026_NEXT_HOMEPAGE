@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useMediaQuery } from "react-responsive";
 import { Tabs } from "antd";
 import { useRouter } from "next/router";
+import { track } from "lib/analytics";
 import * as S from "styles/activities/style";
 import { ACTIVITY_ITEMS } from "constants/activities";
 
@@ -11,13 +12,32 @@ import { ACTIVITY_ITEMS } from "constants/activities";
 const AOS = dynamic(() => import("aos"), { ssr: false });
 
 // 각 섹션을 `dynamic import`로 최적화
-const Curriculum = dynamic(() => import("components/activities/curriculum"), { ssr: false });
-const Session = dynamic(() => import("components/activities/session"), { ssr: false });
-const Project = dynamic(() => import("components/activities/project"), { ssr: false });
-const Demoday = dynamic(() => import("components/activities/demoday"), { ssr: false });
-const WhyNext = dynamic(() => import("components/activities/whynext"), { ssr: false });
+const Curriculum = dynamic(() => import("components/activities/curriculum"), {
+  ssr: false,
+});
+const Session = dynamic(() => import("components/activities/session"), {
+  ssr: false,
+});
+const Project = dynamic(() => import("components/activities/project"), {
+  ssr: false,
+});
+const Demoday = dynamic(() => import("components/activities/demoday"), {
+  ssr: false,
+});
+const WhyNext = dynamic(() => import("components/activities/whynext"), {
+  ssr: false,
+});
 
 const { CURRICULUM, SESSION, PROJECT, DEMODAY, WHY_NEXT } = ACTIVITY_ITEMS;
+
+/* 어느 탭이 실제로 읽히는지 운영진 화면에서 보기 위한 키-이름 대응. */
+const TAB_LABELS: Record<string, string> = {
+  "1": CURRICULUM,
+  "5": WHY_NEXT,
+  "2": SESSION,
+  "3": PROJECT,
+  "4": DEMODAY,
+};
 
 export default function Activities() {
   const router = useRouter();
@@ -45,6 +65,12 @@ export default function Activities() {
       setViewKey(router.query.key as string);
     }
   }, [router.query.key]);
+
+  // 어느 탭이 실제로 읽히는지. 첫 표시도 한 번 센다.
+  useEffect(() => {
+    if (loading) return;
+    track("tab_view", { path: "/activities", tab: TAB_LABELS[viewKey] });
+  }, [viewKey, loading]);
 
   return (
     <>
