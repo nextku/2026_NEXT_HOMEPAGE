@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 import GoogleMark from "components/member/GoogleMark";
+import { isSupabaseConfigured } from "lib/supabase/client";
 import { signInWithGoogle, useAuth } from "lib/supabase/useAuth";
 import * as S from "styles/member/style";
 
@@ -54,11 +55,18 @@ export default function Login() {
             <S.GoogleButton
               type="button"
               onClick={onSignIn}
-              disabled={busy || loading}
+              disabled={busy || loading || !isSupabaseConfigured}
             >
               <GoogleMark />
               {busy ? "구글로 이동 중" : "구글 계정으로 계속하기"}
             </S.GoogleButton>
+
+            {!isSupabaseConfigured && (
+              <S.AuthNote>
+                로그인 준비가 아직 끝나지 않았습니다. 잠시 뒤에 다시 시도해
+                주세요.
+              </S.AuthNote>
+            )}
 
             <S.AuthNote>
               처음 로그인하면 기수와 학과를 확인한 뒤 운영진이 승인합니다. 승인

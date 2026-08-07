@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { createClient } from "./client";
+import { createClient, isSupabaseConfigured } from "./client";
 
 export type MemberStatus = "pending" | "approved" | "rejected";
 export type MemberRole = "member" | "admin";
@@ -34,6 +34,13 @@ export function useAuth() {
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    // 환경변수가 없는 환경(설정 전 배포 등)에서 훅이 화면을 통째로 죽이지
+    // 않게 한다. 안내는 로그인 화면이 한다.
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient();
     let alive = true;
 

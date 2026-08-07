@@ -14,14 +14,19 @@ import { createBrowserClient } from "@supabase/ssr";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-if (!url || !key) {
-  // 빌드가 조용히 통과한 뒤 런타임에 알 수 없는 오류로 터지는 것보다,
-  // 설정이 빠졌다는 사실을 개발 중에 바로 알리는 편이 낫다.
-  throw new Error(
-    "Supabase 환경변수가 없습니다. .env.example 을 .env.local 로 복사하고 값을 채워주세요.",
-  );
-}
+/** 환경변수가 채워져 있는지. 로그인 화면이 미리 확인하는 용도다. */
+export const isSupabaseConfigured = Boolean(url && key);
 
+/**
+ * 확인은 여기서 한다. 모듈 최상단에서 throw 하면 next build 가 /login 을
+ * 프리렌더하다 죽고, Supabase 와 무관한 홈·소개 페이지까지 배포가 막힌다.
+ * 설정 누락은 로그인 화면 안에서만 드러나야 한다.
+ */
 export function createClient() {
-  return createBrowserClient(url!, key!);
+  if (!url || !key) {
+    throw new Error(
+      "Supabase 환경변수가 없습니다. .env.example 을 .env.local 로 복사하고 값을 채워주세요.",
+    );
+  }
+  return createBrowserClient(url, key);
 }
