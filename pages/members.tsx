@@ -13,7 +13,12 @@ import {
   type Post,
 } from "constants/member";
 import { createClient } from "lib/supabase/client";
-import { signOut, useAuth, type Profile } from "lib/supabase/useAuth";
+import {
+  signOut,
+  signOutAndLogin,
+  useAuth,
+  type Profile,
+} from "lib/supabase/useAuth";
 import * as S from "styles/member/style";
 
 /**
@@ -32,7 +37,15 @@ const DEPARTMENTS = Object.values(DEPARTMENT);
 
 export default function Members() {
   const router = useRouter();
-  const { session, profile, loading, isApproved, isAdmin, refresh } = useAuth();
+  const {
+    session,
+    profile,
+    profileError,
+    loading,
+    isApproved,
+    isAdmin,
+    refresh,
+  } = useAuth();
   // 거절당한 사람이 신청서를 다시 열었을 때만 켜진다.
   const [rewriting, setRewriting] = useState(false);
 
@@ -43,16 +56,39 @@ export default function Members() {
   const body = () => {
     if (loading || !session) return null;
 
+    /*
+     * 로그인은 돼 있는데 프로필이 없는 상태.
+     *
+     * 대부분은 브라우저에 남은 세션이 이미 지워진 계정을 가리키는 경우다.
+     * 계정을 지웠다 다시 만들면 id 가 새로 발급되는데, 예전 토큰은 옛 id 를
+     * 들고 있어서 조회 결과가 비어 있게 된다. 이때 새로고침은 아무 소용이 없다.
+     * 다시 로그인해야 풀리므로 그 버튼을 준다.
+     *
+     * 조회 자체가 실패한 경우(정책·테이블 문제)는 원인이 전혀 다르니
+     * 오류 문구를 그대로 보여줘 헤매지 않게 한다.
+     */
     if (!profile) {
       return (
         <S.Narrow>
           <S.Intro>
-            <h1>프로필을 불러오지 못했습니다</h1>
+            <h1>다시 로그인해 주세요</h1>
             <p>
-              잠시 후 새로고침해 주세요. 계속 같은 화면이 보이면 학회 메일로
-              알려주세요.
+              로그인 정보가 더 이상 유효하지 않습니다. 계정을 다시 만들었거나
+              오래된 로그인이 남아 있는 경우입니다.
             </p>
           </S.Intro>
+
+          {profileError && (
+            <S.Notice $bad style={{ marginBottom: "1.6rem" }}>
+              {profileError}
+            </S.Notice>
+          )}
+
+          <S.Actions>
+            <S.Approve type="button" onClick={signOutAndLogin}>
+              다시 로그인
+            </S.Approve>
+          </S.Actions>
         </S.Narrow>
       );
     }
