@@ -126,7 +126,13 @@ export default function App({
                 name="keywords"
                 content="NEXT, 고려대학교, 창업, 학회, 소프트웨어"
               />
+              {/*
+                key 를 붙여야 개별 페이지에서 덮어쓸 수 있다. next/head 는 이름이
+                아니라 key 로 중복을 제거하기 때문에, key 가 없으면 페이지에서 하나
+                더 쓰는 순간 description 태그가 둘로 나간다.
+              */}
               <meta
+                key="description"
                 name="description"
                 content="고려대 소프트웨어 창업 학회 | NEXT에서 개발자 & 스타트업 창업의 허브 🚀 혁신적인 아이디어를 현실로 만들어 보세요."
               />
