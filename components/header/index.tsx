@@ -14,6 +14,7 @@ const Links = [
   { name: "ACTIVITIES", path: URLS.ACTIVITIES },
   { name: "PEOPLE", path: URLS.PEOPLE },
   { name: "JOIN US", path: URLS.JOIN_US },
+  { name: "MEMBERS", path: URLS.MEMBERS },
 ];
 const NavBar = () => {
   const router = useRouter();

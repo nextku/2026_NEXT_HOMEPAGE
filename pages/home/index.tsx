@@ -363,7 +363,15 @@ export default function Main() {
             </S.FooterTop>
 
             <S.FooterBottom>
-              <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
+              <S.FooterMeta>
+                <S.FooterCopyright>
+                  NEXT 2026 All Rights Reserved
+                </S.FooterCopyright>
+                <S.FooterLegal>
+                  <a href="/privacy">개인정보처리방침</a>
+                  <a href="/terms">이용약관</a>
+                </S.FooterLegal>
+              </S.FooterMeta>
               <S.FooterSocials>
                 <a
                   href="https://www.linkedin.com/company/nextxlikelion/posts/?feedView=all"
