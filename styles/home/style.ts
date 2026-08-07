@@ -52,12 +52,7 @@ export const RecruitPopup = styled.div`
    * Keep the 720:430 artwork inside both viewport axes. The vh term is the
    * available height (minus the backdrop padding) converted to that ratio.
    */
-  width: min(
-    92vw,
-    calc(100vw - 4rem),
-    calc(167.4419vh - 6.6977rem),
-    720px
-  );
+  width: min(92vw, calc(100vw - 4rem), calc(167.4419vh - 6.6977rem), 720px);
   aspect-ratio: 720 / 430;
   flex: 0 0 auto;
   overflow: hidden;
@@ -65,7 +60,11 @@ export const RecruitPopup = styled.div`
   border-radius: 28px;
   color: ${THEME.WHITE};
   background:
-    radial-gradient(circle at 84% 22%, rgba(255, 106, 0, 0.25), transparent 32%),
+    radial-gradient(
+      circle at 84% 22%,
+      rgba(255, 106, 0, 0.25),
+      transparent 32%
+    ),
     linear-gradient(145deg, #202020 0%, #090909 58%, #000 100%);
   box-shadow:
     0 30px 90px rgba(0, 0, 0, 0.55),
@@ -78,12 +77,7 @@ export const RecruitPopup = styled.div`
   }
 
   @supports (height: 100dvh) {
-    width: min(
-      92vw,
-      calc(100vw - 4rem),
-      calc(167.4419dvh - 6.6977rem),
-      720px
-    );
+    width: min(92vw, calc(100vw - 4rem), calc(167.4419dvh - 6.6977rem), 720px);
   }
 
   &::before,
@@ -148,7 +142,6 @@ export const RecruitPopupGlow = styled.div`
   border: 1px solid rgba(255, 106, 0, 0.28);
   border-radius: 50%;
   box-shadow: inset 0 0 11.11cqw rgba(255, 106, 0, 0.13);
-
 `;
 
 export const RecruitPopupClose = styled.button`
@@ -178,7 +171,6 @@ export const RecruitPopupClose = styled.button`
     outline: 2px solid ${THEME.ORANGE};
     outline-offset: 3px;
   }
-
 `;
 
 export const RecruitPopupContent = styled.div`
@@ -211,8 +203,13 @@ export const RecruitPopupContent = styled.div`
 
   & h2 {
     margin: 2.5cqw 0 3.89cqw;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
-      "Malgun Gothic", sans-serif;
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Apple SD Gothic Neo",
+      "Malgun Gothic",
+      sans-serif;
     font-size: 5.2cqw;
     font-weight: 700;
     line-height: 1.34;
@@ -876,6 +873,22 @@ export const FooterTop = styled.div`
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: start;
   }
+`;
+
+/**
+ * 학회명 아래 한 줄짜리 설명. 구글 OAuth 심사가 이 글을 읽는다.
+ *
+ * 문단으로 늘어놓으면 푸터에서 아무도 안 읽고 덩어리만 커진다. 학회명에
+ * 붙은 부제로 보이도록 한 줄로 짧게 두고, 좁아지면 두 줄까지만 접힌다.
+ */
+export const FooterAbout = styled.p`
+  margin-top: 0.7rem !important;
+  max-width: 46ch;
+  font-size: 1.35rem !important;
+  line-height: 1.7 !important;
+  letter-spacing: -0.025em;
+  color: rgba(255, 255, 255, 0.44) !important;
+  word-break: keep-all;
 `;
 
 export const FooterContacts = styled.div`

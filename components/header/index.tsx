@@ -14,7 +14,8 @@ const Links = [
   { name: "ACTIVITIES", path: URLS.ACTIVITIES },
   { name: "PEOPLE", path: URLS.PEOPLE },
   { name: "JOIN US", path: URLS.JOIN_US },
-  { name: "MEMBERS", path: URLS.MEMBERS },
+  // 로그인이 필요한 유일한 항목이라 데스크톱에서는 아이콘으로 구분한다.
+  { name: "MEMBERS", path: URLS.MEMBERS, icon: true },
 ];
 const NavBar = () => {
   const router = useRouter();
@@ -23,7 +24,10 @@ const NavBar = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const [fullscreen, setFullscreen] = useState<number>();
   const [subMenu, setSubMenu] = useState("");
-  const logoSrc = pathname === URLS.HOME || pathname === URLS.JOIN_US ? LogoImg : BlackLogoImg;
+  const logoSrc =
+    pathname === URLS.HOME || pathname === URLS.JOIN_US
+      ? LogoImg
+      : BlackLogoImg;
   const updateScroll = () => {
     setScrollPosition(window.scrollY || document.documentElement.scrollTop);
   };
@@ -124,7 +128,10 @@ const NavBar = () => {
                                 animate={{ height: "auto" }}
                                 exit={{ height: 0, transition: { delay: 0.5 } }}
                               >
-                                <S.SubMenuContainer id="/about" subMenu={subMenu}>
+                                <S.SubMenuContainer
+                                  id="/about"
+                                  subMenu={subMenu}
+                                >
                                   <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
@@ -199,7 +206,10 @@ const NavBar = () => {
                                 animate={{ height: "auto" }}
                                 exit={{ height: 0, transition: { delay: 0.5 } }}
                               >
-                                <S.SubMenuContainer id="/activities" subMenu={subMenu}>
+                                <S.SubMenuContainer
+                                  id="/activities"
+                                  subMenu={subMenu}
+                                >
                                   <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
@@ -305,7 +315,10 @@ const NavBar = () => {
                         nextku.contact@gmail.com
                       </a>
                     </p>
-                    <p>Korea University, Anam-dong, Seongbuk-gu, Seoul, South Korea</p>
+                    <p>
+                      Korea University, Anam-dong, Seongbuk-gu, Seoul, South
+                      Korea
+                    </p>
                     <p>Ⓒ NEXT</p>
                   </S.NoticeContainer>
                 </S.MenuContainer>
@@ -336,18 +349,43 @@ const NavBar = () => {
             style={{ cursor: "pointer" }}
           />
           <S.NavLinkWrapper>
-            {Links.map(({ name, path }) => (
-              <S.StyledNav
-                isWhite={pathname === URLS.HOME || pathname === URLS.JOIN_US}
-                onClick={() => {
-                  router.push(path);
-                }}
-                selected={pathname === path ? true : false}
-                key={name}
-              >
-                {name}
-              </S.StyledNav>
-            ))}
+            {Links.map(({ name, path, icon }) =>
+              icon ? (
+                <S.NavIcon
+                  key={name}
+                  type="button"
+                  aria-label="학회원 로그인"
+                  title="학회원"
+                  isWhite={pathname === URLS.HOME || pathname === URLS.JOIN_US}
+                  selected={pathname === path}
+                  onClick={() => router.push(path)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="8.2" r="3.6" />
+                    <path d="M4.8 19.6c1.3-3.3 3.9-5 7.2-5s5.9 1.7 7.2 5" />
+                  </svg>
+                </S.NavIcon>
+              ) : (
+                <S.StyledNav
+                  isWhite={pathname === URLS.HOME || pathname === URLS.JOIN_US}
+                  onClick={() => {
+                    router.push(path);
+                  }}
+                  selected={pathname === path ? true : false}
+                  key={name}
+                >
+                  {name}
+                </S.StyledNav>
+              ),
+            )}
           </S.NavLinkWrapper>
         </S.NavBarContainer>
       )}

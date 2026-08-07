@@ -12,9 +12,12 @@ import { RECRUIT, isRecruiting } from "constants/recruit";
 import Sticky from "components/sticky";
 
 // 히어로 워드마크는 canvas 기반이라 서버에서 그릴 수 없다.
-const ParticleWordmark = dynamic(() => import("components/hero/ParticleWordmark"), {
-  ssr: false,
-});
+const ParticleWordmark = dynamic(
+  () => import("components/hero/ParticleWordmark"),
+  {
+    ssr: false,
+  },
+);
 
 // AOS 동적 로드 (SSR 방지)
 const AOS = dynamic(() => import("aos"), { ssr: false });
@@ -95,7 +98,17 @@ export default function Main() {
   return (
     <div>
       <Head>
-        <title>고려대 소프트웨어 창업 학회 | NEXT : HOME</title>
+        <title>고려대학교 소프트웨어 창업학회 NEXT</title>
+        {/*
+          구글 OAuth 심사는 이 페이지를 읽고 두 가지를 확인한다 —
+          동의 화면의 앱 이름과 같은 이름이 여기 있는지, 그리고 앱이 무엇을
+          하는지 설명돼 있는지. 제목과 설명의 이름 표기를 동의 화면과
+          똑같이 맞춰야 한다.
+        */}
+        <meta
+          name="description"
+          content="고려대학교 소프트웨어 창업학회 NEXT의 공식 웹사이트입니다. 학회 소개와 활동, 신입 부원 모집을 안내하고, 학회원은 구글 계정으로 로그인해 채용·투자·행사 정보를 확인합니다."
+        />
         <meta
           name="google-site-verification"
           content="YdrWjel7OcCUGNmuvaV86uwaB_ZEqJsOqOoV-rKi6vA"
@@ -349,6 +362,16 @@ export default function Main() {
             <S.FooterTop>
               <div>
                 <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
+                {/*
+                  구글 OAuth 심사가 "홈페이지에 앱의 목적 설명이 없다" 로
+                  반려한 자리다. 설명은 있어야 하되 푸터에 문단이 들어가면
+                  읽히지 않으므로 학회명 바로 아래 한 줄로 붙인다.
+                  방침 링크는 아래 줄에 이미 있으므로 여기서 또 걸지 않는다.
+                */}
+                <S.FooterAbout>
+                  학회 소개와 신입 부원 모집 안내 · 학회원은 구글 로그인으로
+                  채용·투자·행사 정보 확인
+                </S.FooterAbout>
                 <p style={{ marginTop: "1rem" }}>
                   email |{" "}
                   <a href="mailto:nextku.contact@gmail.com">
