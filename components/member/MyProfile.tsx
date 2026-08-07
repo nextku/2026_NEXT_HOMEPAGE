@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 import { DEPARTMENT } from "constants/people";
-import { checkPassword } from "lib/password";
 import {
   changePassword,
   updateProfile,
@@ -182,7 +181,3 @@ export default function MyProfile({
     </S.Split>
   );
 }
-
-/** 저장 버튼을 눌러도 되는 상태인지 바깥에서 볼 일이 있으면 쓴다. */
-export const isPasswordOk = (pw: string, email?: string) =>
-  checkPassword(pw, email).allOk;

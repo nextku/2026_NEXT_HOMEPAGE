@@ -143,6 +143,56 @@ export const AuthNote = styled.p`
   }
 `;
 
+/* ─── 내 정보 ─────────────────────────────────────────────────────────── */
+
+/** 카드 아래에 보조 폼이 하나 더 붙는 화면. 사이만 벌린다. */
+export const Split = styled.div`
+  display: grid;
+  gap: 2rem;
+  max-width: 46rem;
+`;
+
+/**
+ * 본인이 못 바꾸는 값.
+ *
+ * 입력칸처럼 보이면 눌러보고 안 되는 것을 이상하게 여긴다. 아예 칸을 없애고
+ * 읽는 글로 둔다.
+ */
+export const Readonly = styled.div`
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.6rem 1.8rem;
+  border: 1px solid #e7e2d8;
+  border-radius: 10px;
+  background: #fdfcfa;
+
+  & > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.6rem;
+    font-size: 1.45rem;
+    letter-spacing: -0.02em;
+  }
+  & span {
+    color: #8d877f;
+  }
+  & strong {
+    font-weight: 700;
+    color: #17150f;
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+  & > p {
+    margin: 0.4rem 0 0;
+    font-size: 1.3rem;
+    line-height: 1.7;
+    letter-spacing: -0.02em;
+    color: #8d877f;
+    word-break: keep-all;
+  }
+`;
+
 /* ─── 비밀번호 규칙 표시 ──────────────────────────────────────────────── */
 
 /** 라벨 줄 오른쪽에 붙는 보기/숨기기. 붙임말이라 작고 조용하게 둔다. */

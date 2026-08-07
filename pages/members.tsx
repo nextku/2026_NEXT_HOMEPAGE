@@ -12,6 +12,7 @@ import {
   safeLink,
   type Post,
 } from "constants/member";
+import MyProfile from "components/member/MyProfile";
 import { createClient } from "lib/supabase/client";
 import {
   signOut,
@@ -111,7 +112,12 @@ export default function Members() {
       );
     }
     return (
-      <Lounge name={profile.name} isAdmin={isAdmin} isApproved={isApproved} />
+      <Lounge
+        profile={profile}
+        isAdmin={isAdmin}
+        isApproved={isApproved}
+        onProfileSaved={refresh}
+      />
     );
   };
 
@@ -310,17 +316,21 @@ function Rejected({
 /* ─── 라운지 ──────────────────────────────────────────────────────────── */
 
 function Lounge({
-  name,
+  profile,
   isAdmin,
   isApproved,
+  onProfileSaved,
 }: {
-  name: string;
+  profile: Profile;
   isAdmin: boolean;
   isApproved: boolean;
+  onProfileSaved: () => void;
 }) {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  // 내 정보는 자주 열지 않는다. 평소에는 접어두고 필요할 때만 편다.
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     if (!isApproved) return;
@@ -352,10 +362,16 @@ function Lounge({
     <S.Wrap>
       <S.TopBar>
         <S.Intro style={{ marginBottom: 0 }}>
-          <h1>{name}님, 환영합니다</h1>
-          <p>학회원에게만 공개되는 채용·투자·행사 정보입니다.</p>
+          <h1>{profile.name}님, 환영합니다</h1>
+          <p>
+            {profile.generation}기{profile.title ? ` · ${profile.title}` : ""} ·
+            학회원에게만 공개되는 채용·투자·행사 정보입니다.
+          </p>
         </S.Intro>
         <S.Actions>
+          <S.Promote type="button" onClick={() => setShowProfile((v) => !v)}>
+            {showProfile ? "목록 보기" : "내 정보"}
+          </S.Promote>
           {isAdmin && (
             <S.Promote type="button" onClick={() => router.push("/admin")}>
               운영진 페이지
@@ -367,70 +383,76 @@ function Lounge({
         </S.Actions>
       </S.TopBar>
 
-      {used.length > 0 && (
-        <S.Filters>
-          <S.Chip
-            type="button"
-            $on={filter === "all"}
-            onClick={() => setFilter("all")}
-          >
-            전체
-          </S.Chip>
-          {used.map((c) => (
-            <S.Chip
-              key={c.key}
-              type="button"
-              $on={filter === c.key}
-              onClick={() => setFilter(c.key)}
-            >
-              {c.label}
-            </S.Chip>
-          ))}
-        </S.Filters>
-      )}
-
-      {posts === null ? null : shown.length === 0 ? (
-        <S.Empty>아직 올라온 글이 없습니다.</S.Empty>
+      {showProfile ? (
+        <MyProfile profile={profile} onSaved={onProfileSaved} />
       ) : (
-        <S.PostList>
-          {shown.map((p) => {
-            const href = safeLink(p.link);
-            return (
-              <S.PostCard key={p.id}>
-                <S.PostTop>
-                  <S.Kind>{categoryLabel(p.category)}</S.Kind>
-                  {p.company && <span>{p.company}</span>}
-                  <time dateTime={p.created_at}>
-                    {formatDate(p.created_at)}
-                  </time>
-                  {p.deadline && <span>마감 {formatDay(p.deadline)}</span>}
-                </S.PostTop>
-                <S.PostTitle>{p.title}</S.PostTitle>
-                <S.PostBody>{p.body}</S.PostBody>
-                {href && (
-                  <S.PostLink
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <span>자세히 보기</span>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                  </S.PostLink>
-                )}
-              </S.PostCard>
-            );
-          })}
-        </S.PostList>
+        <>
+          {used.length > 0 && (
+            <S.Filters>
+              <S.Chip
+                type="button"
+                $on={filter === "all"}
+                onClick={() => setFilter("all")}
+              >
+                전체
+              </S.Chip>
+              {used.map((c) => (
+                <S.Chip
+                  key={c.key}
+                  type="button"
+                  $on={filter === c.key}
+                  onClick={() => setFilter(c.key)}
+                >
+                  {c.label}
+                </S.Chip>
+              ))}
+            </S.Filters>
+          )}
+
+          {posts === null ? null : shown.length === 0 ? (
+            <S.Empty>아직 올라온 글이 없습니다.</S.Empty>
+          ) : (
+            <S.PostList>
+              {shown.map((p) => {
+                const href = safeLink(p.link);
+                return (
+                  <S.PostCard key={p.id}>
+                    <S.PostTop>
+                      <S.Kind>{categoryLabel(p.category)}</S.Kind>
+                      {p.company && <span>{p.company}</span>}
+                      <time dateTime={p.created_at}>
+                        {formatDate(p.created_at)}
+                      </time>
+                      {p.deadline && <span>마감 {formatDay(p.deadline)}</span>}
+                    </S.PostTop>
+                    <S.PostTitle>{p.title}</S.PostTitle>
+                    <S.PostBody>{p.body}</S.PostBody>
+                    {href && (
+                      <S.PostLink
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span>자세히 보기</span>
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                      </S.PostLink>
+                    )}
+                  </S.PostCard>
+                );
+              })}
+            </S.PostList>
+          )}
+        </>
       )}
     </S.Wrap>
   );
