@@ -42,21 +42,29 @@ def code_block(_label=None):
               </table>"""
 
 
-def button(text):
-    """링크형 메일에서만 쓴다. 오렌지는 누를 수 있는 것에만."""
+def button(text, path="/reset-password", kind="recovery"):
+    """링크 버튼.
+
+    ConfirmationURL 을 쓰지 않는다. 그 주소는 PKCE 흐름이라 링크를 요청한 그
+    브라우저에서만 열린다 — 컴퓨터에서 요청하고 휴대폰 메일 앱에서 여는
+    흔한 경우에 반드시 실패한다.
+
+    token_hash 를 직접 붙이면 서버가 검증하므로 어느 기기에서 열든 열린다.
+    """
+    url = f"{{{{ .SiteURL }}}}{path}?token_hash={{{{ .TokenHash }}}}&type={kind}"
     return f"""
               <div style="height:18px;font-size:0;line-height:0;">&nbsp;</div>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="border-radius:8px;background:{ORANGE};">
-                    <a href="{{{{ .ConfirmationURL }}}}"
+                    <a href="{url}"
                        style="display:inline-block;padding:15px 26px;font-family:{FONT};font-size:15px;font-weight:700;letter-spacing:-0.02em;color:{INK};text-decoration:none;border-radius:8px;">{text}</a>
                   </td>
                 </tr>
               </table>
               <p style="margin:16px 0 0;font-family:{FONT};font-size:12px;line-height:1.7;letter-spacing:-0.02em;color:{MUTE};word-break:break-all;">
                 버튼이 눌리지 않으면 아래 주소를 브라우저에 붙여넣어 주세요.<br>
-                <span style="color:{BODY};">{{{{ .ConfirmationURL }}}}</span>
+                <span style="color:{BODY};">{url}</span>
               </p>"""
 
 
@@ -132,7 +140,7 @@ TEMPLATES = {
     "03-invite.html": page(
         "NEXT 학회원 초대",
         "운영진이 이 주소를 학회원으로 초대했습니다. 아래 버튼을 누르면 계정이 만들어집니다.",
-        button("초대 수락하기"),
+        button("초대 수락하기", "/login", "invite"),
         "초대는 잠시 뒤 만료됩니다. 짐작 가는 곳이 없다면 이 메일을 무시하셔도 됩니다.",
     ),
     "04-change-email.html": page(
@@ -142,12 +150,11 @@ TEMPLATES = {
         code_block("확인 코드"),
         "이 변경을 요청하지 않았다면 코드를 입력하지 마시고 학회 메일로 알려주세요. 주소는 그대로 유지됩니다.",
     ),
-    # 코드를 먼저 둔다. 링크는 요청한 그 브라우저에서만 열리기 때문에,
-    # 컴퓨터에서 요청하고 휴대폰에서 메일을 여는 흔한 경우에 실패한다.
+    # 코드를 먼저 두고 링크를 아래에 둔다. 둘 다 어느 기기에서든 통한다.
     "05-reset-password.html": page(
         "비밀번호 재설정",
         "아래 여섯 자리 숫자를 재설정 화면에 입력해 주세요.",
-        code_block() + button("같은 기기라면 이 버튼으로도 됩니다"),
+        code_block() + button("링크로 바로 바꾸기"),
         "코드는 잠시 뒤 만료됩니다. " + IGNORE,
     ),
     "06-reauthentication.html": page(
