@@ -875,20 +875,20 @@ export const FooterTop = styled.div`
   }
 `;
 
-/** 이 사이트가 무엇인지 한 문단. 구글 OAuth 심사가 이 글을 읽는다. */
+/**
+ * 학회명 아래 한 줄짜리 설명. 구글 OAuth 심사가 이 글을 읽는다.
+ *
+ * 문단으로 늘어놓으면 푸터에서 아무도 안 읽고 덩어리만 커진다. 학회명에
+ * 붙은 부제로 보이도록 한 줄로 짧게 두고, 좁아지면 두 줄까지만 접힌다.
+ */
 export const FooterAbout = styled.p`
-  margin-top: 1.2rem !important;
-  max-width: 52ch;
-  font-size: 1.4rem !important;
-  line-height: 1.75 !important;
+  margin-top: 0.7rem !important;
+  max-width: 46ch;
+  font-size: 1.35rem !important;
+  line-height: 1.7 !important;
   letter-spacing: -0.025em;
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(255, 255, 255, 0.44) !important;
   word-break: keep-all;
-
-  & a {
-    color: rgba(255, 255, 255, 0.72);
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.24);
-  }
 `;
 
 export const FooterContacts = styled.div`
