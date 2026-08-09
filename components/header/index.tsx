@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { URLS } from "constants/urls";
+import { useScrollLock } from "lib/useScrollLock";
 import * as S from "styles/components/header/style";
 import LogoImg from "public/assets/logo.png";
 import BlackLogoImg from "public/assets/blackLogo.png";
@@ -21,6 +22,8 @@ const NavBar = () => {
   const router = useRouter();
   const pathname = router.pathname;
   const [isOpen, setIsOpen] = useState(false);
+  // 전체 화면 메뉴도 모달이다. 열려 있는 동안 뒤 페이지는 움직이지 않는다.
+  useScrollLock(isOpen);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [fullscreen, setFullscreen] = useState<number>();
   const [subMenu, setSubMenu] = useState("");
