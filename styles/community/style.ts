@@ -558,6 +558,17 @@ export const docStyles = css`
     margin-top: 2.2em;
     margin-bottom: -0.6em;
   }
+
+  /*
+     첫 줄에는 위 여백을 주지 않는다.
+
+     위의 2.2em 은 앞 문단과 제목을 떼어놓으려는 것인데, 맨 처음에는 뗄 것이
+     없다. 그대로 두면 글이 제목으로 시작할 때마다 상자 위쪽에 빈 자리가
+     남는다.
+  */
+  & .next-doc > *:first-child {
+    margin-top: 0;
+  }
   & .next-doc h1 {
     font-size: 1.55em;
   }

@@ -41,6 +41,8 @@ export default function PostPage() {
     title: string | null;
   } | null>(null);
   const [comments, setComments] = useState<Comment[] | null>(null);
+  // 댓글을 못 읽은 것과 댓글이 없는 것은 화면이 구분해서 말해야 한다.
+  const [commentError, setCommentError] = useState<string | null>(null);
   const [likes, setLikes] = useState(0);
   const [liked, setLiked] = useState(false);
   const [missing, setMissing] = useState(false);
@@ -86,7 +88,9 @@ export default function PostPage() {
       setLikes(count ?? 0);
 
       if (session) setLiked(await fetchMyLike(id, session.user.id));
-      setComments(await fetchComments(id));
+      const c = await fetchComments(id);
+      setComments(c.rows);
+      setCommentError(c.error);
 
       // 조회수는 한 번만. 새로고침마다 올리면 글쓴이 본인이 제일 많이 올린다.
       const seenKey = `nextku_seen_${id}`;
@@ -197,10 +201,15 @@ export default function PostPage() {
               <CommentSection
                 postId={post.id}
                 comments={comments}
+                loadError={commentError}
                 meId={session.user.id}
                 meName={profile?.name ?? ""}
                 isAdmin={isAdmin}
-                reload={async () => setComments(await fetchComments(post.id))}
+                reload={async () => {
+                  const c = await fetchComments(post.id);
+                  setComments(c.rows);
+                  setCommentError(c.error);
+                }}
               />
             </>
           )}
@@ -215,12 +224,15 @@ export default function PostPage() {
 function CommentSection({
   postId,
   comments,
+  loadError,
   meId,
   isAdmin,
   reload,
 }: {
   postId: string;
   comments: Comment[] | null;
+  /** 목록을 못 읽은 이유. 없으면 정상이다. */
+  loadError: string | null;
   meId: string;
   meName: string;
   isAdmin: boolean;
@@ -329,7 +341,9 @@ function CommentSection({
     <C.Comments>
       <h2>댓글 {roots.length > 0 ? (comments ?? []).length : ""}</h2>
 
-      {comments === null ? null : comments.length === 0 ? (
+      {loadError ? (
+        <C.EditorError>댓글을 불러오지 못했습니다. {loadError}</C.EditorError>
+      ) : comments === null ? null : comments.length === 0 ? (
         <C.Empty style={{ padding: "2.4rem 0" }}>첫 댓글을 남겨보세요.</C.Empty>
       ) : (
         <C.CommentList>{roots.map((c) => one(c, false))}</C.CommentList>
