@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useRecoilState } from "recoil";
 import * as S from "styles/join/style";
 import { joinModalOpen, isLaunched } from "constants/atoms";
+import { RECRUIT_STAGES } from "constants/recruit";
 import { track } from "lib/analytics";
 import RecruitTimeline, { Stage } from "components/join/RecruitTimeline";
 
@@ -20,37 +21,6 @@ const variants = {
   open: { opacity: 1 },
   closed: { opacity: 0 },
 };
-
-/** 안내문에 흩어져 있던 날짜를 한곳에 모은다. 표시 문자열과 실제 날짜가 어긋나지 않게. */
-const RECRUIT_STAGES: Stage[] = [
-  {
-    label: "서류 접수",
-    display: "8/3(월) — 8/15(토)",
-    start: new Date("2026-08-03T00:00:00"),
-    end: new Date("2026-08-15T00:00:00"),
-  },
-  {
-    label: "1차 합격자 발표",
-    display: "8/19(수)",
-    start: new Date("2026-08-19T00:00:00"),
-  },
-  {
-    label: "면접",
-    display: "8/22(토) — 8/23(일)",
-    start: new Date("2026-08-22T00:00:00"),
-    end: new Date("2026-08-23T00:00:00"),
-  },
-  {
-    label: "최종 합격자 발표",
-    display: "8/26(수)",
-    start: new Date("2026-08-26T00:00:00"),
-  },
-  {
-    label: "오리엔테이션",
-    display: "8/29(토)",
-    start: new Date("2026-08-29T00:00:00"),
-  },
-];
 
 // 동적 로딩
 const S3upload = dynamic(() => import("components/s3upload/index"), {
