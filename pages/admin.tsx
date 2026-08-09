@@ -44,7 +44,18 @@ const TITLE_PRESETS = ["대표", "부대표", "운영진"] as const;
 export default function Admin() {
   const router = useRouter();
   const { session, profile, loading, isAdmin, isOwner } = useAuth();
-  const [tab, setTab] = useState<Tab>("pending");
+  /*
+   * 탭을 주소에 둔다. 상태로만 두면 새로고침할 때마다 첫 탭으로 돌아가고,
+   * 통계를 보다가 실수로 새로고침하면 다시 찾아 들어가야 한다.
+   * 링크로 특정 탭을 바로 열 수도 있다.
+   */
+  const tab = ((router.query.tab as string) || "pending") as Tab;
+  const setTab = (next: Tab) =>
+    router.replace(
+      { pathname: "/admin", query: next === "pending" ? {} : { tab: next } },
+      undefined,
+      { shallow: true },
+    );
   const [rows, setRows] = useState<Profile[] | null>(null);
 
   useEffect(() => {

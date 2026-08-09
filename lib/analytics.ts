@@ -1,4 +1,13 @@
-import { createClient, isSupabaseConfigured } from "lib/supabase/client";
+/*
+ * Supabase 클라이언트를 위에서 불러오지 않는다.
+ *
+ * 이 파일은 _app 에 들어가므로, 여기서 정적으로 가져오면 홈·소개처럼 로그인과
+ * 무관한 페이지도 인증 라이브러리 전체(60kB 남짓)를 내려받는다. 하는 일은
+ * 행 하나를 넣는 것뿐이라 그때 가서 가져오면 된다.
+ */
+const supabaseEnvReady =
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 /**
  * 방문·클릭 기록.
@@ -59,7 +68,7 @@ export function track(
   name: EventName,
   extra: { path?: string; tab?: string } = {},
 ) {
-  if (typeof window === "undefined" || !isSupabaseConfigured) return;
+  if (typeof window === "undefined" || !supabaseEnvReady) return;
 
   try {
     const referrer = document.referrer || null;
@@ -69,16 +78,17 @@ export function track(
         ? referrer
         : null;
 
-    void createClient()
-      .from("events")
-      .insert({
-        name,
-        path: extra.path ?? window.location.pathname,
-        tab: extra.tab ?? null,
-        referrer: external,
-        session_id: sessionId(),
-        internal: isInternal(),
-      })
+    const row = {
+      name,
+      path: extra.path ?? window.location.pathname,
+      tab: extra.tab ?? null,
+      referrer: external,
+      session_id: sessionId(),
+      internal: isInternal(),
+    };
+
+    void import("lib/supabase/client")
+      .then(({ createClient }) => createClient().from("events").insert(row))
       .then(
         () => undefined,
         () => undefined,
