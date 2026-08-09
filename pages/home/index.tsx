@@ -9,6 +9,7 @@ import * as S from "styles/home/style";
 import { Partners } from "constants/partners";
 import { RECRUIT, isRecruiting } from "constants/recruit";
 import Sticky from "components/sticky";
+import { useScrollLock } from "lib/useScrollLock";
 
 // 히어로 워드마크는 canvas 기반이라 서버에서 그릴 수 없다.
 const ParticleWordmark = dynamic(
@@ -63,6 +64,8 @@ export default function Main() {
    * 마운트된 뒤 기간을 확인해 연다.
    */
   const [recruitPopupOpen, setRecruitPopupOpen] = useState(false);
+  // 팝업이 떠 있는 동안 뒤 페이지는 움직이지 않는다.
+  useScrollLock(recruitPopupOpen);
 
   useEffect(() => {
     if (isRecruiting()) setRecruitPopupOpen(true);

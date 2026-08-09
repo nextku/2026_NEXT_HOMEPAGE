@@ -9,6 +9,7 @@ import * as S from "styles/join/style";
 import { joinModalOpen, isLaunched } from "constants/atoms";
 import { RECRUIT_STAGES } from "constants/recruit";
 import { track } from "lib/analytics";
+import { useScrollLock } from "lib/useScrollLock";
 import RecruitTimeline, { Stage } from "components/join/RecruitTimeline";
 
 // Static Assets
@@ -33,6 +34,8 @@ export default function Join() {
   const [launch, setLaunch] = useRecoilState(isLaunched);
   const [modalPage, setModalPage] = useState(1);
   const [modalOpen, setModalOpen] = useRecoilState(joinModalOpen);
+  // 모달이 떠 있는 동안 뒤 페이지는 움직이지 않는다.
+  useScrollLock(modalOpen);
   const [accept, setAccept] = useState(false);
   /* 로켓 점화 연출 중인지. 연출이 끝나갈 때쯤 안내를 띄운다. */
   const [igniting, setIgniting] = useState(false);
