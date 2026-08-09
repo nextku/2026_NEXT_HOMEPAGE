@@ -122,13 +122,55 @@ export async function fetchPost(id: string) {
  *
  * 댓글마다 프로필을 따로 물어보면 스무 개짜리 글에서 요청이 스물한 번이다.
  */
+/**
+ * 댓글과 글쓴이 이름.
+ *
+ * 한 번에 붙여 받지 않는다. 예전에는 이렇게 물었다.
+ *
+ *   .select("*, author:profiles!post_comments_author_id_fkey(name, generation)")
+ *
+ * post_comments.author_id 는 auth.users 를 참조하므로 그 이름의 관계는
+ * profiles 로 가지 않는다. 관계를 못 찾으면 한 줄도 못 가져오는 것이 아니라
+ * 쿼리 전체가 실패하는데, 그 실패를 버리고 빈 배열을 돌려주고 있어서 댓글이
+ * 하나도 없는 것처럼 보였다. 글은 계속 저장되고 있었다.
+ *
+ * 표를 따로 읽고 화면에서 잇는다. 요청이 하나 늘지만 사람 수만큼이 아니라
+ * 언제나 두 번이고, 관계 이름에 기대지 않아 같은 방식으로 조용히 깨지지 않는다.
+ *
+ * 실패는 돌려준다. 삼키면 이 일이 그대로 되풀이된다.
+ */
 export async function fetchComments(postId: string) {
-  const { data } = await createClient()
+  const supabase = createClient();
+
+  const { data, error } = await supabase
     .from("post_comments")
-    .select("*, author:profiles!post_comments_author_id_fkey(name, generation)")
+    .select("*")
     .eq("post_id", postId)
     .order("created_at");
-  return (data as Comment[]) ?? [];
+
+  if (error) return { rows: [] as Comment[], error: error.message };
+
+  const rows = (data as Comment[]) ?? [];
+  const ids = Array.from(new Set(rows.map((r) => r.author_id)));
+  if (ids.length === 0) return { rows, error: null };
+
+  // 이름표에 쓰는 칸만 나오는 창. 메일 주소 같은 것은 여기로 안 나온다.
+  const { data: people } = await supabase
+    .from("member_public")
+    .select("id, name, generation")
+    .in("id", ids);
+
+  const byId = new Map(
+    (people ?? []).map((p: { id: string; name: string | null; generation: number | null }) => [
+      p.id,
+      { name: p.name, generation: p.generation },
+    ]),
+  );
+
+  return {
+    rows: rows.map((r) => ({ ...r, author: byId.get(r.author_id) ?? null })),
+    error: null,
+  };
 }
 
 export async function toggleLike(postId: string, userId: string, on: boolean) {
