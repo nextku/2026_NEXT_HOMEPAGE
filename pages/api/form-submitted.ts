@@ -23,14 +23,43 @@ type Body = {
   /** 지원자 메일. 없으면 지원자에게는 보내지 않고 운영진 알림만 간다. */
   email?: string;
   /**
-   * 나머지 응답. 지금은 쓰지 않는다 — 응답 시트에 그대로 남기 때문이다.
-   * 스크립트는 계속 보내주므로, 나중에 알림이 필요해지면 여기서 꺼내 쓰면 된다.
+   * 응답 전체. { 문항 제목: 답변 }.
+   *
+   * 이름을 여기서 다시 찾는다. 스크립트도 찾아보지만 문항 제목이 기수마다
+   * 바뀌므로, 규칙을 서버에 두면 다음에 어긋났을 때 스크립트를 다시 열지
+   * 않아도 된다.
    */
   answers?: Record<string, string>;
 };
 
 /** 지원자가 답장을 누르면 여기로 간다. noreply 로 가면 아무도 못 본다. */
 const REPLY_TO = "nextku.contact@gmail.com";
+
+/**
+ * 응답에서 이름을 찾는다.
+ *
+ * 문항 제목이 기수마다 다르다 — 이름, 성함, 성명, 지원자 이름… 어느 쪽이든
+ * 잡히게 둔다. 값도 확인한다: 메일 주소나 문장이 들어온 칸은 이름이 아니다.
+ * 못 찾으면 빈 문자열을 주고, 그러면 인사말이 "지원자님" 으로 나간다.
+ */
+function nameFromAnswers(answers: Record<string, string>) {
+  const looksLikeName = (v: string) => {
+    const t = v.trim();
+    if (!t || t.length > 12) return false;
+    if (t.includes("@") || /https?:/i.test(t)) return false;
+    if (/^\d+$/.test(t)) return false;
+    return true;
+  };
+
+  const entry = Object.entries(answers).find(
+    ([title, value]) =>
+      /이름|성함|성명|name/i.test(title) &&
+      !/학과|학번|전공|팀|파일/.test(title) &&
+      looksLikeName(String(value ?? "")),
+  );
+
+  return entry ? String(entry[1]).trim() : "";
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -47,10 +76,10 @@ export default async function handler(
     return res.status(401).json({ error: "unauthorized" });
   }
 
-  const { name, email } = (req.body ?? {}) as Body;
+  const { name, email, answers = {} } = (req.body ?? {}) as Body;
 
   const applicant = (email ?? "").trim();
-  const who = (name ?? "").trim();
+  const who = (name ?? "").trim() || nameFromAnswers(answers);
   const gen = RECRUIT.generation;
 
   // 지원자 확인 메일
