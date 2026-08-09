@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import React, { useEffect, useRef, useState } from "react";
 
 import PasswordFields from "components/member/PasswordFields";
+import { GENERATIONS } from "constants/member";
+import { DEPARTMENT } from "constants/people";
 import { formatLeft, useAttemptLimit, useCooldown } from "lib/cooldown";
 import { MIN_PASSWORD } from "lib/password";
 import { isSupabaseConfigured } from "lib/supabase/client";
@@ -10,6 +12,7 @@ import {
   resendSignupCode,
   sendPasswordReset,
   signInWithPassword,
+  submitProfile,
   updatePassword,
   verifyRecoveryCode,
   signUpWithPassword,
@@ -34,6 +37,8 @@ import * as S from "styles/member/style";
 
 type Mode = "signin" | "signup" | "verify" | "forgot" | "reset";
 
+const DEPARTMENTS = Object.values(DEPARTMENT);
+
 export default function Login() {
   const router = useRouter();
   const { isLoggedIn, loading } = useAuth();
@@ -44,6 +49,15 @@ export default function Login() {
   const [again, setAgain] = useState("");
   const [pwValid, setPwValid] = useState(false);
   const [code, setCode] = useState("");
+  /*
+   * 학회원 확인에 쓰는 값. 가입 화면에서 받아두었다가 코드 확인을 통과한
+   * 직후에 낸다. 여기서 묻는 이유는 두 가지다 — 기수를 묻는 화면은 학회원이
+   * 아닌 사람에게 "여기가 내 자리가 아니구나" 를 바로 알리고, 승인에 필요한
+   * 것을 한 번에 받아두면 가입한 사람이 다시 무엇을 적을 필요가 없다.
+   */
+  const [name, setName] = useState("");
+  const [generation, setGeneration] = useState("");
+  const [department, setDepartment] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -111,6 +125,10 @@ export default function Login() {
      * 제출을 막지는 않기 때문이다. 물론 이것도 방어선은 아니다 —
      * 최소 길이는 Supabase 설정이 최종적으로 강제한다.
      */
+    if (!name.trim() || !generation || !department.trim()) {
+      setError("이름과 기수, 학과를 모두 적어주세요.");
+      return;
+    }
     if (!pwValid) {
       setError("아래 조건을 모두 채운 뒤 다시 눌러주세요.");
       return;
@@ -137,6 +155,12 @@ export default function Login() {
           return err;
         }
         codeTries.reset();
+        /*
+         * 확인을 통과한 지금이 로그인된 첫 순간이다. 가입 화면에서 받아둔
+         * 값을 여기서 낸다. 저장에 실패해도 가입 자체는 끝난 것이므로 막지
+         * 않는다 — 라운지가 빈 항목을 보고 다시 물어본다.
+         */
+        await submitProfile(name, Number(generation), department);
         return null;
       },
       () => router.replace("/members"),
@@ -191,7 +215,7 @@ export default function Login() {
 
   const heading =
     mode === "signup"
-      ? "학회원 가입"
+      ? "학회원 계정 만들기"
       : mode === "verify"
         ? "메일 확인"
         : mode === "forgot"
@@ -202,7 +226,7 @@ export default function Login() {
 
   const lead =
     mode === "signup"
-      ? "가입 후 메일로 보내는 코드를 입력하면 계정이 만들어집니다."
+      ? "NEXT 학회원이 쓰는 공간입니다. 적어주신 기수와 이름을 운영진이 명단과 대조한 뒤 승인합니다."
       : mode === "verify"
         ? `${email} 로 여섯 자리 코드를 보냈습니다.`
         : mode === "forgot"
@@ -296,6 +320,60 @@ export default function Login() {
           {mode === "signup" && (
             <S.AuthCard as="form" onSubmit={onSignUp}>
               {emailField}
+
+              <S.Field>
+                <span>이름</span>
+                <S.Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="김넥스트"
+                  autoComplete="name"
+                  maxLength={20}
+                  required
+                  disabled={!isSupabaseConfigured}
+                />
+                <small>명단에 있는 이름 그대로 적어주세요.</small>
+              </S.Field>
+
+              <S.FieldRow>
+                <S.Field>
+                  <span>기수</span>
+                  <S.Select
+                    value={generation}
+                    onChange={(e) => setGeneration(e.target.value)}
+                    required
+                    disabled={!isSupabaseConfigured}
+                  >
+                    <option value="" disabled>
+                      선택
+                    </option>
+                    {GENERATIONS.map((g) => (
+                      <option key={g} value={g}>
+                        {g}기
+                      </option>
+                    ))}
+                  </S.Select>
+                </S.Field>
+
+                <S.Field>
+                  <span>학과</span>
+                  <S.Input
+                    list="ku-departments"
+                    value={department}
+                    onChange={(e) => setDepartment(e.target.value)}
+                    placeholder="컴퓨터학과"
+                    maxLength={30}
+                    required
+                    disabled={!isSupabaseConfigured}
+                  />
+                  <datalist id="ku-departments">
+                    {DEPARTMENTS.map((d) => (
+                      <option key={d} value={d} />
+                    ))}
+                  </datalist>
+                </S.Field>
+              </S.FieldRow>
+
               <PasswordFields
                 email={email}
                 password={password}
@@ -317,7 +395,7 @@ export default function Login() {
                   ? "보내는 중"
                   : !sendCool.ready
                     ? `${formatLeft(sendCool.left)} 후 다시 보낼 수 있습니다`
-                    : "가입하고 인증 코드 받기"}
+                    : "인증 코드 받기"}
               </S.Submit>
 
               <S.AuthNote>
