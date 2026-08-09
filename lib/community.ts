@@ -155,10 +155,16 @@ export async function fetchComments(postId: string) {
   if (ids.length === 0) return { rows, error: null };
 
   // 이름표에 쓰는 칸만 나오는 창. 메일 주소 같은 것은 여기로 안 나온다.
-  const { data: people } = await supabase
+  const { data: people, error: peopleError } = await supabase
     .from("member_public")
     .select("id, name, generation")
     .in("id", ids);
+
+  /*
+     이름을 못 읽어도 댓글은 보여준다. 글이 있는데 이름 때문에 통째로 감추는
+     것은 손해가 크다. 다만 조용히 "이름 없음" 으로 두지는 않는다 - 그러면
+     창이 없는 것인지 정말 이름이 빈 것인지 알 수 없다.
+  */
 
   const byId = new Map(
     (people ?? []).map((p: { id: string; name: string | null; generation: number | null }) => [
