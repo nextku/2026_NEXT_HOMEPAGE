@@ -15,9 +15,6 @@ const INK = "#17150F";
 const BODY = "#57524A";
 const MUTE = "#8D877F";
 const LINE = "#E7E2D8";
-const EDGE = "#EFEAE0";
-const CREAM = "#FBF8F3";
-const FILL = "#FDFCFA";
 
 const LOGO = "https://www.next-ku.com/assets/blackLogo.png";
 const SITE = "https://www.next-ku.com";
@@ -45,56 +42,70 @@ export function shell({
   /** 사람이 보낸 메일로 읽히게 하는 서명. 자동 발송 알림에는 붙이지 않는다. */
   signature?: { role: string; name: string };
 }) {
+  /*
+    카드가 아니라 편지지로 둔다.
+
+    색 바탕에 흰 카드를 얹는 형태는 서비스 알림의 틀이다. 본문이 "대표
+    아무개입니다" 로 시작하는 편지인데 그 틀에 넣으면 사람이 쓴 글로 읽히지
+    않는다. 흰 바탕에 로고와 글만 두면 기관이 보낸 서한에 가까워진다.
+
+    일정 표는 남긴다. 그것은 장식이 아니라 정보이고, 날짜 다섯 줄을 문장으로
+    풀어 쓰면 오히려 읽기 어렵다. 다만 상자를 걷고 가는 선만 남긴다.
+  */
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-       style="margin:0;padding:40px 16px;background:${CREAM};">
+       style="margin:0;padding:48px 20px;background:#FFFFFF;">
   <tr><td align="center">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-           style="max-width:480px;background:#FFFFFF;border:1px solid ${EDGE};border-radius:14px;">
-      <tr><td style="padding:34px 34px 0;">
-        <img src="${LOGO}" alt="NEXT" width="96" style="display:block;width:96px;height:auto;border:0;outline:none;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+
+      <tr><td style="padding-bottom:36px;">
+        <img src="${LOGO}" alt="NEXT" width="92" style="display:block;width:92px;height:auto;border:0;outline:none;">
       </td></tr>
-      <tr><td style="padding:26px 34px 0;">
-        <h1 style="margin:0;font-family:${FONT};font-size:21px;font-weight:750;letter-spacing:-0.03em;line-height:1.35;color:${INK};">${title}</h1>
-        <p style="margin:12px 0 0;font-family:${FONT};font-size:15px;line-height:1.75;letter-spacing:-0.025em;color:${BODY};word-break:keep-all;">${lead}</p>
+
+      <tr><td>
+        <h1 style="margin:0 0 22px;font-family:${FONT};font-size:19px;font-weight:750;letter-spacing:-0.03em;line-height:1.45;color:${INK};">${title}</h1>
+        <div style="font-family:${FONT};font-size:15px;line-height:1.9;letter-spacing:-0.025em;color:${BODY};word-break:keep-all;">${lead}</div>
       </td></tr>
-      ${middle ? `<tr><td style="padding:24px 34px 0;">${middle}</td></tr>` : ""}
+
+      ${middle ? `<tr><td style="padding-top:30px;">${middle}</td></tr>` : ""}
+
       ${
         signature
-          ? `<tr><td style="padding:26px 34px 0;">
-        <p style="margin:0;font-family:${FONT};font-size:14px;line-height:1.8;letter-spacing:-0.025em;color:${MUTE};">
-          고려대학교 소프트웨어 창업학회 NEXT<br>
+          ? `<tr><td style="padding-top:34px;">
+        <p style="margin:0;font-family:${FONT};font-size:15px;line-height:1.9;letter-spacing:-0.025em;color:${BODY};">
           <span style="color:${INK};font-weight:700;">${esc(signature.role)} ${esc(signature.name)}</span> 드림
         </p>
       </td></tr>`
           : ""
       }
-      <tr><td style="padding:24px 34px 32px;">
+
+      <tr><td style="padding-top:36px;">
         <div style="height:1px;background:${LINE};font-size:0;line-height:0;">&nbsp;</div>
-        <p style="margin:18px 0 0;font-family:${FONT};font-size:13px;line-height:1.75;letter-spacing:-0.02em;color:${MUTE};word-break:keep-all;">${note}</p>
-      </td></tr>
-    </table>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
-      <tr><td style="padding:20px 6px 0;">
-        <p style="margin:0;font-family:${FONT};font-size:12px;line-height:1.8;letter-spacing:-0.02em;color:${MUTE};">
-          고려대학교 소프트웨어 창업학회 NEXT<br>
+        <p style="margin:16px 0 0;font-family:${FONT};font-size:12.5px;line-height:1.8;letter-spacing:-0.02em;color:${MUTE};word-break:keep-all;">${note}</p>
+        <p style="margin:14px 0 0;font-family:${FONT};font-size:12.5px;line-height:1.8;letter-spacing:-0.02em;color:${MUTE};">
+          고려대학교 소프트웨어 창업학회 NEXT ·
           <a href="${SITE}" style="color:${MUTE};text-decoration:none;border-bottom:1px solid ${LINE};">next-ku.com</a>
         </p>
       </td></tr>
+
     </table>
   </td></tr>
 </table>`;
 }
 
-/** 이름-값 목록. 일정이나 제출 내용처럼 짝으로 읽는 것에 쓴다. */
+/**
+ * 이름-값 목록.
+ *
+ * 상자에 담지 않는다. 본문이 편지인데 가운데만 카드가 되면 그 부분만 붙여넣은
+ * 것처럼 보인다. 가로선만 남겨 표라는 것을 알리고 나머지는 여백에 맡긴다.
+ */
 export function rows(pairs: [string, string][]) {
   if (pairs.length === 0) return "";
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-     style="border:1px solid ${LINE};border-radius:10px;background:${FILL};">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
   ${pairs
     .map(
       ([k, v], i) => `<tr>
-    <td style="padding:${i === 0 ? "16px" : "10px"} 18px ${i === pairs.length - 1 ? "16px" : "10px"} 18px;font-family:${FONT};font-size:13px;letter-spacing:-0.02em;color:${MUTE};white-space:nowrap;vertical-align:top;">${esc(k)}</td>
-    <td style="padding:${i === 0 ? "16px" : "10px"} 18px ${i === pairs.length - 1 ? "16px" : "10px"} 0;font-family:${FONT};font-size:14px;font-weight:650;letter-spacing:-0.02em;color:${INK};text-align:right;word-break:break-all;">${esc(v)}</td>
+    <td style="padding:13px 0;border-top:1px solid ${LINE};${i === pairs.length - 1 ? `border-bottom:1px solid ${LINE};` : ""}font-family:${FONT};font-size:14px;letter-spacing:-0.02em;color:${MUTE};white-space:nowrap;vertical-align:top;">${esc(k)}</td>
+    <td style="padding:13px 0;border-top:1px solid ${LINE};${i === pairs.length - 1 ? `border-bottom:1px solid ${LINE};` : ""}font-family:${FONT};font-size:14px;font-weight:650;letter-spacing:-0.02em;color:${INK};text-align:right;word-break:break-all;">${esc(v)}</td>
   </tr>`,
     )
     .join("")}
