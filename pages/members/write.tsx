@@ -48,6 +48,12 @@ export default function Write() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
+  /*
+   * 글이 올라갔는가. 자동 저장이 이 뒤에 깨어나면 아무것도 쓰지 않는다.
+   * state 가 아니라 ref 인 이유는, 이미 예약된 타이머 안에서 최신 값을 봐야
+   * 하기 때문이다. state 는 그 타이머가 만들어질 때의 값으로 굳는다.
+   */
+  const posted = useRef(false);
   const [savedNote, setSavedNote] = useState("");
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
@@ -102,10 +108,27 @@ export default function Write() {
 
   // 임시 저장. 고치는 중일 때는 하지 않는다 — 원본과 섞이면 되돌리기 어렵다.
   useEffect(() => {
-    if (!ready || editId) return;
+    if (!ready || editId || posted.current) return;
     const t = setTimeout(() => {
+      /*
+         예약된 뒤에 글이 올라갔을 수 있다.
+         마지막 타자로 이 타이머가 걸리고, 800ms 가 지나기 전에 올리기를 누르면
+         올린 뒤에 이것이 깨어나 방금 지운 임시 저장을 되살렸다. 그래서 새 글을
+         열 때마다 올린 글이 다시 채워져 있었다. 깨어나서 한 번 더 확인한다.
+      */
+      if (posted.current) return;
       try {
-        if (!title.trim() && isEmptyDoc(doc)) return;
+        /*
+           다 지운 것도 저장한다.
+
+           예전에는 비어 있으면 그냥 넘어갔는데, 그러면 지우기 전의 글이 그대로
+           남아서 나갔다 오면 되살아났다. 지운 것은 사고가 아니라 뜻이다.
+        */
+        if (!title.trim() && isEmptyDoc(doc)) {
+          localStorage.removeItem(DRAFT_KEY);
+          setSavedNote("");
+          return;
+        }
         localStorage.setItem(
           DRAFT_KEY,
           JSON.stringify({ title, doc, boardId }),
@@ -177,6 +200,8 @@ export default function Write() {
       return;
     }
 
+    // 지우기 전에 표시한다. 예약돼 있던 자동 저장이 이 뒤에 깨어나도 쓰지 않는다.
+    posted.current = true;
     try {
       localStorage.removeItem(DRAFT_KEY);
     } catch {
