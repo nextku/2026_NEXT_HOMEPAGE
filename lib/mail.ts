@@ -36,11 +36,14 @@ export function shell({
   lead,
   middle = "",
   note,
+  signature,
 }: {
   title: string;
   lead: string;
   middle?: string;
   note: string;
+  /** 사람이 보낸 메일로 읽히게 하는 서명. 자동 발송 알림에는 붙이지 않는다. */
+  signature?: { role: string; name: string };
 }) {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
        style="margin:0;padding:40px 16px;background:${CREAM};">
@@ -55,6 +58,16 @@ export function shell({
         <p style="margin:12px 0 0;font-family:${FONT};font-size:15px;line-height:1.75;letter-spacing:-0.025em;color:${BODY};word-break:keep-all;">${lead}</p>
       </td></tr>
       ${middle ? `<tr><td style="padding:24px 34px 0;">${middle}</td></tr>` : ""}
+      ${
+        signature
+          ? `<tr><td style="padding:26px 34px 0;">
+        <p style="margin:0;font-family:${FONT};font-size:14px;line-height:1.8;letter-spacing:-0.025em;color:${MUTE};">
+          고려대학교 소프트웨어 창업학회 NEXT<br>
+          <span style="color:${INK};font-weight:700;">${esc(signature.role)} ${esc(signature.name)}</span> 드림
+        </p>
+      </td></tr>`
+          : ""
+      }
       <tr><td style="padding:24px 34px 32px;">
         <div style="height:1px;background:${LINE};font-size:0;line-height:0;">&nbsp;</div>
         <p style="margin:18px 0 0;font-family:${FONT};font-size:13px;line-height:1.75;letter-spacing:-0.02em;color:${MUTE};word-break:keep-all;">${note}</p>
