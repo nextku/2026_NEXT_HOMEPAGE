@@ -115,6 +115,23 @@ export default function Main() {
           name="google-site-verification"
           content="YdrWjel7OcCUGNmuvaV86uwaB_ZEqJsOqOoV-rKi6vA"
         />
+        {/*
+          모집 팝업의 워드마크를 미리 받아둔다.
+
+          팝업은 hydration 이 끝난 뒤에 열리는데, 그때 처음 요청하면 로고 자리가
+          잠깐 비어 보인다. 여기에 적어두면 HTML 을 읽는 순간 함께 받으므로
+          팝업이 열릴 때는 이미 캐시에 있다.
+
+          모집 기간이 아니면 팝업이 안 뜨므로 18KB 를 헛으로 받는다. 그런데
+          모집 여부는 시각으로 판단하는 값이라 서버와 브라우저의 답이 갈릴 수
+          있고, 갈리면 이 태그가 hydration 을 흔든다. 헛걸음 한 번이 더 싸다.
+        */}
+        <link
+          rel="preload"
+          as="image"
+          href="/assets/new_logo(wh).svg"
+          type="image/svg+xml"
+        />
       </Head>
       {/* <Intro></Intro> */}
       <S.Container>

@@ -260,6 +260,14 @@ export const RecruitPopupWordmark = styled.img`
      한글 글자 높이보다 확실히 크게 잡아 '마크'로 읽히게 한다. */
   height: 0.95em;
   width: auto;
+  /*
+     파일이 도착하기 전에도 자리를 잡아둔다.
+
+     width: auto 만 두면 로드 전 폭이 0 이라 "함께할 를 찾습니다" 로 붙었다가
+     이미지가 오는 순간 문장이 옆으로 밀린다. 원본 비율을 적어두면 브라우저가
+     높이만 보고 폭을 미리 계산하므로 글자가 움직이지 않는다.
+  */
+  aspect-ratio: 3196 / 721;
   vertical-align: baseline;
   position: relative;
   top: 0.115em;
