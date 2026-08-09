@@ -15,6 +15,31 @@ export type EventName =
   "page_view" | "tab_view" | "download_click" | "apply_click";
 
 const SESSION_KEY = "nextku_sid";
+const INTERNAL_KEY = "nextku_internal";
+
+/**
+ * 이 브라우저가 학회 내부 사람의 것인지.
+ *
+ * 한 번이라도 로그인했으면 표시해두고, 로그아웃해도 지우지 않는다. 같은 사람이
+ * 로그아웃한 채 둘러본 것도 내부 방문이기 때문이다.
+ *
+ * 기록을 버리지는 않는다. 표시만 남기고 집계에서 빼면 나중에 되살릴 수 있다.
+ */
+export function markInternal() {
+  try {
+    localStorage.setItem(INTERNAL_KEY, "1");
+  } catch {
+    // 저장소를 못 쓰면 그냥 외부 방문으로 센다. 통계가 조금 부풀 뿐이다.
+  }
+}
+
+function isInternal() {
+  try {
+    return localStorage.getItem(INTERNAL_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 function sessionId() {
   try {
@@ -52,6 +77,7 @@ export function track(
         tab: extra.tab ?? null,
         referrer: external,
         session_id: sessionId(),
+        internal: isInternal(),
       })
       .then(
         () => undefined,

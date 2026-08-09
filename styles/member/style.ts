@@ -998,6 +998,68 @@ export const ChartTip = styled.div`
   }
 `;
 
+/* ─── 학회원 수정 패널 ────────────────────────────────────────────────── */
+
+export const EditBox = styled.div`
+  display: grid;
+  gap: 1.4rem;
+  min-width: 0;
+  padding: 1.8rem;
+  border: 1px solid #e7e2d8;
+  border-radius: 12px;
+  background: #fdfcfa;
+
+  @media (min-width: 52rem) {
+    width: 44rem;
+  }
+`;
+
+export const EditGrid = styled.div`
+  display: grid;
+  gap: 1.2rem;
+
+  @media (min-width: 30rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`;
+
+/** 권한 체크. 라벨 전체가 눌리도록 label 로 감싼다. */
+export const Check = styled.label`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  cursor: pointer;
+
+  & input {
+    width: 1.8rem;
+    height: 1.8rem;
+    margin-top: 0.1rem;
+    accent-color: #f7941e;
+    flex: 0 0 auto;
+    cursor: pointer;
+  }
+  & > span {
+    display: grid;
+    gap: 0.2rem;
+    font-size: 1.45rem;
+    font-weight: 650;
+    letter-spacing: -0.025em;
+    color: #17150f;
+  }
+  & small {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #8d877f;
+    word-break: keep-all;
+  }
+  & input:disabled {
+    cursor: default;
+  }
+  &:has(input:disabled) {
+    cursor: default;
+  }
+`;
+
 /** 운영진이 직접 적는 직책. 정해진 목록이 없어 자유 입력으로 둔다. */
 export const TitleInput = styled.input`
   min-width: 0;
