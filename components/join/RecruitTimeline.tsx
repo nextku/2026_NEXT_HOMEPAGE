@@ -12,14 +12,8 @@ import * as S from "styles/components/recruitTimeline/style";
  * 지난 단계 / 진행 중인 단계 / 남은 단계를 구분해 보여준다.
  */
 
-export type Stage = {
-  label: string;
-  /** 화면에 보여줄 기간 문자열 */
-  display: string;
-  start: Date;
-  /** 하루짜리 일정이면 생략 */
-  end?: Date;
-};
+import type { RecruitStage as Stage } from "constants/recruit";
+export type { RecruitStage as Stage } from "constants/recruit";
 
 type Props = {
   stages: Stage[];
