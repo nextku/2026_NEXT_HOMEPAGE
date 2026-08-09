@@ -33,13 +33,22 @@ const settle = keyframes`
 `;
 
 export const LoadingContainer = styled.div`
+  /*
+   * 화면 전체를 덮는다.
+   *
+   * 예전에는 문서 흐름 안에 있어서 헤더(z-index 10)가 위에 남았고, 헤더가 깔아둔
+   * 흰 그라데이션이 이 검은 바탕 위에 얼룩처럼 비쳤다. 로딩 중에 내비게이션이
+   * 떠 있어도 누를 것이 없으므로 덮는 편이 맞다.
+   */
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
   width: 100%;
   /* iOS Safari 는 100vh 가 주소창을 포함해 화면 밖으로 넘친다 */
   height: 100vh;
   height: 100dvh;
   /* 완전한 중립 무채색. 이전 #121009 는 따뜻한 쪽으로 기울어 색이 돌았다. */
   background-color: #0b0b0c;
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;

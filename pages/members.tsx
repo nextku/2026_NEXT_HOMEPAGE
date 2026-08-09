@@ -244,7 +244,7 @@ function Application({
       </S.FormCard>
 
       <S.Foot>
-        <S.SignOut type="button" onClick={signOut}>
+        <S.SignOut type="button" onClick={() => signOut()}>
           다른 계정으로 로그인
         </S.SignOut>
       </S.Foot>
@@ -277,7 +277,7 @@ function Waiting({ profile }: { profile: Profile }) {
       </S.WaitCard>
 
       <S.Foot>
-        <S.SignOut type="button" onClick={signOut}>
+        <S.SignOut type="button" onClick={() => signOut()}>
           로그아웃
         </S.SignOut>
       </S.Foot>
@@ -306,7 +306,7 @@ function Rejected({
         <S.Approve type="button" onClick={onRewrite}>
           다시 작성하기
         </S.Approve>
-        <S.Reject type="button" onClick={signOut}>
+        <S.Reject type="button" onClick={() => signOut()}>
           로그아웃
         </S.Reject>
       </S.Actions>
@@ -378,7 +378,7 @@ function Lounge({
               운영진 페이지
             </S.Promote>
           )}
-          <S.SignOut type="button" onClick={signOut}>
+          <S.SignOut type="button" onClick={() => signOut()}>
             로그아웃
           </S.SignOut>
         </S.Actions>
