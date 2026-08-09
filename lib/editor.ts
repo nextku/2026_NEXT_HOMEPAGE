@@ -82,6 +82,65 @@ export function isEmptyDoc(doc: JSONContent | null | undefined) {
   return excerptFrom(doc, 1).length === 0 && !firstImage(doc);
 }
 
+/* ─── 붙여넣은 마크다운 ────────────────────────────────────────────────── */
+
+/**
+ * 붙여넣은 글이 마크다운인가.
+ *
+ * 편집기의 마크다운 규칙은 글쇠를 누를 때만 돈다. 그래서 문서를 통째로
+ * 붙여넣으면 '# ' 이 제목이 되지 않고 글자 그대로 남았다.
+ *
+ * 다만 모든 붙여넣기를 마크다운으로 읽으면 안 된다. '2026. 8. 3' 같은 줄이
+ * 번호 목록이 되고, '- 대표 이성민' 이 글머리표가 된다. 문서 전체를 옮겨온
+ * 경우에만 손대도록 줄 머리의 표시를 찾는다.
+ */
+export function looksLikeMarkdown(text: string) {
+  const t = text.trim();
+  if (!t) return false;
+
+  const blocks = [
+    /^#{1,6}\s+\S/m, // 제목
+    /^>\s+\S/m, // 인용
+    /^```/m, // 코드 블록
+    /^(?:-{3,}|\*{3,}|_{3,})\s*$/m, // 구분선
+    /^\s*[-*+]\s+\[[ xX]\]\s/m, // 체크 목록
+    /!\[[^\]]*\]\([^)]+\)/, // 사진
+    /\[[^\]]+\]\([^)]+\)/, // 링크
+    /\*\*[^*\n]+\*\*/, // 굵게
+  ];
+  if (blocks.some((re) => re.test(t))) return true;
+
+  /*
+     글머리표는 그것만으로는 근거가 약하다. 붙여넣은 것이 '- 대표 이성민'
+     한 줄일 수도 있다. 두 줄 이상 이어질 때만 목록으로 본다.
+  */
+  if ((t.match(/^\s*[-*+]\s+\S/gm) ?? []).length >= 2) return true;
+
+  /*
+     번호 목록은 더 조심해야 한다. '2026. 8. 3 서류 마감' 처럼 날짜를 세 줄
+     적은 것이 '2026.' 때문에 목록으로 읽혔다.
+
+     두 가지를 함께 본다. 번호는 두 자리까지만 — 연도는 네 자리라 걸러진다.
+     그리고 첫 항목이 1 이어야 한다 — 옮겨 적은 목록은 1 부터 시작하지만
+     날짜는 그럴 이유가 없다.
+  */
+  const numbered = t.match(/^\s*\d{1,2}[.)]\s+\S/gm) ?? [];
+  return numbered.length >= 2 && /^\s*1[.)]\s/.test(numbered[0]);
+}
+
+/**
+ * 마크다운을 편집기가 아는 문서로.
+ *
+ * 마크다운 → HTML → 편집기 순서로 간다. HTML 을 그대로 저장하지는 않는다.
+ * 편집기가 자기 스키마로 다시 읽으므로, 우리가 정해둔 조각(제목·목록·인용·
+ * 코드·링크·사진)만 남고 나머지는 버려진다. 마크다운에 섞인 날 HTML 도 그
+ * 단계에서 함께 걸러진다.
+ */
+export async function markdownToHtml(text: string) {
+  const { marked } = await import("marked");
+  return marked.parse(text, { async: false, gfm: true, breaks: false });
+}
+
 /**
  * 사진 올리기.
  *
