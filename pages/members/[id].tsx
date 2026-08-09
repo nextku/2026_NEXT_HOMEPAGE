@@ -13,6 +13,7 @@ import {
   type Comment,
   type Post,
 } from "lib/community";
+import Confirm from "components/ui/Confirm";
 import { createClient } from "lib/supabase/client";
 import { useAuth } from "lib/supabase/useAuth";
 import * as C from "styles/community/style";
@@ -119,9 +120,12 @@ export default function PostPage() {
     await toggleLike(post.id, session.user.id, next);
   };
 
+  const [askDelete, setAskDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   const remove = async () => {
     if (!post) return;
-    if (!window.confirm("이 글을 지웁니다. 되돌릴 수 없습니다.")) return;
+    setDeleting(true);
     await createClient().from("posts").delete().eq("id", post.id);
     router.replace("/members");
   };
@@ -130,6 +134,16 @@ export default function PostPage() {
 
   return (
     <>
+      <Confirm
+        open={askDelete}
+        tone="danger"
+        title="이 글을 지웁니다"
+        detail="되돌릴 수 없습니다. 달린 댓글도 함께 사라집니다."
+        confirmLabel="지우기"
+        busy={deleting}
+        onConfirm={remove}
+        onCancel={() => setAskDelete(false)}
+      />
       <Head>
         <title>{post ? `${post.title} | NEXT` : "글 | NEXT"}</title>
         <meta name="robots" content="noindex" />
@@ -151,7 +165,7 @@ export default function PostPage() {
                     고치기
                   </C.Ghost>
                 )}
-                <C.Ghost type="button" onClick={remove}>
+                <C.Ghost type="button" onClick={() => setAskDelete(true)}>
                   지우기
                 </C.Ghost>
               </C.Row>
@@ -281,8 +295,10 @@ function CommentSection({
    * 지운 댓글은 자리를 남긴다. 통째로 없애면 그 아래 답글이 무엇에 대한
    * 답인지 알 수 없게 된다.
    */
+  const [askRemove, setAskRemove] = useState<string | null>(null);
+
   const remove = async (id: string) => {
-    if (!window.confirm("댓글을 지웁니다.")) return;
+    setAskRemove(null);
     setError("");
     const { error: err } = await createClient()
       .from("post_comments")
@@ -295,18 +311,36 @@ function CommentSection({
     await reload();
   };
 
-  const roots = (comments ?? []).filter((c) => !c.parent_id);
+  const all = comments ?? [];
   const repliesOf = (id: string) =>
-    (comments ?? []).filter((c) => c.parent_id === id);
+    all.filter((c) => c.parent_id === id && !c.deleted_at);
+
+  /*
+   * 지운 댓글은 답글이 달려 있을 때만 자리를 남긴다.
+   *
+   * 원래 뜻은 "지운 것을 통째로 없애면 그 아래 답글이 무엇에 대한 답인지 알 수
+   * 없다" 였다. 그 걱정은 답글이 있을 때만 성립한다. 답글 없는 것까지 남기면
+   * 아무도 안 읽을 "지워진 댓글입니다" 만 쌓인다.
+   */
+  const roots = all.filter(
+    (c) => !c.parent_id && (!c.deleted_at || repliesOf(c.id).length > 0),
+  );
+
+  // 개수는 남아 있는 것만. 목록의 댓글 수(post_list)도 같은 기준이다.
+  const liveCount = all.filter((c) => !c.deleted_at).length;
 
   const one = (c: Comment, isReply: boolean) => (
     <C.Comment key={c.id} $reply={isReply}>
-      <C.CommentHead>
-        <b>
-          {authorText(c.author?.name ?? null, c.author?.generation ?? null)}
-        </b>
-        <span>{whenText(c.created_at)}</span>
-      </C.CommentHead>
+      {/* 지운 자리에는 누가 썼는지 적지 않는다. 남기는 것은 답글이 매달릴
+          자리뿐이고, 지운 사람을 알릴 이유는 없다. */}
+      {!c.deleted_at && (
+        <C.CommentHead>
+          <b>
+            {authorText(c.author?.name ?? null, c.author?.generation ?? null)}
+          </b>
+          <span>{whenText(c.created_at)}</span>
+        </C.CommentHead>
+      )}
 
       {c.deleted_at ? (
         <C.CommentBody style={{ color: "#a9a196" }}>
@@ -325,7 +359,7 @@ function CommentSection({
               </button>
             )}
             {(c.author_id === meId || isAdmin) && (
-              <button type="button" onClick={() => remove(c.id)}>
+              <button type="button" onClick={() => setAskRemove(c.id)}>
                 지우기
               </button>
             )}
@@ -339,7 +373,7 @@ function CommentSection({
 
   return (
     <C.Comments>
-      <h2>댓글 {roots.length > 0 ? (comments ?? []).length : ""}</h2>
+      <h2>댓글 {liveCount > 0 ? liveCount : ""}</h2>
 
       {loadError ? (
         <C.EditorError>댓글을 불러오지 못했습니다. {loadError}</C.EditorError>
@@ -348,6 +382,16 @@ function CommentSection({
       ) : (
         <C.CommentList>{roots.map((c) => one(c, false))}</C.CommentList>
       )}
+
+      <Confirm
+        open={askRemove !== null}
+        tone="danger"
+        title="댓글을 지웁니다"
+        detail="답글이 달려 있으면 자리는 남고 내용만 지워집니다."
+        confirmLabel="지우기"
+        onConfirm={() => askRemove && remove(askRemove)}
+        onCancel={() => setAskRemove(null)}
+      />
 
       <C.CommentForm onSubmit={send}>
         <C.CommentInput

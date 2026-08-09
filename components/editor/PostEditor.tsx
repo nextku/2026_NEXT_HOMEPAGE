@@ -14,6 +14,7 @@ import {
   markdownToHtml,
   uploadImage,
 } from "lib/editor";
+import AskText from "components/ui/AskText";
 import * as S from "styles/community/style";
 
 import {
@@ -70,6 +71,8 @@ export default function PostEditor({
   /** 여러 장을 올릴 때 몇 번째인지. 0 이면 올리는 중이 아니다. */
   const [queue, setQueue] = useState({ done: 0, total: 0 });
   const [error, setError] = useState("");
+  /** 링크 주소를 묻는 상자. window.prompt 는 사이트가 묻는 것으로 읽히지 않는다. */
+  const [askLink, setAskLink] = useState(false);
   /*
    * 붙여넣기 처리기와 '/' 목록은 useEditor 설정 안에 있어서 editor 를 아직 볼
    * 수 없다. 만들어진 뒤 이 상자에 넣어두고 그때 꺼내 쓴다.
@@ -201,10 +204,11 @@ export default function PostEditor({
     </S.Tool>
   );
 
-  const editLink = () => {
-    const prev = editor.getAttributes("link").href ?? "";
-    const url = window.prompt("링크 주소", prev);
-    if (url === null) return;
+  const editLink = () => setAskLink(true);
+
+  const applyLink = (url: string) => {
+    setAskLink(false);
+    // 비우고 확인하면 링크를 없앤다. 지우기 버튼을 따로 두지 않아도 된다.
     if (url === "") {
       editor.chain().focus().unsetLink().run();
       return;
@@ -214,6 +218,17 @@ export default function PostEditor({
 
   return (
     <S.EditorShell>
+      <AskText
+        open={askLink}
+        title="링크"
+        label="주소"
+        placeholder="https://"
+        initial={editor.getAttributes("link").href ?? ""}
+        hint="비우고 확인하면 링크가 없어집니다."
+        onSubmit={applyLink}
+        onCancel={() => setAskLink(false)}
+      />
+
       <S.Toolbar>
         <S.ToolGroup>
           {tool("큰 제목", on("heading", { level: 1 }), () =>

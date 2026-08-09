@@ -3,10 +3,10 @@ import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PEOPLE_INFORMATION } from "constants/people";
-import { POST_CATEGORIES } from "constants/member";
 import DailyChart from "components/member/DailyChart";
 import { memberTags } from "lib/memberLabel";
 import { parseRoster, type RosterParse } from "lib/roster";
+import Confirm from "components/ui/Confirm";
 import { createClient } from "lib/supabase/client";
 import {
   signOut,
@@ -28,7 +28,7 @@ import * as S from "styles/member/style";
  * is_admin() 을 통과해야만 반영된다.
  */
 
-type Tab = "pending" | "members" | "roster" | "stats" | "write";
+type Tab = "pending" | "members" | "roster" | "stats";
 
 /*
  * 직책 고르기.
@@ -171,18 +171,9 @@ export default function Admin() {
             >
               명단
             </S.Tab>
-            <S.Tab
-              type="button"
-              $on={tab === "write"}
-              onClick={() => setTab("write")}
-            >
-              글쓰기
-            </S.Tab>
           </S.Tabs>
 
-          {tab === "write" ? (
-            <PostForm authorId={profile!.id} />
-          ) : tab === "roster" ? (
+          {tab === "roster" ? (
             <RosterForm onSaved={load} />
           ) : tab === "stats" ? (
             <Stats />
@@ -378,6 +369,7 @@ function MemberRow({
   );
   const [isAdminRole, setIsAdminRole] = useState(row.role === "admin");
   const [handing, setHanding] = useState(false);
+  const [askHand, setAskHand] = useState(false);
 
   /*
    * 필드를 한 줄에 늘어놓으면 좁은 화면에서 서로를 밀어낸다. 평소에는 요약만
@@ -570,23 +562,30 @@ function MemberRow({
               <S.Reject
                 type="button"
                 disabled={handing || busy}
-                onClick={async () => {
-                  const ok = window.confirm(
-                    `관리자 권한을 ${row.name || row.email} 에게 넘깁니다.\n` +
-                      "넘긴 뒤에는 본인이 되돌릴 수 없고, 받은 쪽에서 다시 넘겨야 합니다.",
-                  );
-                  if (!ok) return;
-                  setHanding(true);
-                  const err = await transferOwnership(row.id);
-                  if (err) setMsg(err);
-                  else onDone();
-                  setHanding(false);
-                }}
+                onClick={() => setAskHand(true)}
               >
                 {handing ? "넘기는 중" : "관리자 권한 넘기기"}
               </S.Reject>
             </S.Actions>
           )}
+
+          <Confirm
+            open={askHand}
+            tone="danger"
+            title={`관리자 권한을 ${row.name || row.email} 에게 넘깁니다`}
+            detail="넘긴 뒤에는 본인이 되돌릴 수 없습니다. 받은 쪽에서 다시 넘겨야 합니다."
+            confirmLabel="넘기기"
+            busy={handing}
+            onConfirm={async () => {
+              setHanding(true);
+              const err = await transferOwnership(row.id);
+              if (err) setMsg(err);
+              else onDone();
+              setHanding(false);
+              setAskHand(false);
+            }}
+            onCancel={() => setAskHand(false)}
+          />
 
           {msg && <S.Notice $bad>{msg}</S.Notice>}
 
@@ -938,127 +937,3 @@ function RosterForm({ onSaved }: { onSaved: () => void }) {
   );
 }
 
-/* ─── 게시물 작성 ─────────────────────────────────────────────────────── */
-
-function PostForm({ authorId }: { authorId: string }) {
-  const [category, setCategory] = useState<string>(POST_CATEGORIES[0].key);
-  const [title, setTitle] = useState("");
-  const [company, setCompany] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [link, setLink] = useState("");
-  const [body, setBody] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [bad, setBad] = useState(false);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (busy) return;
-    setBusy(true);
-    setMsg("");
-
-    const { error } = await createClient()
-      .from("posts")
-      .insert({
-        category,
-        title: title.trim(),
-        body: body.trim(),
-        company: company.trim() || null,
-        deadline: deadline || null,
-        link: link.trim() || null,
-        author_id: authorId,
-      });
-
-    if (error) {
-      setBad(true);
-      setMsg("올리지 못했습니다. 잠시 후 다시 시도해 주세요.");
-    } else {
-      setBad(false);
-      setMsg("올라갔습니다. 라운지에서 바로 보입니다.");
-      setTitle("");
-      setCompany("");
-      setDeadline("");
-      setLink("");
-      setBody("");
-    }
-    setBusy(false);
-  };
-
-  return (
-    <S.FormWide onSubmit={submit}>
-      <S.FieldRowLead>
-        <S.Field>
-          <span>분류</span>
-          <S.Select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            {POST_CATEGORIES.map((c) => (
-              <option key={c.key} value={c.key}>
-                {c.label}
-              </option>
-            ))}
-          </S.Select>
-        </S.Field>
-
-        <S.Field>
-          <span>제목</span>
-          <S.Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="백엔드 인턴 모집"
-            maxLength={80}
-            required
-          />
-        </S.Field>
-      </S.FieldRowLead>
-
-      <S.FieldRowLead>
-        <S.Field>
-          <span>마감</span>
-          <S.Input
-            type="date"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-          />
-        </S.Field>
-
-        <S.Field>
-          <span>회사 · 기관</span>
-          <S.Input
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            placeholder="비워두어도 됩니다"
-            maxLength={40}
-          />
-        </S.Field>
-      </S.FieldRowLead>
-
-      <S.Field>
-        <span>내용</span>
-        <S.Textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="어떤 일인지, 누구를 찾는지, 어떻게 지원하는지"
-          required
-        />
-      </S.Field>
-
-      <S.Field>
-        <span>링크</span>
-        <S.Input
-          type="url"
-          value={link}
-          onChange={(e) => setLink(e.target.value)}
-          placeholder="https://"
-        />
-      </S.Field>
-
-      {msg && <S.Notice $bad={bad}>{msg}</S.Notice>}
-
-      <S.Submit type="submit" disabled={busy}>
-        {busy ? "올리는 중" : "올리기"}
-      </S.Submit>
-    </S.FormWide>
-  );
-}
