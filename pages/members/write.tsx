@@ -2,7 +2,7 @@ import type { JSONContent } from "@tiptap/react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { fetchBoards, fetchPost, type Board } from "lib/community";
 import { excerptFrom, firstImage, isEmptyDoc } from "lib/editor";
@@ -32,6 +32,14 @@ const PostEditor = dynamic(() => import("components/editor/PostEditor"), {
 
 const DRAFT_KEY = "nextku_draft";
 
+/** "오후 3:07" 처럼. 방금인지 아까인지 알 수 있어야 저장을 믿는다. */
+function stamp() {
+  return new Date().toLocaleTimeString("ko-KR", {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export default function Write() {
   const router = useRouter();
   const { session, profile, loading, isApproved, isAdmin } = useAuth();
@@ -54,6 +62,11 @@ export default function Write() {
    * 하기 때문이다. state 는 그 타이머가 만들어질 때의 값으로 굳는다.
    */
   const posted = useRef(false);
+  /*
+   * 가장 최근 값. 화면을 떠날 때 쓰는 정리 함수는 만들어질 당시의 state 를
+   * 붙들고 있으므로, 최신 값은 여기서 꺼내야 한다.
+   */
+  const latest = useRef({ title: "", doc: null as JSONContent | null, boardId: "" });
   const [savedNote, setSavedNote] = useState("");
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
@@ -73,9 +86,9 @@ export default function Write() {
     if (editId) {
       fetchPost(editId).then((p) => {
         if (p) {
-          setBoardId(p.board_id);
-          setTitle(p.title);
-          setDoc(p.content);
+          putBoard(p.board_id);
+          putTitle(p.title);
+          putDoc(p.content);
           setCompany(p.company ?? "");
           setDeadline(p.deadline ?? "");
         }
@@ -88,9 +101,9 @@ export default function Write() {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (raw) {
         const d = JSON.parse(raw);
-        setTitle(d.title ?? "");
-        setDoc(d.doc ?? null);
-        setBoardId(d.boardId ?? "");
+        putTitle(d.title ?? "");
+        putDoc(d.doc ?? null);
+        putBoard(d.boardId ?? "");
         setSavedNote("쓰던 글을 불러왔습니다");
       }
     } catch {
@@ -99,47 +112,86 @@ export default function Write() {
     setReady(true);
   }, [isApproved, router.isReady, editId, ready]);
 
+  /*
+   * 값을 바꾸는 자리에서 ref 도 함께 갱신한다.
+   *
+   * 렌더가 끝난 뒤에만 담아두면, 지우고 곧바로 나가는 경우에 그 렌더가 일어나기
+   * 전에 화면이 사라져 옛 값이 저장된다. state 와 ref 를 같은 자리에서 함께
+   * 옮겨야 떠나는 순간의 값이 언제나 맞는다.
+   */
+  const putTitle = (v: string) => {
+    latest.current.title = v;
+    setTitle(v);
+  };
+  const putDoc = (v: JSONContent | null) => {
+    latest.current.doc = v;
+    setDoc(v);
+  };
+  const putBoard = (v: string) => {
+    latest.current.boardId = v;
+    setBoardId(v);
+  };
+
   // 게시판이 아직 안 정해졌으면 주소의 값, 그것도 없으면 첫 번째.
   useEffect(() => {
     if (boardId || boards.length === 0) return;
     const found = queryBoard && boards.find((b) => b.slug === queryBoard);
-    setBoardId((found || boards[0]).id);
+    putBoard((found || boards[0]).id);
   }, [boards, boardId, queryBoard]);
 
-  // 임시 저장. 고치는 중일 때는 하지 않는다 — 원본과 섞이면 되돌리기 어렵다.
+  /*
+   * 임시 저장.
+   *
+   * 고치는 중일 때는 하지 않는다 — 원본과 섞이면 되돌리기 어렵다.
+   *
+   * 쓰는 일이 세 갈래다. 타자가 멎으면 자동으로, 화면을 떠날 때 한 번 더,
+   * 그리고 사람이 직접 누를 때. 자동만 두었더니 지우고 곧바로 나가는 경우를
+   * 놓쳤다 — 800ms 를 기다리는 사이에 화면이 사라지면서 타이머가 취소되어,
+   * "비웠다" 가 저장되지 않고 지우기 전 글이 그대로 남았다.
+   */
+  const save = useCallback(() => {
+    if (editId || posted.current) return;
+    const { title: t, doc: d, boardId: b } = latest.current;
+    try {
+      // 다 지운 것도 뜻이다. 비었으면 비었다고 적는다.
+      if (!t.trim() && isEmptyDoc(d)) {
+        localStorage.removeItem(DRAFT_KEY);
+        setSavedNote("");
+        return;
+      }
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ title: t, doc: d, boardId: b }));
+      setSavedNote(`${stamp()} 저장됨`);
+    } catch {
+      // 저장 못 해도 글 쓰는 데는 지장이 없다.
+    }
+  }, [editId]);
+
+  // 타자가 멎으면.
   useEffect(() => {
     if (!ready || editId || posted.current) return;
-    const t = setTimeout(() => {
-      /*
-         예약된 뒤에 글이 올라갔을 수 있다.
-         마지막 타자로 이 타이머가 걸리고, 800ms 가 지나기 전에 올리기를 누르면
-         올린 뒤에 이것이 깨어나 방금 지운 임시 저장을 되살렸다. 그래서 새 글을
-         열 때마다 올린 글이 다시 채워져 있었다. 깨어나서 한 번 더 확인한다.
-      */
-      if (posted.current) return;
-      try {
-        /*
-           다 지운 것도 저장한다.
-
-           예전에는 비어 있으면 그냥 넘어갔는데, 그러면 지우기 전의 글이 그대로
-           남아서 나갔다 오면 되살아났다. 지운 것은 사고가 아니라 뜻이다.
-        */
-        if (!title.trim() && isEmptyDoc(doc)) {
-          localStorage.removeItem(DRAFT_KEY);
-          setSavedNote("");
-          return;
-        }
-        localStorage.setItem(
-          DRAFT_KEY,
-          JSON.stringify({ title, doc, boardId }),
-        );
-        setSavedNote("임시 저장됨");
-      } catch {
-        // 저장 못 해도 글 쓰는 데는 지장이 없다.
-      }
-    }, 800);
+    const t = setTimeout(save, 800);
     return () => clearTimeout(t);
-  }, [title, doc, boardId, ready, editId]);
+  }, [title, doc, boardId, ready, editId, save]);
+
+  /*
+   * 떠날 때 한 번 더.
+   *
+   * 이 효과는 마운트와 언마운트에만 돈다. 그래서 정리 함수가 곧 "화면을
+   * 떠나는 순간" 이고, 그때 ref 에 담긴 가장 최근 값을 쓴다. state 를 그대로
+   * 읽으면 마운트 시점의 빈 값이 굳어 오히려 지운 것처럼 저장된다.
+   *
+   * 탭을 닫거나 새로고침하는 것은 언마운트가 아니므로 따로 받는다.
+   */
+  useEffect(() => {
+    if (editId) return;
+    const onLeave = () => save();
+    window.addEventListener("beforeunload", onLeave);
+    return () => {
+      window.removeEventListener("beforeunload", onLeave);
+      if (!ready) return;
+      save();
+    };
+  }, [editId, ready, save]);
 
   // 제목 칸이 내용에 따라 늘어나게. 두 줄짜리 제목이 잘리면 안 된다.
   useEffect(() => {
@@ -245,6 +297,12 @@ export default function Write() {
             </C.Back>
             <C.Row>
               <C.SaveState>{savedNote}</C.SaveState>
+              {/* 고칠 때는 원본이 있으므로 임시 저장을 두지 않는다. */}
+              {!editId && (
+                <C.Ghost type="button" onClick={save}>
+                  임시 저장
+                </C.Ghost>
+              )}
               <C.Primary
                 type="button"
                 onClick={submit}
@@ -260,7 +318,7 @@ export default function Write() {
               <span>게시판</span>
               <C.Select
                 value={boardId}
-                onChange={(e) => setBoardId(e.target.value)}
+                onChange={(e) => putBoard(e.target.value)}
               >
                 {boards
                   .filter((b) => b.write_role === "member" || isAdmin)
@@ -298,7 +356,7 @@ export default function Write() {
           <C.TitleInput
             ref={titleRef}
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => putTitle(e.target.value)}
             placeholder="제목"
             rows={1}
             maxLength={120}
@@ -308,7 +366,7 @@ export default function Write() {
             {ready && (
               <PostEditor
                 value={doc}
-                onChange={setDoc}
+                onChange={putDoc}
                 userId={session.user.id}
               />
             )}
