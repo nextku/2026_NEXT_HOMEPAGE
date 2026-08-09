@@ -520,7 +520,7 @@ export const MainContainer = styled.div`
   position: relative;
   overflow: hidden;
 `;
-export const MainContainerBG = styled.img<{ isMobile: boolean }>`
+export const MainContainerBG = styled.img`
   width: 100%;
   height: 100%;
   opacity: 0.7;
@@ -528,11 +528,9 @@ export const MainContainerBG = styled.img<{ isMobile: boolean }>`
   filter: grayscale(1);
   animation: ${color} 3s 0.5s forwards;
 
-  ${(props) =>
-    props.isMobile &&
-    css`
-      object-fit: contain;
-    `}
+  @media (max-width: 820px) {
+    object-fit: contain;
+  }
 `;
 export const MainContainerLogo = styled.div`
   width: 56%;
@@ -540,13 +538,17 @@ export const MainContainerLogo = styled.div`
     width: 100%;
   }
 `;
-export const MainWrapper = styled.div<{ isMobile: boolean }>`
+export const MainWrapper = styled.div`
   position: absolute;
   z-index: 2;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: ${(props) => (props.isMobile ? "80%" : "60%")};
+  width: 60%;
+
+  @media (max-width: 820px) {
+    width: 80%;
+  }
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -584,7 +586,7 @@ export const HomeTwoTextWrapper = styled.span`
     width: 380px;
   }
 `;
-export const Section1 = styled.div<{ isMobile: boolean }>`
+export const Section1 = styled.div`
   width: 100%;
   padding: 20rem 10%;
   display: flex;
@@ -613,25 +615,23 @@ export const Section1 = styled.div<{ isMobile: boolean }>`
     color: #ffffff;
     font-weight: 700;
   }
-  ${(props) =>
-    props.isMobile &&
-    css`
-      padding: 10rem 8%;
+  @media (max-width: 820px) {
+    padding: 10rem 8%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    & div {
+      display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      & div {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-      }
-      & div:last-child p {
-        font-size: 1.8rem;
-      }
-      & div:last-child p:first-child {
-        font-size: 3.2rem;
-      }
-    `}
+      width: 100%;
+    }
+    & div:last-child p {
+      font-size: 1.8rem;
+    }
+    & div:last-child p:first-child {
+      font-size: 3.2rem;
+    }
+  }
 `;
 export const Section2 = styled.div`
   /*
@@ -647,7 +647,7 @@ export const Section2 = styled.div`
   align-items: center;
   color: white;
 `;
-export const TextWrapper = styled.div<{ isMobile: boolean }>`
+export const TextWrapper = styled.div`
   /*
    * 섹션 제목이 오렌지 + 가운데 정렬이라 홈만 다른 문법을 쓰고 있었다.
    * 다른 페이지는 이미 흰/검정 + 왼쪽 정렬이라 홈에 들어오면 톤이 튄다.
@@ -717,7 +717,7 @@ export const NextInlineLogo2 = styled.img<NextInlineLogoProps2>`
   }
 `;
 
-export const LottieContainer = styled.div<{ isMobile: boolean }>`
+export const LottieContainer = styled.div`
   /*
    * width: 125% 라 부모보다 넓어져 화면 밖으로 55px 삐져나오고 가로 스크롤이 생겼다.
    * 세 항목을 고른 격자로 두면 폭을 넘길 이유가 없다.
@@ -778,7 +778,7 @@ export const FinaleWrapper = styled.div`
   }
 `;
 
-export const ArrowBG = styled.div<{ isMobile: boolean }>`
+export const ArrowBG = styled.div`
   /*
    * 부모(LottieContainer)가 max-width: 116rem 으로 좁아지면서 삼각형이
    * 그 폭에 갇혀 좌우가 잘렸다. 화면 폭 전체로 펴서 꼭짓점이 살아 있게 한다.
@@ -805,7 +805,7 @@ export const ArrowBG = styled.div<{ isMobile: boolean }>`
   }
 `;
 
-export const LottieWrapper = styled.div<{ isMobile: boolean }>`
+export const LottieWrapper = styled.div`
   /*
    * 로티마다 원본 여백이 달라 그대로 두면 아래 라벨이 계단처럼 어긋난다.
    * 그림 영역 높이를 고정해 세 항목의 제목이 같은 선에서 시작하게 한다.
@@ -850,7 +850,7 @@ export const LottieWrapper = styled.div<{ isMobile: boolean }>`
   }
 `;
 
-export const MoreBtn = styled.div<{ isMobile: boolean }>`
+export const MoreBtn = styled.div`
   /* '>>' 는 텍스트 기호라 폰트마다 모양이 달라진다. 화살표는 SVG 로 그린다. */
   display: inline-flex;
   align-items: center;
@@ -883,7 +883,7 @@ export const MoreBtn = styled.div<{ isMobile: boolean }>`
   }
 `;
 
-export const PartnerContainer = styled.div<{ isMobile: boolean }>`
+export const PartnerContainer = styled.div`
   /*
    * 이전에는 로고를 20% 폭 flex 로 늘어놓아 원본 비율에 따라 크기가 요동쳤고
    * 마지막 줄이 어색하게 남았다. 같은 크기의 칸을 주고 그 안에서 맞춘다.
@@ -939,7 +939,7 @@ export const PartnerContainer = styled.div<{ isMobile: boolean }>`
  * 위쪽은 학회 정보와 연락처를 두 단으로, 아래쪽은 얇은 선으로 나눠
  * 저작권과 소셜을 양 끝에 붙인다. 모바일에서는 한 단으로 쌓인다.
  */
-export const Footer = styled.footer<{ isMobile?: boolean }>`
+export const Footer = styled.footer`
   width: 100%;
   background: #000;
   color: #fff;
