@@ -1,5 +1,11 @@
-import { BubbleMenu, EditorContent, useEditor } from "@tiptap/react";
+import {
+  BubbleMenu,
+  EditorContent,
+  ReactRenderer,
+  useEditor,
+} from "@tiptap/react";
 import type { Editor, JSONContent } from "@tiptap/react";
+import tippy, { type Instance } from "tippy.js";
 import React, { useCallback, useRef, useState } from "react";
 
 import {
@@ -10,6 +16,31 @@ import {
 } from "lib/editor";
 import * as S from "styles/community/style";
 
+import {
+  IconBold,
+  IconBulletList,
+  IconCode,
+  IconCodeBlock,
+  IconDivider,
+  IconH1,
+  IconH2,
+  IconH3,
+  IconImage,
+  IconItalic,
+  IconLink,
+  IconOrderedList,
+  IconQuote,
+  IconStrike,
+  IconTaskList,
+} from "./icons";
+import {
+  SlashCommand,
+  filterSlashItems,
+  slashItems,
+  type SlashItem,
+} from "./SlashCommand";
+import SlashMenu, { type SlashMenuHandle } from "./SlashMenu";
+
 /**
  * 글 편집기.
  *
@@ -17,8 +48,9 @@ import * as S from "styles/community/style";
  * 화면에 보이는 것이 곧 결과물이다. 나눠 보여주면 쓰는 사람이 두 곳을 번갈아
  * 봐야 하고, 마크다운을 모르는 사람은 왼쪽이 무슨 말인지 알 수 없다.
  *
- * 그래서 마크다운을 아는 사람은 그대로 치면 되고, 모르는 사람은 위의 도구나
- * 글을 끌어 선택했을 때 뜨는 막대를 쓰면 된다. 둘 다 같은 결과에 닿는다.
+ * 그래서 넣는 길을 네 갈래로 둔다. 마크다운을 아는 사람은 그대로 치고, 모르는
+ * 사람은 위의 도구를 누르거나 '/' 를 쳐서 목록에서 고른다. 글을 끌어 선택하면
+ * 그 자리에 막대가 뜬다. 사진은 끌어다 놓거나 붙여넣어도 된다.
  */
 
 type Props = {
@@ -28,13 +60,6 @@ type Props = {
   placeholder?: string;
 };
 
-const SHORTCUTS = [
-  { label: "제목", hint: "# " },
-  { label: "목록", hint: "- " },
-  { label: "인용", hint: "> " },
-  { label: "코드", hint: "``` " },
-];
-
 export default function PostEditor({
   value,
   onChange,
@@ -42,16 +67,27 @@ export default function PostEditor({
   placeholder,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
+  /** 여러 장을 올릴 때 몇 번째인지. 0 이면 올리는 중이 아니다. */
+  const [queue, setQueue] = useState({ done: 0, total: 0 });
   const [error, setError] = useState("");
   /*
-   * 붙여넣기 처리기는 useEditor 설정 안에 있어서 editor 를 아직 볼 수 없다.
-   * 만들어진 뒤 이 상자에 넣어두고 그때 꺼내 쓴다.
+   * 붙여넣기 처리기와 '/' 목록은 useEditor 설정 안에 있어서 editor 를 아직 볼
+   * 수 없다. 만들어진 뒤 이 상자에 넣어두고 그때 꺼내 쓴다.
    */
   const editorRef = useRef<Editor | null>(null);
+  const pickFile = useCallback(() => fileRef.current?.click(), []);
 
   const editor = useEditor({
-    extensions: editorExtensions(placeholder),
+    extensions: [
+      ...editorExtensions(placeholder),
+      SlashCommand.configure({
+        suggestion: {
+          items: ({ query }) =>
+            filterSlashItems(slashItems(pickFile), query).slice(0, 10),
+          render: makeSlashRenderer,
+        },
+      }),
+    ],
     content: value ?? undefined,
     // 서버에서 그리면 hydration 이 어긋난다. 이 컴포넌트는 항상 클라이언트에서만 뜬다.
     onUpdate: ({ editor }) => onChange(editor.getJSON()),
@@ -64,7 +100,7 @@ export default function PostEditor({
         const images = files.filter((f) => f.type.startsWith("image/"));
         if (images.length > 0) {
           event.preventDefault();
-          images.forEach(insert);
+          void insertMany(images);
           return true;
         }
 
@@ -98,25 +134,45 @@ export default function PostEditor({
         const images = files.filter((f) => f.type.startsWith("image/"));
         if (images.length === 0) return false;
         event.preventDefault();
-        images.forEach(insert);
+        void insertMany(images);
         return true;
       },
     },
   });
 
-  const insert = useCallback(
-    async (file: File) => {
-      setUploading(true);
+  /**
+   * 여러 장을 차례로 올린다.
+   *
+   * 한꺼번에 보내면 어느 것이 끝났는지 셀 수 없어 진행 표시가 맞지 않고,
+   * 순서도 도착하는 대로 섞인다. 하나씩 올려 고른 순서대로 넣는다.
+   */
+  const insertMany = useCallback(
+    async (files: File[]) => {
+      if (files.length === 0) return;
       setError("");
-      const { url, error: err } = await uploadImage(file, userId);
-      setUploading(false);
-      if (!url) {
-        setError(err ?? "사진을 올리지 못했습니다.");
-        return;
+      setQueue({ done: 0, total: files.length });
+
+      const failed: string[] = [];
+      for (let i = 0; i < files.length; i += 1) {
+        const { url, error: err } = await uploadImage(files[i], userId);
+        if (url) {
+          editorRef.current?.chain().focus().setImage({ src: url }).run();
+        } else {
+          failed.push(err ?? files[i].name);
+        }
+        setQueue({ done: i + 1, total: files.length });
       }
-      editor?.chain().focus().setImage({ src: url }).run();
+
+      setQueue({ done: 0, total: 0 });
+      if (failed.length > 0) {
+        setError(
+          failed.length === files.length
+            ? `사진을 올리지 못했습니다. ${failed[0]}`
+            : `${failed.length}장을 올리지 못했습니다. ${failed[0]}`,
+        );
+      }
     },
-    [editor, userId],
+    [userId],
   );
 
   editorRef.current = editor;
@@ -125,80 +181,119 @@ export default function PostEditor({
 
   const on = (name: string, attrs?: Record<string, unknown>) =>
     editor.isActive(name, attrs);
+  const uploading = queue.total > 0;
+
+  const tool = (
+    label: string,
+    active: boolean,
+    run: () => void,
+    icon: React.ReactNode,
+  ) => (
+    <S.Tool
+      type="button"
+      $on={active}
+      onClick={run}
+      title={label}
+      aria-label={label}
+      aria-pressed={active}
+    >
+      {icon}
+    </S.Tool>
+  );
+
+  const editLink = () => {
+    const prev = editor.getAttributes("link").href ?? "";
+    const url = window.prompt("링크 주소", prev);
+    if (url === null) return;
+    if (url === "") {
+      editor.chain().focus().unsetLink().run();
+      return;
+    }
+    editor.chain().focus().setLink({ href: url }).run();
+  };
 
   return (
     <S.EditorShell>
       <S.Toolbar>
         <S.ToolGroup>
-          <S.Tool
-            type="button"
-            $on={on("heading", { level: 2 })}
-            onClick={() =>
-              editor.chain().focus().toggleHeading({ level: 2 }).run()
-            }
-            title="제목"
-          >
-            제목
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("bold")}
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            title="굵게"
-          >
-            <b>B</b>
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("italic")}
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            title="기울임"
-          >
-            <i>I</i>
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("bulletList")}
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-            title="목록"
-          >
-            목록
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("taskList")}
-            onClick={() => editor.chain().focus().toggleTaskList().run()}
-            title="체크리스트"
-          >
-            체크
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("blockquote")}
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            title="인용"
-          >
-            인용
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("codeBlock")}
-            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-            title="코드"
-          >
-            코드
-          </S.Tool>
+          {tool("큰 제목", on("heading", { level: 1 }), () =>
+            editor.chain().focus().toggleHeading({ level: 1 }).run(),
+            <IconH1 />,
+          )}
+          {tool("중간 제목", on("heading", { level: 2 }), () =>
+            editor.chain().focus().toggleHeading({ level: 2 }).run(),
+            <IconH2 />,
+          )}
+          {tool("작은 제목", on("heading", { level: 3 }), () =>
+            editor.chain().focus().toggleHeading({ level: 3 }).run(),
+            <IconH3 />,
+          )}
+
+          <S.ToolDivider />
+
+          {tool("굵게", on("bold"), () =>
+            editor.chain().focus().toggleBold().run(),
+            <IconBold />,
+          )}
+          {tool("기울임", on("italic"), () =>
+            editor.chain().focus().toggleItalic().run(),
+            <IconItalic />,
+          )}
+          {tool("취소선", on("strike"), () =>
+            editor.chain().focus().toggleStrike().run(),
+            <IconStrike />,
+          )}
+          {tool("인라인 코드", on("code"), () =>
+            editor.chain().focus().toggleCode().run(),
+            <IconCode />,
+          )}
+          {tool("링크", on("link"), editLink, <IconLink />)}
+
+          <S.ToolDivider />
+
+          {tool("글머리 목록", on("bulletList"), () =>
+            editor.chain().focus().toggleBulletList().run(),
+            <IconBulletList />,
+          )}
+          {tool("번호 목록", on("orderedList"), () =>
+            editor.chain().focus().toggleOrderedList().run(),
+            <IconOrderedList />,
+          )}
+          {tool("체크 목록", on("taskList"), () =>
+            editor.chain().focus().toggleTaskList().run(),
+            <IconTaskList />,
+          )}
+
+          <S.ToolDivider />
+
+          {tool("인용", on("blockquote"), () =>
+            editor.chain().focus().toggleBlockquote().run(),
+            <IconQuote />,
+          )}
+          {tool("코드 블록", on("codeBlock"), () =>
+            editor.chain().focus().toggleCodeBlock().run(),
+            <IconCodeBlock />,
+          )}
+          {tool("구분선", false, () =>
+            editor.chain().focus().setHorizontalRule().run(),
+            <IconDivider />,
+          )}
         </S.ToolGroup>
 
         <S.ToolGroup>
-          <S.Tool
+          {/* 다른 도구와 달리 테두리를 둔다. 낱말 하나로는 누를 수 있는
+              것인지 알아보지 못했다. */}
+          <S.ToolImage
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={pickFile}
             disabled={uploading}
-            title="사진"
+            title="사진 넣기"
           >
-            {uploading ? "올리는 중" : "사진"}
-          </S.Tool>
+            <IconImage />
+            {uploading
+              ? `${queue.done}/${queue.total} 올리는 중`
+              : "사진"}
+          </S.ToolImage>
           <input
             ref={fileRef}
             type="file"
@@ -206,7 +301,7 @@ export default function PostEditor({
             multiple
             hidden
             onChange={(e) => {
-              Array.from(e.target.files ?? []).forEach(insert);
+              void insertMany(Array.from(e.target.files ?? []));
               e.target.value = "";
             }}
           />
@@ -216,50 +311,23 @@ export default function PostEditor({
       {/* 글을 끌어 선택했을 때만 뜬다. 손이 이미 그 자리에 있으니 가장 가깝다. */}
       <BubbleMenu editor={editor} tippyOptions={{ duration: 120 }}>
         <S.Bubble>
-          <S.Tool
-            type="button"
-            $on={on("bold")}
-            onClick={() => editor.chain().focus().toggleBold().run()}
-          >
-            <b>B</b>
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("italic")}
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-          >
-            <i>I</i>
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("strike")}
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-          >
-            <s>S</s>
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("code")}
-            onClick={() => editor.chain().focus().toggleCode().run()}
-          >
-            {"</>"}
-          </S.Tool>
-          <S.Tool
-            type="button"
-            $on={on("link")}
-            onClick={() => {
-              const prev = editor.getAttributes("link").href ?? "";
-              const url = window.prompt("링크 주소", prev);
-              if (url === null) return;
-              if (url === "") {
-                editor.chain().focus().unsetLink().run();
-                return;
-              }
-              editor.chain().focus().setLink({ href: url }).run();
-            }}
-          >
-            링크
-          </S.Tool>
+          {tool("굵게", on("bold"), () =>
+            editor.chain().focus().toggleBold().run(),
+            <IconBold />,
+          )}
+          {tool("기울임", on("italic"), () =>
+            editor.chain().focus().toggleItalic().run(),
+            <IconItalic />,
+          )}
+          {tool("취소선", on("strike"), () =>
+            editor.chain().focus().toggleStrike().run(),
+            <IconStrike />,
+          )}
+          {tool("인라인 코드", on("code"), () =>
+            editor.chain().focus().toggleCode().run(),
+            <IconCode />,
+          )}
+          {tool("링크", on("link"), editLink, <IconLink />)}
         </S.Bubble>
       </BubbleMenu>
 
@@ -270,13 +338,86 @@ export default function PostEditor({
       {error && <S.EditorError>{error}</S.EditorError>}
 
       <S.EditorHint>
-        {SHORTCUTS.map((s) => (
-          <span key={s.label}>
-            <code>{s.hint}</code> {s.label}
-          </span>
-        ))}
-        <span>사진은 끌어다 놓거나 붙여넣으면 올라갑니다</span>
+        <span>
+          <code>/</code> 를 치면 넣을 수 있는 것이 뜹니다
+        </span>
+        <span>
+          <code>#</code> 제목
+        </span>
+        <span>
+          <code>-</code> 목록
+        </span>
+        <span>
+          <code>&gt;</code> 인용
+        </span>
+        <span>사진은 끌어다 놓거나 붙여넣어도 올라갑니다</span>
       </S.EditorHint>
     </S.EditorShell>
   );
+}
+
+/* ─── '/' 목록을 띄우는 자리 ──────────────────────────────────────────── */
+
+/**
+ * 목록을 글자 옆에 붙여 띄운다.
+ *
+ * 편집기 안에 그리면 글 흐름을 밀어내므로 tippy 로 띄운다. 이미 말풍선 막대가
+ * 쓰고 있는 것이라 따로 받아오는 것이 없다.
+ */
+function makeSlashRenderer() {
+  let component: ReactRenderer<SlashMenuHandle> | null = null;
+  let popup: Instance | null = null;
+
+  return {
+    onStart: (props: {
+      editor: Editor;
+      items: SlashItem[];
+      command: (item: SlashItem) => void;
+      clientRect?: (() => DOMRect | null) | null;
+    }) => {
+      component = new ReactRenderer(SlashMenu, {
+        props,
+        editor: props.editor,
+      });
+      if (!props.clientRect) return;
+
+      popup = tippy(document.body, {
+        getReferenceClientRect: props.clientRect as () => DOMRect,
+        appendTo: () => document.body,
+        content: component.element,
+        showOnCreate: true,
+        interactive: true,
+        trigger: "manual",
+        placement: "bottom-start",
+      });
+    },
+
+    onUpdate: (props: {
+      items: SlashItem[];
+      clientRect?: (() => DOMRect | null) | null;
+    }) => {
+      component?.updateProps(props);
+      if (props.clientRect && popup) {
+        popup.setProps({
+          getReferenceClientRect: props.clientRect as () => DOMRect,
+        });
+      }
+    },
+
+    onKeyDown: (props: { event: KeyboardEvent }) => {
+      // 목록이 떠 있을 때 Esc 는 글이 아니라 목록을 닫는다.
+      if (props.event.key === "Escape") {
+        popup?.hide();
+        return true;
+      }
+      return component?.ref?.onKeyDown(props) ?? false;
+    },
+
+    onExit: () => {
+      popup?.destroy();
+      component?.destroy();
+      popup = null;
+      component = null;
+    },
+  };
 }
