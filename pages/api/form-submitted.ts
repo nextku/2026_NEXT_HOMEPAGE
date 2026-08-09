@@ -112,7 +112,12 @@ export default async function handler(
       ].join("<br>"),
       middle: schedule,
       signature: { role: `NEXT ${gen}기 대표`, name: RECRUIT.leader },
-      note: `모든 안내는 이 주소로 드립니다. 제출 내용을 고치시려면 접수 마감 전에 다시 제출해 주세요. 문의는 nextku.contact@gmail.com 으로 보내주세요.`,
+      note:
+        "제출하신 내용은 접수 마감 전까지 수정 제출할 수 있습니다. " +
+        // 메일 클라이언트는 <style> 을 자주 걷어낸다. 링크 모양은 태그에 직접 준다.
+        '문의는 카카오 채널 <a href="https://pf.kakao.com/_xacxgxbn" ' +
+        'style="color:#17150F;font-weight:600;text-decoration:none;border-bottom:1px solid #E7E2D8;">고려대 NEXT</a> ' +
+        "또는 nextku.contact@gmail.com 으로 보내주세요.",
     });
 
     const sent = await sendMail({
