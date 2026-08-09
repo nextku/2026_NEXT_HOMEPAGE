@@ -25,6 +25,17 @@ import * as S from "styles/member/style";
 
 type Tab = "pending" | "members" | "roster" | "stats" | "write";
 
+/*
+ * 직책 고르기.
+ *
+ * 거의 다 이 넷 중 하나다. 매번 타이핑하면 "부대표" 와 "부 대표" 가 섞이고,
+ * 그러면 나중에 세거나 거르지 못한다. 다만 팀장처럼 기수마다 생기는 직책이
+ * 있어서 마지막에 직접 입력을 남겨둔다.
+ *
+ * 빈 값이 곧 일반 학회원이다. '학회원' 이라는 직책을 따로 저장하지 않는다.
+ */
+const TITLE_PRESETS = ["대표", "부대표", "운영진"] as const;
+
 export default function Admin() {
   const router = useRouter();
   const { session, profile, loading, isAdmin } = useAuth();
@@ -342,6 +353,10 @@ function MemberRow({
   const [staffGen, setStaffGen] = useState(
     row.staff_generation ? String(row.staff_generation) : "",
   );
+  // 목록에 없는 직책을 가진 사람은 열자마자 직접 입력 상태여야 한다.
+  const [custom, setCustom] = useState(
+    !!row.title && !TITLE_PRESETS.includes(row.title as never),
+  );
   const [isAdminRole, setIsAdminRole] = useState(row.role === "admin");
 
   /*
@@ -423,15 +438,53 @@ function MemberRow({
                 maxLength={30}
               />
             </S.Field>
-            <S.Field>
+            <S.FieldWide>
               <span>직책</span>
-              <S.Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="없으면 비워두세요"
-                maxLength={20}
-              />
-            </S.Field>
+              <S.Segmented>
+                <S.Chip
+                  type="button"
+                  $on={!custom && !title}
+                  onClick={() => {
+                    setCustom(false);
+                    setTitle("");
+                  }}
+                >
+                  학회원
+                </S.Chip>
+                {TITLE_PRESETS.map((t) => (
+                  <S.Chip
+                    key={t}
+                    type="button"
+                    $on={!custom && title === t}
+                    onClick={() => {
+                      setCustom(false);
+                      setTitle(t);
+                    }}
+                  >
+                    {t}
+                  </S.Chip>
+                ))}
+                <S.Chip
+                  type="button"
+                  $on={custom}
+                  onClick={() => {
+                    setCustom(true);
+                    if (TITLE_PRESETS.includes(title as never)) setTitle("");
+                  }}
+                >
+                  직접 입력
+                </S.Chip>
+              </S.Segmented>
+              {custom && (
+                <S.Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="개발팀장, 학술부 등"
+                  maxLength={20}
+                  autoFocus
+                />
+              )}
+            </S.FieldWide>
             <S.Field>
               <span>직책 기수</span>
               <S.Input
