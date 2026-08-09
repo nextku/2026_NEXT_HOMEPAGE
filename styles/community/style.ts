@@ -175,53 +175,38 @@ export const SideLink = styled.button<{ $on: boolean }>`
 /**
  * 운영진 화면으로.
  *
- * 판도 아니고 계정 항목도 아니다. 승인·명단처럼 권한이 있어야 하는 일을 하러
- * 가는 자리라, 판 목록에 섞으면 게시판인 줄 알고 계정 항목에 섞으면 내 정보나
- * 로그아웃과 같은 무게로 읽힌다. 둘 사이에 따로 세운다.
+ * 처음에는 판 목록 아래에 굵은 글씨로만 세웠다. 대기 인원이 0 이면 아무 표시도
+ * 없어서 그냥 글자 하나였고, 승인하러 갈 자리를 찾지 못했다. 색을 아끼려다
+ * 정작 필요한 사람에게 안 보이면 아낀 것이 아니다.
  *
- * 자리 자체에는 색을 쓰지 않는다. 오렌지는 글쓰기가 이미 쓰고 있어 하나 더
- * 두면 무엇이 주된 행동인지 흐려진다. 굵기와 여백으로 떼어 놓고, 색은 옆의
- * 숫자에만 쓴다 - 그것은 행동이 아니라 "사람이 기다리고 있다" 는 알림이다.
+ * 글쓰기 옆에 버튼으로 세운다. 글쓰기와 같은 크기지만 검정으로 채워 구별한다 -
+ * 오렌지 둘을 나란히 두면 어느 쪽이 주된 행동인지 흐려지고, 테두리만 있는
+ * 버튼은 다시 눈에 안 들어온다.
  */
-export const AdminLink = styled.button`
-  display: flex;
+export const AdminButton = styled.button`
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
   gap: 0.8rem;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  text-align: left;
   white-space: nowrap;
-  min-height: 3.4rem;
-  margin-top: 1.2rem;
-  padding: 0 1.2rem;
-  ${squircle(9)};
+  min-height: 4.6rem;
+  padding: 0 1.6rem;
+  border: 1px solid ${INK};
+  border-radius: 9px;
+  background: ${INK};
+  color: #fbf8f3;
   font-size: 1.45rem;
   font-weight: 700;
   letter-spacing: -0.025em;
-  color: ${INK};
   cursor: pointer;
-  transition: background 0.16s ease;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
 
   @media (any-hover: hover) {
     &:hover {
-      background: rgba(23, 21, 15, 0.05);
+      background: #2e2a20;
+      border-color: #2e2a20;
     }
-  }
-
-  @media (max-width: 900px) {
-    /*
-       좁은 화면에서 판 목록은 옆으로 밀리는 줄이 된다. 순서대로 두면 운영진이
-       일곱 번째 판 뒤에 놓여 스크롤해야 보인다. 승인이 밀리고 있는 것을
-       알리려고 세운 자리가 화면 밖에 있으면 뜻이 없으므로 맨 앞으로 보낸다.
-
-       띄워서 겹치는 방법도 있지만 그러면 밑으로 판이 지나가 무엇이 가려졌는지
-       알 수 없다. 자리를 차지하되 먼저 오게 하는 편이 정직하다.
-    */
-    order: -1;
-    width: auto;
-    margin: 0 0.8rem 0 0;
   }
 `;
 
@@ -240,7 +225,7 @@ export const Badge = styled.span`
   padding: 0 0.6rem;
   border-radius: 999px;
   background: ${ORANGE};
-  color: #ffffff;
+  color: ${INK};
   font-size: 1.2rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
