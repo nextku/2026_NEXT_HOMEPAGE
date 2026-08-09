@@ -403,7 +403,7 @@ function MemberRow({
 
       {!open ? (
         <S.Actions>
-          {row.role === "admin" && <S.Badge $tone="approved">관리자</S.Badge>}
+          {row.role === "admin" && <S.Badge $tone="approved">운영진</S.Badge>}
           <S.Promote type="button" onClick={() => setOpen(true)}>
             수정
           </S.Promote>
@@ -501,9 +501,12 @@ function MemberRow({
           </S.EditGrid>
 
           {/*
-            직책과 별개다. 직책은 학회 안에서의 역할이고, 이것은 이 화면에
-            들어올 수 있는지를 정한다. NEXT 공용 계정처럼 직책 없이 권한만
-            가진 경우가 있다.
+            직책과 별개다. 직책은 학회 안에서 무엇으로 불리는가이고, 이것은
+            이 화면에 들어올 수 있는가다. 대표라도 이 칸을 켜지 않으면 못 들어오고,
+            NEXT 공용 계정처럼 직책 없이 권한만 가진 경우도 있다.
+
+            DB 의 값은 그대로 'admin' 이다. 화면에서 부르는 이름만 바꿨다 —
+            열거형을 고치면 정책과 함수까지 모두 따라가야 하는데 얻는 것이 없다.
           */}
           <S.Check>
             <input
@@ -513,7 +516,7 @@ function MemberRow({
               disabled={isSelf}
             />
             <span>
-              관리자 권한
+              운영진 권한
               <small>
                 {isSelf
                   ? "본인 권한은 스스로 내릴 수 없습니다."
@@ -556,6 +559,7 @@ type Stats = {
 };
 
 const RANGES = [
+  { days: 1, label: "오늘" },
   { days: 7, label: "7일" },
   { days: 30, label: "30일" },
   { days: 90, label: "90일" },
@@ -608,7 +612,7 @@ function Stats() {
             $on={days === r.days}
             onClick={() => setDays(r.days)}
           >
-            최근 {r.label}
+            {r.days === 1 ? r.label : `최근 ${r.label}`}
           </S.Chip>
         ))}
       </S.StatBar>

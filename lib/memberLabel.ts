@@ -25,7 +25,13 @@ export function memberLabel(p: {
   return parts.join(" · ");
 }
 
-/** 이름이 아직 없는 사람. 가입만 하고 신청서를 안 쓴 상태다. */
+/**
+ * 신청서를 아직 안 쓴 상태인가.
+ *
+ * 운영진 권한이 있는 계정은 예외다. NEXT 공용 계정처럼 사람이 아닌 계정이 있고, 그런 계정에는
+ * 기수가 없다. 기수를 요구하면 아무 값이나 적어 넣게 되고 명단이 지저분해진다.
+ */
 export function needsApplication(p: Profile) {
+  if (p.role === "admin") return false;
   return !p.name?.trim() || p.generation === null;
 }

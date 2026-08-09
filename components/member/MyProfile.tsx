@@ -110,10 +110,12 @@ export default function MyProfile({
         </S.Field>
 
         <S.Readonly>
-          <div>
-            <span>기수</span>
-            <strong>{profile.generation}기</strong>
-          </div>
+          {profile.generation !== null && (
+            <div>
+              <span>기수</span>
+              <strong>{profile.generation}기</strong>
+            </div>
+          )}
           <div>
             <span>이메일</span>
             <strong>{profile.email}</strong>
