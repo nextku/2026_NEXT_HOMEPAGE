@@ -18,6 +18,8 @@ export type RosterRow = {
   name: string;
   generation: number;
   title?: string;
+  /** 직책을 맡은 기수. 입회 기수와 같으면 비운다. */
+  staff_generation?: number;
 };
 
 export type RosterSkip = { line: string; reason: string };
@@ -69,9 +71,15 @@ export function parseRoster(text: string): RosterParse {
     if (isHeaderLine(cells)) continue;
 
     const email = cells.find((c) => EMAIL.test(c))?.toLowerCase();
-    const genCell = cells.find((c) => GENERATION.test(c));
+    /*
+     * 숫자 칸이 둘일 수 있다 — 입회 기수와 직책 기수. 나온 순서대로 읽는다.
+     * "14, 홍길동, 대표, 15" 든 "홍길동 14 대표 15" 든 결과가 같다.
+     */
+    const genCells = cells.filter((c) => GENERATION.test(c));
+    const genCell = genCells[0];
+    const staffCell = genCells[1];
     const rest = cells.filter(
-      (c) => c !== genCell && c.toLowerCase() !== email,
+      (c) => !genCells.includes(c) && c.toLowerCase() !== email,
     );
 
     if (!email) {
@@ -97,12 +105,20 @@ export function parseRoster(text: string): RosterParse {
       continue;
     }
 
+    const title = rest[1] || undefined;
+    const staff = staffCell
+      ? Number(GENERATION.exec(staffCell)![1])
+      : undefined;
+
     seen.add(email);
     rows.push({
       email,
       name: rest[0],
       generation,
-      title: rest[1] || undefined,
+      title,
+      // 직책이 없으면 그 기수도 의미가 없고, 같으면 굳이 두 번 담지 않는다.
+      staff_generation:
+        title && staff && staff !== generation ? staff : undefined,
     });
   }
 

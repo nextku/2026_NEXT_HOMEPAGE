@@ -998,6 +998,42 @@ export const ChartTip = styled.div`
   }
 `;
 
+/**
+ * 기수·직책 조각.
+ *
+ * 이름 옆에 이어 붙이면 "14기 · 15기 대표 이성민" 처럼 읽혀서 어디까지가
+ * 소속이고 어디부터가 이름인지 흐려진다. 이름은 이름대로 크게 두고,
+ * 소속은 아래에 조각으로 늘어놓는다.
+ */
+export const Tags = styled.ul`
+  list-style: none;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+`;
+
+export const Tag = styled.li<{ $strong?: boolean }>`
+  padding: 0.3rem 0.7rem;
+  border-radius: 5px;
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+
+  ${({ $strong }) =>
+    $strong
+      ? css`
+          background: rgba(29, 122, 62, 0.12);
+          color: #1d7a3e;
+        `
+      : css`
+          background: #f1ece2;
+          color: #57524a;
+        `}
+`;
+
 /* ─── 학회원 수정 패널 ────────────────────────────────────────────────── */
 
 export const EditBox = styled.div`
