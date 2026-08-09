@@ -183,6 +183,13 @@ export function authorText(
   const who = name?.trim() || "이름 없음";
   const parts = [];
   if (generation) parts.push(`${generation}기`);
-  if (title) parts.push(title);
+  /*
+     직책이 이름과 같으면 붙이지 않는다.
+
+     공용 계정은 이름과 직책이 둘 다 "관리자" 라서 "관리자 관리자" 로 나왔다.
+     사람 계정에서도 성이 없는 별칭을 쓰면 같은 일이 생길 수 있다. 두 값이
+     같을 때 앞의 것은 아무것도 더 말해주지 않으므로 뺀다.
+  */
+  if (title && title.trim() !== who) parts.push(title.trim());
   return parts.length ? `${parts.join(" ")} ${who}` : who;
 }
