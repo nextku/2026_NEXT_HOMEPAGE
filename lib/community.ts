@@ -73,6 +73,27 @@ export async function fetchBoards() {
   return (data as Board[]) ?? [];
 }
 
+/**
+ * 승인을 기다리는 사람 수.
+ *
+ * 운영진 화면으로 가는 자리에 함께 보여준다. 들어가 봐야 알 수 있으면 며칠씩
+ * 방치되는데, 숫자가 옆에 있으면 그럴 일이 없다.
+ *
+ * 기수가 없는 행은 세지 않는다. 계정만 만들고 신청서를 아직 안 쓴 사람이라
+ * 운영진이 할 수 있는 일이 없다 - admin 화면의 대기 목록과 같은 기준이다.
+ *
+ * 행을 받지 않고 개수만 센다(head: true). 운영진이 아닌 계정이 불러도 RLS 가
+ * 자기 행만 보여주므로 남의 수는 새지 않는다.
+ */
+export async function fetchPendingCount() {
+  const { count } = await createClient()
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending")
+    .not("generation", "is", null);
+  return count ?? 0;
+}
+
 export async function fetchPosts(boardSlug: string | null, limit = 30) {
   let q = createClient()
     .from("post_list")

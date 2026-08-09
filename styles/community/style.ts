@@ -173,6 +173,81 @@ export const SideLink = styled.button<{ $on: boolean }>`
 `;
 
 /**
+ * 운영진 화면으로.
+ *
+ * 판도 아니고 계정 항목도 아니다. 승인·명단처럼 권한이 있어야 하는 일을 하러
+ * 가는 자리라, 판 목록에 섞으면 게시판인 줄 알고 계정 항목에 섞으면 내 정보나
+ * 로그아웃과 같은 무게로 읽힌다. 둘 사이에 따로 세운다.
+ *
+ * 자리 자체에는 색을 쓰지 않는다. 오렌지는 글쓰기가 이미 쓰고 있어 하나 더
+ * 두면 무엇이 주된 행동인지 흐려진다. 굵기와 여백으로 떼어 놓고, 색은 옆의
+ * 숫자에만 쓴다 - 그것은 행동이 아니라 "사람이 기다리고 있다" 는 알림이다.
+ */
+export const AdminLink = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  white-space: nowrap;
+  min-height: 3.4rem;
+  margin-top: 1.2rem;
+  padding: 0 1.2rem;
+  ${squircle(9)};
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: ${INK};
+  cursor: pointer;
+  transition: background 0.16s ease;
+
+  @media (any-hover: hover) {
+    &:hover {
+      background: rgba(23, 21, 15, 0.05);
+    }
+  }
+
+  @media (max-width: 900px) {
+    /*
+       좁은 화면에서 판 목록은 옆으로 밀리는 줄이 된다. 순서대로 두면 운영진이
+       일곱 번째 판 뒤에 놓여 스크롤해야 보인다. 승인이 밀리고 있는 것을
+       알리려고 세운 자리가 화면 밖에 있으면 뜻이 없으므로 맨 앞으로 보낸다.
+
+       띄워서 겹치는 방법도 있지만 그러면 밑으로 판이 지나가 무엇이 가려졌는지
+       알 수 없다. 자리를 차지하되 먼저 오게 하는 편이 정직하다.
+    */
+    order: -1;
+    width: auto;
+    margin: 0 0.8rem 0 0;
+  }
+`;
+
+/**
+ * 대기 인원.
+ *
+ * 장식이 아니라 수다. 0 이면 그리지 않는다 - 늘 떠 있으면 눈이 익어서 정작
+ * 사람이 기다릴 때 알아채지 못한다.
+ */
+export const Badge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: 999px;
+  background: ${ORANGE};
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+`;
+
+/**
  * 나.
  *
  * 글쓰기와 한 줄에 섞여 있었다. 글쓰기는 지금 보고 있는 판에 하는 일이고

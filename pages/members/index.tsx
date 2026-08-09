@@ -7,6 +7,7 @@ import MyProfile from "components/member/MyProfile";
 import {
   authorText,
   fetchBoards,
+  fetchPendingCount,
   fetchPosts,
   whenText,
   type Board,
@@ -147,11 +148,18 @@ function Community({
   const [boards, setBoards] = useState<Board[]>([]);
   const [posts, setPosts] = useState<PostListItem[] | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState(0);
 
   useEffect(() => {
     if (!isApproved) return;
     fetchBoards().then(setBoards);
   }, [isApproved]);
+
+  // 승인 대기 인원. 운영진 자리에 함께 띄운다.
+  useEffect(() => {
+    if (!isAdmin) return;
+    fetchPendingCount().then(setPending);
+  }, [isAdmin]);
 
   /*
    * 판을 바꿔도 이전 목록을 지우지 않는다.
@@ -205,22 +213,27 @@ function Community({
                 {b.name}
               </C.SideLink>
             ))}
+            {isAdmin && (
+              <C.AdminLink type="button" onClick={() => router.push("/admin")}>
+                운영진
+                {pending > 0 && <C.Badge>{pending}</C.Badge>}
+              </C.AdminLink>
+            )}
           </C.SideNav>
 
           <C.Me>
             <C.MeName>
               <strong>{name}</strong>
-              {label && <span>{label}</span>}
+              {/*
+                 공용 계정처럼 이름과 직책이 같은 값인 경우가 있다("관리자").
+                 그대로 두면 같은 낱말이 두 줄로 겹쳐 나온다.
+              */}
+              {label && label !== name && <span>{label}</span>}
             </C.MeName>
             <C.MeLinks>
               <C.MeLink type="button" onClick={onProfile}>
                 내 정보
               </C.MeLink>
-              {isAdmin && (
-                <C.MeLink type="button" onClick={() => router.push("/admin")}>
-                  운영진
-                </C.MeLink>
-              )}
               <C.MeLink type="button" onClick={() => signOut()}>
                 로그아웃
               </C.MeLink>
