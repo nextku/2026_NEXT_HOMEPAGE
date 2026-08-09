@@ -327,11 +327,18 @@ export const RecruitPopupButton = styled.button`
   -webkit-backdrop-filter: blur(14px) saturate(150%);
   /* 테두리 대신 안쪽 링. border 를 새로 주면 버튼 크기가 1px 씩 밀린다.
      위는 밝게, 아래는 어둡게 해서 두께가 있는 유리처럼 보이게 한다. */
+  /*
+     그림자에 오렌지를 섞지 않는다. 버튼 색이 주변으로 번지면 발광하는 것처럼
+     보이고, 그 인상이 곧 '만들어낸 티' 로 읽힌다. 실제 물체의 그림자는 그
+     물체의 색이 아니라 바닥의 어두움이다. 검정으로 아래에 떨어뜨리고,
+     두께는 안쪽 링이 만든다.
+  */
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.16),
-    0 0.83cqw 2.2cqw rgba(247, 148, 30, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 0.28cqw 0.7cqw rgba(0, 0, 0, 0.38),
+    0 1.1cqw 2.4cqw rgba(0, 0, 0, 0.34);
   font-size: 2.15cqw;
   font-weight: 800;
   cursor: pointer;
@@ -353,10 +360,11 @@ export const RecruitPopupButton = styled.button`
     transform: translateY(-2px);
     /* 떠오른 만큼 아래 빛도 넓어져야 들린 것처럼 보인다. */
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.72),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.28),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.16),
-      0 1.4cqw 3cqw rgba(247, 148, 30, 0.36);
+      inset 0 1px 0 rgba(255, 255, 255, 0.66),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.24),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+      0 0.42cqw 1cqw rgba(0, 0, 0, 0.4),
+      0 1.8cqw 3.4cqw rgba(0, 0, 0, 0.38);
   }
   &:hover svg {
     transform: translateX(4px);
@@ -376,10 +384,11 @@ export const RecruitPopupButton = styled.button`
     gap: 8px;
     /* cqw 그림자는 모바일에서 컨테이너 폭을 따라 과하게 번진다. px 로 고정한다. */
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.22),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.16),
-      0 6px 18px rgba(247, 148, 30, 0.28);
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+      0 2px 5px rgba(0, 0, 0, 0.38),
+      0 8px 20px rgba(0, 0, 0, 0.34);
 
     & svg {
       width: 18px;

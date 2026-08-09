@@ -13,6 +13,7 @@ import {
   type Post,
 } from "constants/member";
 import MyProfile from "components/member/MyProfile";
+import { memberLabel, needsApplication } from "lib/memberLabel";
 import { createClient } from "lib/supabase/client";
 import {
   signOut,
@@ -94,7 +95,7 @@ export default function Members() {
       );
     }
 
-    if (profile.generation === null || rewriting) {
+    if (needsApplication(profile) || rewriting) {
       return (
         <Application
           profile={profile}
