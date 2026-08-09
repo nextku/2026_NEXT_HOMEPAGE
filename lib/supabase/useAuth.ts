@@ -18,6 +18,8 @@ export type Profile = {
   staff_generation: number | null;
   status: MemberStatus;
   role: MemberRole;
+  /** 학회 공용 관리자 계정. 항상 한 명이고 권한 이전으로만 바뀐다. */
+  is_owner: boolean;
   created_at: string;
   reject_note: string | null;
 };
@@ -103,7 +105,11 @@ export function useAuth() {
     refresh: () => setReloadKey((n) => n + 1),
     isLoggedIn: !!session,
     isApproved: profile?.status === "approved",
-    isAdmin: profile?.role === "admin" && profile?.status === "approved",
+    // 관리자는 운영진이 하는 일을 모두 할 수 있다. DB 의 is_admin() 과 같은 판단.
+    isAdmin:
+      profile?.status === "approved" &&
+      (profile?.role === "admin" || profile?.is_owner === true),
+    isOwner: profile?.status === "approved" && profile?.is_owner === true,
   };
 }
 
@@ -297,11 +303,29 @@ export async function updateProfile(
   return error ? "저장하지 못했습니다. 잠시 후 다시 시도해 주세요." : null;
 }
 
-export async function signOut(to = "/home") {
+/** 관리자 권한을 다른 승인된 계정으로 넘긴다. 넘긴 사람은 운영진으로 남는다. */
+export async function transferOwnership(targetId: string) {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("transfer_ownership", {
+    p_target: targetId,
+  });
+  return error
+    ? ko(error.message, "권한을 넘기지 못했습니다. 잠시 후 다시 시도해 주세요.")
+    : null;
+}
+
+export async function signOut(to?: unknown) {
   const supabase = createClient();
   // 서버 세션이 이미 사라진 경우에도 브라우저에 남은 토큰은 지워야 한다.
   await supabase.auth.signOut().catch(() => undefined);
-  window.location.href = to;
+
+  /*
+   * onClick={signOut} 로 쓰면 React 가 클릭 이벤트를 첫 인자로 넘긴다.
+   * 그대로 주소에 넣으면 "[object Object]" 로 이동해 404 가 났다.
+   * 호출부를 고쳤지만, 이런 실수 하나가 로그아웃을 막는 일은 없어야 한다.
+   */
+  const target = typeof to === "string" && to.startsWith("/") ? to : "/home";
+  window.location.href = target;
 }
 
 /** 낡은 세션을 버리고 로그인 화면으로. 재로그인 안내에서 쓴다. */

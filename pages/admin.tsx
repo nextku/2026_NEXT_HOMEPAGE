@@ -5,10 +5,15 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { PEOPLE_INFORMATION } from "constants/people";
 import { POST_CATEGORIES } from "constants/member";
 import DailyChart from "components/member/DailyChart";
-import { memberLabel } from "lib/memberLabel";
+import { memberTags } from "lib/memberLabel";
 import { parseRoster, type RosterParse } from "lib/roster";
 import { createClient } from "lib/supabase/client";
-import { signOut, useAuth, type Profile } from "lib/supabase/useAuth";
+import {
+  signOut,
+  transferOwnership,
+  useAuth,
+  type Profile,
+} from "lib/supabase/useAuth";
 import * as S from "styles/member/style";
 
 /**
@@ -38,7 +43,7 @@ const TITLE_PRESETS = ["대표", "부대표", "운영진"] as const;
 
 export default function Admin() {
   const router = useRouter();
-  const { session, profile, loading, isAdmin } = useAuth();
+  const { session, profile, loading, isAdmin, isOwner } = useAuth();
   const [tab, setTab] = useState<Tab>("pending");
   const [rows, setRows] = useState<Profile[] | null>(null);
 
@@ -95,7 +100,7 @@ export default function Admin() {
               <S.Approve type="button" onClick={() => router.push("/members")}>
                 학회원 라운지로
               </S.Approve>
-              <S.Reject type="button" onClick={signOut}>
+              <S.Reject type="button" onClick={() => signOut()}>
                 로그아웃
               </S.Reject>
             </S.Actions>
@@ -120,7 +125,7 @@ export default function Admin() {
               <S.Promote type="button" onClick={() => router.push("/members")}>
                 라운지 보기
               </S.Promote>
-              <S.SignOut type="button" onClick={signOut}>
+              <S.SignOut type="button" onClick={() => signOut()}>
                 로그아웃
               </S.SignOut>
             </S.Actions>
@@ -194,6 +199,7 @@ export default function Admin() {
                   key={r.id}
                   row={r}
                   isSelf={r.id === profile!.id}
+                  viewerIsOwner={isOwner}
                   onDone={load}
                 />
               ))}
@@ -334,10 +340,12 @@ function PendingRow({
 function MemberRow({
   row,
   isSelf,
+  viewerIsOwner,
   onDone,
 }: {
   row: Profile;
   isSelf: boolean;
+  viewerIsOwner: boolean;
   onDone: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -358,6 +366,7 @@ function MemberRow({
     !!row.title && !TITLE_PRESETS.includes(row.title as never),
   );
   const [isAdminRole, setIsAdminRole] = useState(row.role === "admin");
+  const [handing, setHanding] = useState(false);
 
   /*
    * 필드를 한 줄에 늘어놓으면 좁은 화면에서 서로를 밀어낸다. 평소에는 요약만
@@ -376,7 +385,8 @@ function MemberRow({
         title: title.trim() || null,
         // 직책이 없으면 그 기수도 의미가 없다.
         staff_generation: title.trim() && staffGen ? Number(staffGen) : null,
-        role: isAdminRole ? "admin" : "member",
+        // 관리자 계정의 권한은 이 화면에서 바꾸지 않는다. 이전으로만 움직인다.
+        role: row.is_owner ? row.role : isAdminRole ? "admin" : "member",
       })
       .eq("id", row.id);
 
@@ -391,19 +401,27 @@ function MemberRow({
   return (
     <S.Row>
       <S.Who>
-        <strong>
-          {memberLabel(row) ? `${memberLabel(row)} ` : ""}
-          {row.name || "이름 없음"}
-        </strong>
+        <strong>{row.name || "이름 없음"}</strong>
         <p>
           {row.department ? `${row.department} · ` : ""}
           {row.email}
         </p>
+        {memberTags(row).length > 0 && (
+          <S.Tags>
+            {memberTags(row).map((t) => (
+              <S.Tag key={t} $strong={t === "관리자"}>
+                {t}
+              </S.Tag>
+            ))}
+          </S.Tags>
+        )}
       </S.Who>
 
       {!open ? (
         <S.Actions>
-          {row.role === "admin" && <S.Badge $tone="approved">운영진</S.Badge>}
+          {!row.is_owner && row.role === "admin" && (
+            <S.Badge $tone="approved">운영진</S.Badge>
+          )}
           <S.Promote type="button" onClick={() => setOpen(true)}>
             수정
           </S.Promote>
@@ -508,22 +526,56 @@ function MemberRow({
             DB 의 값은 그대로 'admin' 이다. 화면에서 부르는 이름만 바꿨다 —
             열거형을 고치면 정책과 함수까지 모두 따라가야 하는데 얻는 것이 없다.
           */}
-          <S.Check>
-            <input
-              type="checkbox"
-              checked={isAdminRole}
-              onChange={(e) => setIsAdminRole(e.target.checked)}
-              disabled={isSelf}
-            />
-            <span>
-              운영진 권한
-              <small>
-                {isSelf
-                  ? "본인 권한은 스스로 내릴 수 없습니다."
-                  : "승인·명단·통계 화면에 들어올 수 있습니다."}
-              </small>
-            </span>
-          </S.Check>
+          {row.is_owner ? (
+            <S.Notice>
+              학회 공용 관리자 계정입니다. 운영진이 하는 모든 일을 할 수 있고,
+              권한은 아래 이전으로만 옮길 수 있습니다.
+            </S.Notice>
+          ) : (
+            <S.Check>
+              <input
+                type="checkbox"
+                checked={isAdminRole}
+                onChange={(e) => setIsAdminRole(e.target.checked)}
+                disabled={isSelf}
+              />
+              <span>
+                운영진 권한
+                <small>
+                  {isSelf
+                    ? "본인 권한은 스스로 내릴 수 없습니다."
+                    : "승인·명단·통계 화면에 들어올 수 있습니다."}
+                </small>
+              </span>
+            </S.Check>
+          )}
+
+          {/*
+            이전은 관리자만, 그리고 자기 자신이 아닌 승인된 계정에만 보인다.
+            되돌리려면 받은 쪽에서 다시 넘겨줘야 하므로 한 번 묻는다.
+          */}
+          {viewerIsOwner && !row.is_owner && row.status === "approved" && (
+            <S.Actions>
+              <S.Reject
+                type="button"
+                disabled={handing || busy}
+                onClick={async () => {
+                  const ok = window.confirm(
+                    `관리자 권한을 ${row.name || row.email} 에게 넘깁니다.\n` +
+                      "넘긴 뒤에는 본인이 되돌릴 수 없고, 받은 쪽에서 다시 넘겨야 합니다.",
+                  );
+                  if (!ok) return;
+                  setHanding(true);
+                  const err = await transferOwnership(row.id);
+                  if (err) setMsg(err);
+                  else onDone();
+                  setHanding(false);
+                }}
+              >
+                {handing ? "넘기는 중" : "관리자 권한 넘기기"}
+              </S.Reject>
+            </S.Actions>
+          )}
 
           {msg && <S.Notice $bad>{msg}</S.Notice>}
 
@@ -800,7 +852,9 @@ function RosterForm({ onSaved }: { onSaved: () => void }) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={
-            "hong@gmail.com, 14, 홍길동\nkim@gmail.com, 13, 김철수, 부대표"
+            "hong@gmail.com, 14, 홍길동\n" +
+            "kim@gmail.com, 13, 김철수, 부대표\n" +
+            "lee@gmail.com, 14, 이영희, 대표, 15"
           }
           rows={10}
         />
@@ -835,7 +889,12 @@ function RosterForm({ onSaved }: { onSaved: () => void }) {
               {parsed.rows.slice(0, 5).map((r) => (
                 <li key={r.email}>
                   {r.generation}기 {r.name}
-                  {r.title ? ` · ${r.title}` : ""} — {r.email}
+                  {r.title
+                    ? r.staff_generation
+                      ? ` · ${r.staff_generation}기 ${r.title}`
+                      : ` · ${r.title}`
+                    : ""}{" "}
+                  — {r.email}
                 </li>
               ))}
               {parsed.rows.length > 5 && <li>외 {parsed.rows.length - 5}명</li>}
