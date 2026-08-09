@@ -121,7 +121,12 @@ export default function MyProfile({
           {profile.title && (
             <div>
               <span>직책</span>
-              <strong>{profile.title}</strong>
+              <strong>
+                {profile.staff_generation &&
+                profile.staff_generation !== profile.generation
+                  ? `${profile.staff_generation}기 ${profile.title}`
+                  : profile.title}
+              </strong>
             </div>
           )}
           <p>

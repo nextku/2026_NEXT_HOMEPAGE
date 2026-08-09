@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { PEOPLE_INFORMATION } from "constants/people";
 import { POST_CATEGORIES } from "constants/member";
 import DailyChart from "components/member/DailyChart";
+import { memberLabel } from "lib/memberLabel";
 import { parseRoster, type RosterParse } from "lib/roster";
 import { createClient } from "lib/supabase/client";
 import { signOut, useAuth, type Profile } from "lib/supabase/useAuth";
@@ -328,29 +329,47 @@ function MemberRow({
   isSelf: boolean;
   onDone: () => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [title, setTitle] = useState(row.title ?? "");
+  const [msg, setMsg] = useState("");
 
-  const setRole = async (role: "member" | "admin") => {
-    setBusy(true);
-    await createClient().from("profiles").update({ role }).eq("id", row.id);
-    onDone();
-  };
+  const [name, setName] = useState(row.name ?? "");
+  const [department, setDepartment] = useState(row.department ?? "");
+  const [generation, setGeneration] = useState(
+    row.generation ? String(row.generation) : "",
+  );
+  const [title, setTitle] = useState(row.title ?? "");
+  const [staffGen, setStaffGen] = useState(
+    row.staff_generation ? String(row.staff_generation) : "",
+  );
+  const [isAdminRole, setIsAdminRole] = useState(row.role === "admin");
 
   /*
-   * 직책은 정해진 목록이 없다. 기수마다 팀 이름이 바뀌고 새 직책이 생긴다.
-   * 목록으로 묶어두면 그때마다 코드를 고쳐야 하므로 그냥 적게 둔다.
-   * 비우면 일반 학회원이다.
+   * 필드를 한 줄에 늘어놓으면 좁은 화면에서 서로를 밀어낸다. 평소에는 요약만
+   * 보이고, 고칠 때만 펼친다. 목록을 훑는 일이 고치는 일보다 훨씬 잦다.
    */
-  const saveTitle = async () => {
-    const next = title.trim();
-    if (next === (row.title ?? "")) return;
+  const save = async () => {
     setBusy(true);
-    await createClient()
+    setMsg("");
+
+    const { error } = await createClient()
       .from("profiles")
-      .update({ title: next || null })
+      .update({
+        name: name.trim(),
+        department: department.trim() || null,
+        generation: generation ? Number(generation) : null,
+        title: title.trim() || null,
+        // 직책이 없으면 그 기수도 의미가 없다.
+        staff_generation: title.trim() && staffGen ? Number(staffGen) : null,
+        role: isAdminRole ? "admin" : "member",
+      })
       .eq("id", row.id);
-    onDone();
+
+    if (error) setMsg("저장하지 못했습니다.");
+    else {
+      setOpen(false);
+      onDone();
+    }
     setBusy(false);
   };
 
@@ -358,50 +377,110 @@ function MemberRow({
     <S.Row>
       <S.Who>
         <strong>
-          {row.generation}기 {row.name}
-          {row.title ? ` · ${row.title}` : ""}
+          {memberLabel(row) ? `${memberLabel(row)} ` : ""}
+          {row.name || "이름 없음"}
         </strong>
         <p>
-          {row.department} · {row.email}
+          {row.department ? `${row.department} · ` : ""}
+          {row.email}
         </p>
       </S.Who>
 
-      <S.Actions>
-        <S.TitleInput
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onBlur={saveTitle}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") e.currentTarget.blur();
-          }}
-          placeholder="직책 없음"
-          maxLength={20}
-          aria-label={`${row.name} 직책`}
-        />
-        {row.role === "admin" ? (
-          <>
-            <S.Badge $tone="approved">운영진</S.Badge>
-            {/* 마지막 운영진이 스스로를 내리면 아무도 승인할 수 없게 된다. */}
-            {!isSelf && (
-              <S.Promote
-                type="button"
-                disabled={busy}
-                onClick={() => setRole("member")}
-              >
-                운영진 해제
-              </S.Promote>
-            )}
-          </>
-        ) : (
-          <S.Promote
-            type="button"
-            disabled={busy}
-            onClick={() => setRole("admin")}
-          >
-            운영진으로 지정
+      {!open ? (
+        <S.Actions>
+          {row.role === "admin" && <S.Badge $tone="approved">관리자</S.Badge>}
+          <S.Promote type="button" onClick={() => setOpen(true)}>
+            수정
           </S.Promote>
-        )}
-      </S.Actions>
+        </S.Actions>
+      ) : (
+        <S.EditBox>
+          <S.EditGrid>
+            <S.Field>
+              <span>이름</span>
+              <S.Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={20}
+              />
+            </S.Field>
+            <S.Field>
+              <span>기수</span>
+              <S.Input
+                value={generation}
+                onChange={(e) =>
+                  setGeneration(e.target.value.replace(/\D/g, "").slice(0, 2))
+                }
+                inputMode="numeric"
+                placeholder="14"
+              />
+            </S.Field>
+            <S.Field>
+              <span>학과</span>
+              <S.Input
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                maxLength={30}
+              />
+            </S.Field>
+            <S.Field>
+              <span>직책</span>
+              <S.Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="없으면 비워두세요"
+                maxLength={20}
+              />
+            </S.Field>
+            <S.Field>
+              <span>직책 기수</span>
+              <S.Input
+                value={staffGen}
+                onChange={(e) =>
+                  setStaffGen(e.target.value.replace(/\D/g, "").slice(0, 2))
+                }
+                inputMode="numeric"
+                placeholder={generation || "15"}
+                disabled={!title.trim()}
+              />
+              <small>입회 기수와 다를 때만 적으면 됩니다.</small>
+            </S.Field>
+          </S.EditGrid>
+
+          {/*
+            직책과 별개다. 직책은 학회 안에서의 역할이고, 이것은 이 화면에
+            들어올 수 있는지를 정한다. NEXT 공용 계정처럼 직책 없이 권한만
+            가진 경우가 있다.
+          */}
+          <S.Check>
+            <input
+              type="checkbox"
+              checked={isAdminRole}
+              onChange={(e) => setIsAdminRole(e.target.checked)}
+              disabled={isSelf}
+            />
+            <span>
+              관리자 권한
+              <small>
+                {isSelf
+                  ? "본인 권한은 스스로 내릴 수 없습니다."
+                  : "승인·명단·통계 화면에 들어올 수 있습니다."}
+              </small>
+            </span>
+          </S.Check>
+
+          {msg && <S.Notice $bad>{msg}</S.Notice>}
+
+          <S.Actions>
+            <S.Approve type="button" disabled={busy} onClick={save}>
+              {busy ? "저장 중" : "저장"}
+            </S.Approve>
+            <S.Promote type="button" onClick={() => setOpen(false)}>
+              취소
+            </S.Promote>
+          </S.Actions>
+        </S.EditBox>
+      )}
     </S.Row>
   );
 }
@@ -420,6 +499,7 @@ type Stats = {
   tabs: { path: string; tab: string; views: number; visitors: number }[];
   sources: { source: string; visits: number }[];
   daily: { day: string; visitors: number }[];
+  internal_visitors: number;
 };
 
 const RANGES = [
@@ -528,6 +608,15 @@ function Stats() {
           <S.StatBlock style={{ marginBottom: "clamp(2.4rem, 4vw, 3.6rem)" }}>
             <h2>일별 방문자</h2>
             <DailyChart rows={data.daily ?? []} days={data.days} />
+            {/*
+              빼놓고 말하지 않으면 "왜 이것밖에 안 되지" 를 묻게 된다.
+              얼마를 뺐는지 같이 적는다.
+            */}
+            {data.internal_visitors > 0 && (
+              <S.Notice style={{ marginTop: "0.8rem" }}>
+                학회원·운영진 {data.internal_visitors}명의 방문은 빼고 셌습니다.
+              </S.Notice>
+            )}
           </S.StatBlock>
 
           <S.StatGrid>
