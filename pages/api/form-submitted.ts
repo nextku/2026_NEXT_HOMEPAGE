@@ -8,7 +8,7 @@ import { esc, rows, sendMail, shell } from "lib/mail";
  *
  * 폼 자체는 구글에 그대로 둔다. 옮기면 이미 만들어둔 문항과 응답 시트를 다시
  * 만들어야 하는데 그럴 이유가 없다. 대신 제출 순간에 스크립트가 여기를 부르고,
- * 여기서 두 통을 보낸다 — 지원자에게 접수 확인, 운영진에게 알림.
+ * 여기서 지원자에게 접수 확인을 보낸다.
  *
  * 메일 문구를 스크립트가 아니라 여기 두는 이유: 문구 하나 고치자고 구글
  * 스크립트 편집기를 열게 되면 아무도 안 고친다. 일정도 constants/recruit 를
@@ -22,11 +22,15 @@ type Body = {
   name?: string;
   /** 지원자 메일. 없으면 지원자에게는 보내지 않고 운영진 알림만 간다. */
   email?: string;
-  /** 나머지 응답 전부. 운영진 알림에 그대로 옮겨 적는다. */
+  /**
+   * 나머지 응답. 지금은 쓰지 않는다 — 응답 시트에 그대로 남기 때문이다.
+   * 스크립트는 계속 보내주므로, 나중에 알림이 필요해지면 여기서 꺼내 쓰면 된다.
+   */
   answers?: Record<string, string>;
 };
 
-const STAFF_TO = "nextku.contact@gmail.com";
+/** 지원자가 답장을 누르면 여기로 간다. noreply 로 가면 아무도 못 본다. */
+const REPLY_TO = "nextku.contact@gmail.com";
 
 export default async function handler(
   req: NextApiRequest,
@@ -43,7 +47,7 @@ export default async function handler(
     return res.status(401).json({ error: "unauthorized" });
   }
 
-  const { name, email, answers = {} } = (req.body ?? {}) as Body;
+  const { name, email } = (req.body ?? {}) as Body;
 
   const applicant = (email ?? "").trim();
   const who = (name ?? "").trim();
@@ -87,41 +91,23 @@ export default async function handler(
       subject: `[NEXT] ${gen}기 지원이 완료되었습니다`,
       html,
       // 지원자가 답장하면 학회 메일로 간다. noreply 로 가면 아무도 못 본다.
-      replyTo: STAFF_TO,
+      replyTo: REPLY_TO,
     });
 
     if (!sent.ok) {
-      // 지원자 메일이 실패해도 운영진 알림은 보낸다. 접수 사실이 더 중요하다.
       console.error("[form-submitted] 지원자 메일 실패:", sent.error);
+      return res.status(502).json({ error: "mail failed" });
     }
   }
 
-  // 운영진 알림
-  const pairs: [string, string][] = [];
-  if (who) pairs.push(["이름", who]);
-  if (applicant) pairs.push(["이메일", applicant]);
-  Object.entries(answers).forEach(([k, v]) => {
-    const value = String(v ?? "").trim();
-    if (value)
-      pairs.push([k, value.length > 120 ? `${value.slice(0, 120)}…` : value]);
-  });
+  /*
+     운영진에게는 보내지 않는다.
 
-  const staff = await sendMail({
-    to: STAFF_TO,
-    subject: `[NEXT] ${gen}기 새 지원서${who ? ` — ${who}` : ""}`,
-    html: shell({
-      title: "새 지원서가 들어왔습니다",
-      lead: "구글 폼에 방금 제출된 내용입니다. 전체 응답은 응답 시트에서 볼 수 있습니다.",
-      middle: rows(pairs),
-      note: "이 메일은 폼이 제출될 때마다 자동으로 갑니다.",
-    }),
-    replyTo: applicant || undefined,
-  });
-
-  if (!staff.ok) {
-    console.error("[form-submitted] 운영진 알림 실패:", staff.error);
-    return res.status(502).json({ error: "mail failed" });
-  }
+     응답은 구글 폼의 응답 시트에 그대로 쌓이고, 지원 기간에는 제출이 몰린다.
+     제출마다 한 통씩 가면 메일함이 지원서로 덮이고, 정작 봐야 할 메일이 묻힌다.
+     알림이 필요해지면 그때 다시 붙이면 된다 — 지금 필요한 것은 지원자에게
+     가는 한 통뿐이다.
+  */
 
   return res.status(200).json({ ok: true });
 }
