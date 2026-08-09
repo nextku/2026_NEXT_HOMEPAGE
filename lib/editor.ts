@@ -39,7 +39,7 @@ export function editorExtensions(placeholder?: string) {
     Placeholder.configure({
       placeholder:
         placeholder ??
-        "여기에 쓰세요. '# ' 로 제목, '- ' 로 목록, 사진은 끌어다 놓으면 됩니다.",
+        "여기에 쓰세요. '/' 를 치면 제목·목록·사진을 고를 수 있습니다.",
     }),
   ];
 }
