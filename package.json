@@ -24,6 +24,7 @@
         "@tiptap/pm": "^2.27.2",
         "@tiptap/react": "^2.27.2",
         "@tiptap/starter-kit": "^2.27.2",
+        "@tiptap/suggestion": "^2.27.2",
         "@types/antd": "^1.0.0",
         "@types/aos": "^3.0.4",
         "@types/node": "18.11.18",

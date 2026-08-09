@@ -697,6 +697,9 @@ export const ToolGroup = styled.div`
 `;
 
 export const Tool = styled.button<{ $on?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 3.4rem;
   height: 3.4rem;
   padding: 0 0.9rem;
@@ -712,6 +715,13 @@ export const Tool = styled.button<{ $on?: boolean }>`
     background 0.14s ease,
     color 0.14s ease;
 
+  /* 아이콘은 글자 크기를 따라간다. 낱말 버튼과 나란히 서도 키가 맞는다. */
+  & svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    display: block;
+  }
+
   @media (any-hover: hover) {
     &:hover:not(:disabled) {
       background: ${TINT};
@@ -722,6 +732,106 @@ export const Tool = styled.button<{ $on?: boolean }>`
     opacity: 0.45;
     cursor: default;
   }
+`;
+
+/**
+ * 사진 넣기.
+ *
+ * 도구 막대에서 "사진" 이라는 낱말 하나로 서 있었더니 그것이 누를 수 있는
+ * 것인지, 사진을 올릴 수 있기는 한 것인지 알아보지 못했다. 다른 도구와 달리
+ * 테두리를 두르고 아이콘과 낱말을 함께 세워 버튼으로 읽히게 한다.
+ */
+export const ToolImage = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 3.4rem;
+  padding: 0 1.2rem;
+  border: 1px solid ${LINE};
+  border-radius: 8px;
+  background: ${FILL};
+  color: ${INK};
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.14s ease,
+    border-color 0.14s ease;
+
+  & svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    display: block;
+  }
+
+  @media (any-hover: hover) {
+    &:hover:not(:disabled) {
+      background: ${TINT};
+      border-color: #cfc7b8;
+    }
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
+`;
+
+/** 도구 사이를 가르는 실선. 무리마다 하나씩만. */
+export const ToolDivider = styled.span`
+  width: 1px;
+  height: 1.8rem;
+  background: ${LINE};
+  flex: 0 0 auto;
+`;
+
+/* ─── '/' 목록 ────────────────────────────────────────────────────────── */
+
+export const SlashCard = styled.div`
+  width: 24rem;
+  max-height: 28rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem;
+  border: 1px solid ${LINE};
+  ${squircle(12)};
+  background: #ffffff;
+  ${lift};
+`;
+
+export const SlashRow = styled.button<{ $on: boolean }>`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  border: 0;
+  background: ${({ $on }) => ($on ? TINT : "transparent")};
+  text-align: left;
+  padding: 0.8rem 1rem;
+  ${squircle(8)};
+  cursor: pointer;
+
+  & span {
+    font-size: 1.45rem;
+    font-weight: 650;
+    letter-spacing: -0.025em;
+    color: ${INK};
+  }
+  & small {
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+    color: ${FAINT};
+    white-space: nowrap;
+  }
+`;
+
+export const SlashEmpty = styled.div`
+  padding: 1.2rem 1rem;
+  font-size: 1.4rem;
+  letter-spacing: -0.025em;
+  color: ${MUTE};
 `;
 
 /** 선택한 글 위에 뜨는 막대. */

@@ -164,21 +164,32 @@ function Community({
   /*
    * 판을 바꿔도 이전 목록을 지우지 않는다.
    *
-   * 예전에는 여기서 목록을 비우고 새로 받아 채웠다. 그 사이 화면에 아무것도
-   * 없어서 판을 누를 때마다 한 번씩 깜빡였다. 새 목록이 도착할 때까지 있던
-   * 것을 두고 살짝 흐리게만 해두면, 바뀌는 순간에 화면이 비지 않는다.
+   * 처음에는 목록을 비우고 새로 받아 채웠다. 그 사이 화면이 비어서 판을 누를
+   * 때마다 깜빡였다. 그래서 있던 것을 두고 흐리게만 했더니, 이번에는 흐려졌다
+   * 돌아오는 것이 또 깜빡임으로 보였다 - 목록을 받는 데 보통 100ms 남짓이라
+   * 표시가 뜨자마자 사라진다.
+   *
+   * 기다림을 알릴 값어치가 있을 만큼 오래 걸릴 때만 알린다. 그보다 빠르면
+   * 바뀐 목록이 그냥 나타나는 것이 가장 조용하다.
    */
   useEffect(() => {
     if (!isApproved) return;
     let alive = true;
-    setBusy(true);
+
+    const slow = window.setTimeout(() => {
+      if (alive) setBusy(true);
+    }, 250);
+
     fetchPosts(boardSlug).then((rows) => {
       if (!alive) return;
+      window.clearTimeout(slow);
       setPosts(rows);
       setBusy(false);
     });
+
     return () => {
       alive = false;
+      window.clearTimeout(slow);
     };
   }, [isApproved, boardSlug]);
 
