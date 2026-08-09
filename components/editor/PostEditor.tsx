@@ -1,8 +1,13 @@
 import { BubbleMenu, EditorContent, useEditor } from "@tiptap/react";
-import type { JSONContent } from "@tiptap/react";
+import type { Editor, JSONContent } from "@tiptap/react";
 import React, { useCallback, useRef, useState } from "react";
 
-import { editorExtensions, uploadImage } from "lib/editor";
+import {
+  editorExtensions,
+  looksLikeMarkdown,
+  markdownToHtml,
+  uploadImage,
+} from "lib/editor";
 import * as S from "styles/community/style";
 
 /**
@@ -39,6 +44,11 @@ export default function PostEditor({
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  /*
+   * 붙여넣기 처리기는 useEditor 설정 안에 있어서 editor 를 아직 볼 수 없다.
+   * 만들어진 뒤 이 상자에 넣어두고 그때 꺼내 쓴다.
+   */
+  const editorRef = useRef<Editor | null>(null);
 
   const editor = useEditor({
     extensions: editorExtensions(placeholder),
@@ -49,11 +59,36 @@ export default function PostEditor({
       attributes: { class: "next-doc" },
       // 사진을 붙여넣거나 끌어다 놓으면 바로 올린다. 버튼을 찾게 만들지 않는다.
       handlePaste: (_view, event) => {
-        const files = Array.from(event.clipboardData?.files ?? []);
+        const data = event.clipboardData;
+        const files = Array.from(data?.files ?? []);
         const images = files.filter((f) => f.type.startsWith("image/"));
-        if (images.length === 0) return false;
+        if (images.length > 0) {
+          event.preventDefault();
+          images.forEach(insert);
+          return true;
+        }
+
+        /*
+           마크다운 문서를 붙여넣은 경우.
+
+           편집기의 마크다운 규칙은 글쇠를 누를 때만 돌아서, 문서를 통째로
+           옮겨오면 '# ' 이 제목이 되지 않고 글자 그대로 남았다.
+
+           웹 페이지에서 복사한 것은 건드리지 않는다. 그쪽은 이미 짜임새 있는
+           HTML 이 함께 오고, 편집기가 그것을 더 정확히 읽는다. 손댈 것은
+           마크다운 파일이나 편집기에서 온, 글자밖에 없는 붙여넣기다.
+        */
+        const html = data?.getData("text/html") ?? "";
+        const text = data?.getData("text/plain") ?? "";
+        const htmlHasStructure = /<(h[1-6]|ul|ol|blockquote|pre|table)\b/i.test(
+          html,
+        );
+        if (htmlHasStructure || !looksLikeMarkdown(text)) return false;
+
         event.preventDefault();
-        images.forEach(insert);
+        markdownToHtml(text).then((parsed) => {
+          editorRef.current?.chain().focus().insertContent(parsed).run();
+        });
         return true;
       },
       handleDrop: (_view, event) => {
@@ -83,6 +118,8 @@ export default function PostEditor({
     },
     [editor, userId],
   );
+
+  editorRef.current = editor;
 
   if (!editor) return <S.EditorShell aria-busy="true" />;
 
