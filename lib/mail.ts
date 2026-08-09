@@ -63,7 +63,7 @@ export function shell({
           ? `<tr><td style="padding:26px 34px 0;">
         <p style="margin:0;font-family:${FONT};font-size:14px;line-height:1.8;letter-spacing:-0.025em;color:${MUTE};">
           고려대학교 소프트웨어 창업학회 NEXT<br>
-          <span style="color:${INK};font-weight:700;">${esc(signature.role)} ${esc(signature.name)}</span>
+          <span style="color:${INK};font-weight:700;">${esc(signature.role)} ${esc(signature.name)}</span> 드림
         </p>
       </td></tr>`
           : ""
