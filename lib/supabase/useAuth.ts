@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { markInternal } from "lib/analytics";
 import { createClient, isSupabaseConfigured } from "./client";
 
 export type MemberStatus = "pending" | "approved" | "rejected";
@@ -74,7 +73,8 @@ export function useAuth() {
       if (!alive) return;
       // 로그인한 적 있는 브라우저의 방문은 통계에서 뺀다. 우리 사람이 자주
       // 들어와 확인하는데 그것까지 세면 밖에서 온 사람 수를 알 수 없다.
-      if (data.session) markInternal();
+      if (data.session)
+        void import("lib/analytics").then((m) => m.markInternal());
       setSession(data.session);
       if (data.session) await loadProfile(data.session.user.id);
       if (alive) setLoading(false);
@@ -84,7 +84,7 @@ export function useAuth() {
     const { data: sub } = supabase.auth.onAuthStateChange(
       async (_event, next) => {
         if (!alive) return;
-        if (next) markInternal();
+        if (next) void import("lib/analytics").then((m) => m.markInternal());
         setSession(next);
         if (next) await loadProfile(next.user.id);
         else setProfile(null);
