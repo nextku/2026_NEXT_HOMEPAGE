@@ -213,12 +213,6 @@ function Community({
                 {b.name}
               </C.SideLink>
             ))}
-            {isAdmin && (
-              <C.AdminLink type="button" onClick={() => router.push("/admin")}>
-                운영진
-                {pending > 0 && <C.Badge>{pending}</C.Badge>}
-              </C.AdminLink>
-            )}
           </C.SideNav>
 
           <C.Me>
@@ -250,21 +244,36 @@ function Community({
                   "학회원이 남긴 글을 모두 모았습니다. 판을 골라 좁혀 보세요."}
               </p>
             </div>
-            {/* 글쓰기는 지금 보고 있는 판에 하는 일이라 그 제목 옆에 둔다. */}
-            {canWrite && (
-              <C.Primary
-                type="button"
-                onClick={() =>
-                  router.push(
-                    boardSlug
-                      ? `/members/write?board=${boardSlug}`
-                      : "/members/write",
-                  )
-                }
-              >
-                글쓰기
-              </C.Primary>
-            )}
+            {/*
+               누르는 것은 여기 모은다. 글쓰기는 지금 보고 있는 판에 하는 일이라
+               그 제목 옆이 맞고, 운영진도 눌러서 가는 곳이라 같은 줄에 둔다.
+               왼쪽 목록은 판을 고르는 자리로만 남긴다.
+            */}
+            <C.Row>
+              {isAdmin && (
+                <C.AdminButton
+                  type="button"
+                  onClick={() => router.push("/admin")}
+                >
+                  운영진
+                  {pending > 0 && <C.Badge>{pending}</C.Badge>}
+                </C.AdminButton>
+              )}
+              {canWrite && (
+                <C.Primary
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      boardSlug
+                        ? `/members/write?board=${boardSlug}`
+                        : "/members/write",
+                    )
+                  }
+                >
+                  글쓰기
+                </C.Primary>
+              )}
+            </C.Row>
           </C.Head>
 
           <C.Feed $busy={busy}>
