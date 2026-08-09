@@ -229,18 +229,35 @@ function CommentSection({
   const [body, setBody] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy || !body.trim()) return;
     setBusy(true);
+    setError("");
 
-    await createClient().from("post_comments").insert({
-      post_id: postId,
-      parent_id: replyTo,
-      author_id: meId,
-      body: body.trim(),
-    });
+    /*
+     * 결과를 확인한다.
+     *
+     * 예전에는 insert 를 보내고 곧바로 입력창을 비웠다. 실패해도 화면에는
+     * 아무 말이 없고 쓴 글만 사라져서, 눌렀는데 아무 일도 안 일어나는 것처럼
+     * 보였다. 실패하면 쓴 글을 남겨두고 이유를 보여준다.
+     */
+    const { error: err } = await createClient()
+      .from("post_comments")
+      .insert({
+        post_id: postId,
+        parent_id: replyTo,
+        author_id: meId,
+        body: body.trim(),
+      });
+
+    if (err) {
+      setError(`댓글을 올리지 못했습니다. ${err.message}`);
+      setBusy(false);
+      return;
+    }
 
     setBody("");
     setReplyTo(null);
@@ -254,10 +271,15 @@ function CommentSection({
    */
   const remove = async (id: string) => {
     if (!window.confirm("댓글을 지웁니다.")) return;
-    await createClient()
+    setError("");
+    const { error: err } = await createClient()
       .from("post_comments")
       .update({ deleted_at: new Date().toISOString(), body: "" })
       .eq("id", id);
+    if (err) {
+      setError(`댓글을 지우지 못했습니다. ${err.message}`);
+      return;
+    }
     await reload();
   };
 
@@ -319,6 +341,7 @@ function CommentSection({
           onChange={(e) => setBody(e.target.value)}
           placeholder={replyTo ? "답글을 적어주세요" : "댓글을 적어주세요"}
         />
+        {error && <C.EditorError>{error}</C.EditorError>}
         <C.Row>
           {replyTo && (
             <C.Ghost type="button" onClick={() => setReplyTo(null)}>
