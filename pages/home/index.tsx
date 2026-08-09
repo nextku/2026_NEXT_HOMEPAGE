@@ -127,17 +127,23 @@ export default function Main() {
         />
       </Head>
       {/* <Intro></Intro> */}
+      {/*
+        마운트 전 잠깐 보이는 화면.
+
+        본문은 useMediaQuery 로 모바일 여부를 판단해서 마운트 뒤에야 그려진다.
+        그동안 아무것도 없으면 서버가 내려주는 HTML 이 빈 div 하나가 되어,
+        검색엔진 눈에는 글이 하나도 없는 페이지가 된다.
+
+        그래서 글은 두되 로딩 화면처럼 보이게 한다. 예전에는 제목과 문단을
+        왼쪽에 늘어놓아 다른 페이지가 잠깐 떴다 사라지는 것처럼 보였다.
+      */}
       {loading && (
         <S.Booting>
+          <img src="/assets/logo.png" alt="" aria-hidden="true" />
           <h1>고려대학교 소프트웨어 창업학회 NEXT</h1>
           <p>
             다양한 전공과 경험을 가진 사람들이 모여 소프트웨어·IT 창업으로
             세상의 여러 문제를 해결해 나가는 학회입니다.
-          </p>
-          <p>
-            이 웹사이트는 학회 소개와 활동, 신입 부원 모집을 안내합니다.
-            학회원은 구글 계정으로 로그인해 채용·투자·행사 정보를 확인할 수
-            있습니다.
           </p>
         </S.Booting>
       )}
@@ -386,83 +392,79 @@ export default function Main() {
           </S.Section2>
         </S.Container>
       )}
-      {/*
-        푸터는 loading 조건 밖에 둔다.
+      {/* 푸터도 본문의 일부다. 로딩 중에 이것만 떠 있으면 페이지가 깨진 것처럼 보인다. */}
+      {!loading && (
+        <S.Footer>
+          <S.FooterTop>
+            <div>
+              <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
+              <p style={{ marginTop: "1rem" }}>
+                email |{" "}
+                <a href="mailto:nextku.contact@gmail.com">
+                  nextku.contact@gmail.com
+                </a>
+              </p>
+            </div>
+            <S.FooterContacts>
+              <p>대표 이성민 · 010-8693-1884</p>
+              <p>부대표 박보겸 · 010-3185-7117</p>
+            </S.FooterContacts>
+          </S.FooterTop>
 
-        위 본문은 useMediaQuery 로 모바일 여부를 판단하기 때문에 마운트 전에는
-        그리지 못한다. 그 결과 서버가 내려주는 HTML 은 빈 div 하나뿐이었고,
-        JS 를 실행하지 않는 크롤러 눈에는 아무 글도 없는 페이지였다. 구글
-        OAuth 심사가 "홈페이지에 앱의 목적 설명이 없다" 로 반려한 실제 원인이다.
-        푸터는 isMobile 에 의존하지 않으므로 서버에서 그대로 그릴 수 있다.
-      */}
-      <S.Footer>
-        <S.FooterTop>
-          <div>
-            <h3>고려대학교 소프트웨어 창업학회 NEXT</h3>
-            <p style={{ marginTop: "1rem" }}>
-              email |{" "}
-              <a href="mailto:nextku.contact@gmail.com">
-                nextku.contact@gmail.com
+          <S.FooterBottom>
+            <S.FooterMeta>
+              <S.FooterCopyright>
+                NEXT 2026 All Rights Reserved
+              </S.FooterCopyright>
+              <S.FooterLegal>
+                <a href="/privacy">개인정보처리방침</a>
+                <a href="/terms">이용약관</a>
+              </S.FooterLegal>
+            </S.FooterMeta>
+            <S.FooterSocials>
+              <a
+                href="https://www.linkedin.com/company/nextxlikelion/posts/?feedView=all"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="NEXT 링크드인"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="4" />
+                  <path d="M7.5 10.5V17M7.5 7.4v.1M11.5 17v-3.6a2.4 2.4 0 014.8 0V17" />
+                </svg>
               </a>
-            </p>
-          </div>
-          <S.FooterContacts>
-            <p>대표 이성민 · 010-8693-1884</p>
-            <p>부대표 박보겸 · 010-3185-7117</p>
-          </S.FooterContacts>
-        </S.FooterTop>
-
-        <S.FooterBottom>
-          <S.FooterMeta>
-            <S.FooterCopyright>NEXT 2026 All Rights Reserved</S.FooterCopyright>
-            <S.FooterLegal>
-              <a href="/privacy">개인정보처리방침</a>
-              <a href="/terms">이용약관</a>
-            </S.FooterLegal>
-          </S.FooterMeta>
-          <S.FooterSocials>
-            <a
-              href="https://www.linkedin.com/company/nextxlikelion/posts/?feedView=all"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="NEXT 링크드인"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+              <a
+                href="https://www.instagram.com/next_koreauniv/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="NEXT 인스타그램"
               >
-                <rect x="3" y="3" width="18" height="18" rx="4" />
-                <path d="M7.5 10.5V17M7.5 7.4v.1M11.5 17v-3.6a2.4 2.4 0 014.8 0V17" />
-              </svg>
-            </a>
-            <a
-              href="https://www.instagram.com/next_koreauniv/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="NEXT 인스타그램"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="5" />
-                <circle cx="12" cy="12" r="3.8" />
-                <path d="M17.3 6.8v.01" />
-              </svg>
-            </a>
-          </S.FooterSocials>
-        </S.FooterBottom>
-      </S.Footer>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="3.8" />
+                  <path d="M17.3 6.8v.01" />
+                </svg>
+              </a>
+            </S.FooterSocials>
+          </S.FooterBottom>
+        </S.Footer>
+      )}
     </S.PageShell>
   );
 }

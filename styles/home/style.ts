@@ -459,24 +459,36 @@ export const Booting = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: 2.4rem;
   padding: clamp(3rem, 8vw, 10rem) clamp(2.4rem, 8vw, 10rem);
+  text-align: center;
   color: #fff;
 
+  & img {
+    width: clamp(12rem, 22vw, 18rem);
+    height: auto;
+    opacity: 0.9;
+  }
   & h1 {
-    margin: 0 0 1.4rem;
-    font-size: clamp(2rem, 3vw, 2.8rem);
-    font-weight: 800;
-    letter-spacing: -0.035em;
-    line-height: 1.3;
+    /* 검색엔진을 위해 문서에는 남기되, 화면에서는 로고가 그 역할을 한다. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
   & p {
-    margin: 0 0 0.8rem;
-    max-width: 46ch;
-    font-size: clamp(1.5rem, 1.7vw, 1.7rem);
+    margin: 0;
+    max-width: 44ch;
+    font-size: clamp(1.4rem, 1.6vw, 1.6rem);
     line-height: 1.75;
     letter-spacing: -0.025em;
-    color: rgba(255, 255, 255, 0.62);
+    color: rgba(255, 255, 255, 0.5);
     word-break: keep-all;
   }
 `;
