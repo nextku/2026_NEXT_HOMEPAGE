@@ -1014,6 +1014,19 @@ export const EditBox = styled.div`
   }
 `;
 
+/** 두 칸을 가로지르는 항목. 직책 토글처럼 옆으로 긴 것에 쓴다. */
+export const FieldWide = styled(Field)`
+  @media (min-width: 30rem) {
+    grid-column: 1 / -1;
+  }
+`;
+
+export const Segmented = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
 export const EditGrid = styled.div`
   display: grid;
   gap: 1.2rem;
