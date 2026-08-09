@@ -146,18 +146,28 @@ function Community({
 
   const [boards, setBoards] = useState<Board[]>([]);
   const [posts, setPosts] = useState<PostListItem[] | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!isApproved) return;
     fetchBoards().then(setBoards);
   }, [isApproved]);
 
+  /*
+   * 판을 바꿔도 이전 목록을 지우지 않는다.
+   *
+   * 예전에는 여기서 목록을 비우고 새로 받아 채웠다. 그 사이 화면에 아무것도
+   * 없어서 판을 누를 때마다 한 번씩 깜빡였다. 새 목록이 도착할 때까지 있던
+   * 것을 두고 살짝 흐리게만 해두면, 바뀌는 순간에 화면이 비지 않는다.
+   */
   useEffect(() => {
     if (!isApproved) return;
     let alive = true;
-    setPosts(null);
+    setBusy(true);
     fetchPosts(boardSlug).then((rows) => {
-      if (alive) setPosts(rows);
+      if (!alive) return;
+      setPosts(rows);
+      setBusy(false);
     });
     return () => {
       alive = false;
@@ -179,71 +189,87 @@ function Community({
 
   return (
     <C.Wrap>
-      <C.Head>
+      <C.Shell>
+        <C.Side>
+          <C.SideNav>
+            <C.SideLink type="button" $on={!boardSlug} onClick={() => go(null)}>
+              전체
+            </C.SideLink>
+            {boards.map((b) => (
+              <C.SideLink
+                key={b.id}
+                type="button"
+                $on={boardSlug === b.slug}
+                onClick={() => go(b.slug)}
+              >
+                {b.name}
+              </C.SideLink>
+            ))}
+          </C.SideNav>
+
+          <C.Me>
+            <C.MeName>
+              <strong>{name}</strong>
+              {label && <span>{label}</span>}
+            </C.MeName>
+            <C.MeLinks>
+              <C.MeLink type="button" onClick={onProfile}>
+                내 정보
+              </C.MeLink>
+              {isAdmin && (
+                <C.MeLink type="button" onClick={() => router.push("/admin")}>
+                  운영진
+                </C.MeLink>
+              )}
+              <C.MeLink type="button" onClick={() => signOut()}>
+                로그아웃
+              </C.MeLink>
+            </C.MeLinks>
+          </C.Me>
+        </C.Side>
+
         <div>
-          <h1>{current ? current.name : "게시판"}</h1>
-          <p>
-            {current?.description ??
-              `${label ? `${label} · ` : ""}${name}님, 학회원에게만 공개되는 공간입니다.`}
-          </p>
+          <C.Head>
+            <div>
+              <h1>{current ? current.name : "전체 글"}</h1>
+              <p>
+                {current?.description ??
+                  "학회원이 남긴 글을 모두 모았습니다. 판을 골라 좁혀 보세요."}
+              </p>
+            </div>
+            {/* 글쓰기는 지금 보고 있는 판에 하는 일이라 그 제목 옆에 둔다. */}
+            {canWrite && (
+              <C.Primary
+                type="button"
+                onClick={() =>
+                  router.push(
+                    boardSlug
+                      ? `/members/write?board=${boardSlug}`
+                      : "/members/write",
+                  )
+                }
+              >
+                글쓰기
+              </C.Primary>
+            )}
+          </C.Head>
+
+          <C.Feed $busy={busy}>
+            {posts === null ? null : posts.length === 0 ? (
+              <C.Empty>
+                아직 글이 없습니다.
+                {canWrite && " 첫 글을 남겨보세요."}
+              </C.Empty>
+            ) : (
+              <C.List>
+                {posts.map((p) => (
+                  <PostRow key={p.id} post={p} showBoard={!boardSlug} />
+                ))}
+              </C.List>
+            )}
+          </C.Feed>
         </div>
-        <C.Row>
-          {canWrite && (
-            <C.Primary
-              type="button"
-              onClick={() =>
-                router.push(
-                  boardSlug
-                    ? `/members/write?board=${boardSlug}`
-                    : "/members/write",
-                )
-              }
-            >
-              글쓰기
-            </C.Primary>
-          )}
-          <C.Ghost type="button" onClick={onProfile}>
-            내 정보
-          </C.Ghost>
-          {isAdmin && (
-            <C.Ghost type="button" onClick={() => router.push("/admin")}>
-              운영진
-            </C.Ghost>
-          )}
-          <C.Back type="button" onClick={() => signOut()}>
-            로그아웃
-          </C.Back>
-        </C.Row>
-      </C.Head>
-
-      <C.BoardNav>
-        <C.BoardTab type="button" $on={!boardSlug} onClick={() => go(null)}>
-          전체
-        </C.BoardTab>
-        {boards.map((b) => (
-          <C.BoardTab
-            key={b.id}
-            type="button"
-            $on={boardSlug === b.slug}
-            onClick={() => go(b.slug)}
-          >
-            {b.name}
-          </C.BoardTab>
-        ))}
-      </C.BoardNav>
-
-      {posts === null ? null : posts.length === 0 ? (
-        <C.Empty>
-          아직 글이 없습니다.
-          {canWrite && " 첫 글을 남겨보세요."}
-        </C.Empty>
-      ) : (
-        <C.List>
-          {posts.map((p) => (
-            <PostRow key={p.id} post={p} showBoard={!boardSlug} />
-          ))}
-        </C.List>
-      )}
+      </C.Shell>
     </C.Wrap>
   );
 }

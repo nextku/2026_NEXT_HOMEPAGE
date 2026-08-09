@@ -198,6 +198,36 @@ export async function verifySignupCode(email: string, code: string) {
     : null;
 }
 
+/**
+ * 승인 신청 제출.
+ *
+ * 가입 화면에서 받은 이름·기수·학과를 코드 확인 직후에 낸다. 가입 폼에서 바로
+ * 보내지 않는 이유는, 코드를 넣지 않고 떠난 사람의 정보까지 남기지 않기
+ * 위해서다. 확인을 통과한 순간에만 기록된다.
+ *
+ * 명단에 있어 이미 승인된 계정은 함수가 거부한다(submit_profile 의
+ * status <> 'approved' 조건). 그 경우 이름과 기수는 명단 쪽이 옳으므로 덮을
+ * 이유가 없다. 성공으로 본다.
+ */
+export async function submitProfile(
+  name: string,
+  generation: number,
+  department: string,
+) {
+  const supabase = createClient();
+  const { error } = await supabase.rpc("submit_profile", {
+    p_name: name.trim(),
+    p_generation: generation,
+    p_department: department.trim(),
+  });
+  if (!error) return null;
+  if (/not open for submission/i.test(error.message)) return null;
+  return ko(
+    error.message,
+    "정보를 저장하지 못했습니다. 라운지에서 다시 낼 수 있습니다.",
+  );
+}
+
 /** 확인 코드 다시 보내기. */
 export async function resendSignupCode(email: string) {
   const supabase = createClient();

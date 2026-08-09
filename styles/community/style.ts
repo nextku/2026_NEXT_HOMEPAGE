@@ -57,62 +57,231 @@ export const Head = styled.header`
   }
 `;
 
-/* ─── 게시판 목록 ─────────────────────────────────────────────────────── */
+/* ─── 게시판 이동과 계정 ──────────────────────────────────────────────── */
 
 /**
- * 게시판 이동.
+ * 두 칸.
  *
- * 판이 일곱 개다. 드롭다운에 넣으면 어떤 판이 있는지 열어봐야 알고, 세로로
- * 세우면 화면 절반을 먹는다. 가로로 늘어놓고 넘치면 옆으로 민다.
+ * 판이 일곱 개다. 알약 버튼을 가로로 늘어놓았더니 제목 바로 아래에 색색의 줄이
+ * 하나 더 생겨서, 읽으러 온 사람이 글보다 버튼을 먼저 봤다. 판 목록은 자주
+ * 바뀌지 않는 이동 수단이므로 옆으로 뺀다. 본문은 글만 남는다.
  */
-export const BoardNav = styled.nav`
-  display: flex;
-  gap: 0.6rem;
-  margin-bottom: clamp(2rem, 3vw, 2.8rem);
-  padding-bottom: 0.4rem;
-  overflow-x: auto;
-  scrollbar-width: none;
+export const Shell = styled.div`
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: clamp(2.4rem, 5vw, 5.6rem);
+  align-items: start;
 
-  &::-webkit-scrollbar {
-    display: none;
+  @media (max-width: 900px) {
+    display: flex;
+    flex-direction: column;
+    /*
+       위의 align-items: start 를 여기서 풀어야 한다. 세로로 쌓을 때 그대로
+       두면 칸이 내용 폭까지 늘어나, 가로 스크롤러가 판 일곱 개만큼 넓어진다.
+    */
+    align-items: stretch;
+    gap: 2rem;
   }
 `;
 
-export const BoardTab = styled.button<{ $on: boolean }>`
-  flex: 0 0 auto;
-  min-height: 3.8rem;
-  padding: 0 1.5rem;
-  border-radius: 999px;
-  font-size: 1.45rem;
-  font-weight: 650;
-  letter-spacing: -0.025em;
-  cursor: pointer;
-  transition:
-    background 0.16s ease,
-    color 0.16s ease,
-    border-color 0.16s ease;
+export const Side = styled.aside`
+  display: flex;
+  flex-direction: column;
+  gap: 2.8rem;
+  /*
+     flex 자식의 기본 최소 폭은 내용 전체다. 이것을 풀지 않으면 아래 가로
+     스크롤러가 줄어들지 못하고, 판 일곱 개를 한 줄에 늘어놓은 만큼 폭이
+     커져 화면 전체가 옆으로 밀린다.
+  */
+  min-width: 0;
+  /* 글이 길어도 판 목록은 따라온다. */
+  position: sticky;
+  top: 11rem;
 
-  ${({ $on }) =>
-    $on
-      ? css`
-          background: ${INK};
-          border: 1px solid ${INK};
-          color: #fbf8f3;
-        `
-      : css`
-          background: transparent;
-          border: 1px solid ${LINE};
-          color: ${BODY};
-        `}
+  @media (max-width: 900px) {
+    position: static;
+    gap: 1.6rem;
+  }
+`;
 
-  @media (any-hover: hover) {
-    &:hover {
-      border-color: ${({ $on }) => ($on ? INK : "#a9a196")};
+/**
+ * 판 목록.
+ *
+ * 좁은 화면에서는 세로로 세울 자리가 없다. 같은 요소를 가로로 눕히고 넘치면
+ * 옆으로 민다 — DOM 을 둘로 만들면 하나만 고치는 실수가 나온다.
+ */
+export const SideNav = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+
+  @media (max-width: 900px) {
+    flex-direction: row;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: calc(clamp(2rem, 5vw, 6rem) * -1);
+    padding-inline: clamp(2rem, 5vw, 6rem);
+
+    &::-webkit-scrollbar {
+      display: none;
     }
   }
 `;
 
+/**
+ * 판 하나.
+ *
+ * 테두리를 두르지 않는다. 일곱 개에 전부 선을 그으면 목록이 아니라 격자가
+ * 된다. 지금 보고 있는 판만 바탕을 깔아 구별한다.
+ */
+export const SideLink = styled.button<{ $on: boolean }>`
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  white-space: nowrap;
+  min-height: 3.4rem;
+  padding: 0 1.2rem;
+  ${squircle(9)};
+  font-size: 1.45rem;
+  letter-spacing: -0.025em;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
+
+  ${({ $on }) =>
+    $on
+      ? css`
+          background: ${TINT};
+          color: ${INK};
+          font-weight: 700;
+        `
+      : css`
+          color: ${BODY};
+          font-weight: 550;
+        `}
+
+  @media (any-hover: hover) {
+    &:hover {
+      background: ${({ $on }) => ($on ? TINT : "rgba(23, 21, 15, 0.04)")};
+      color: ${INK};
+    }
+  }
+`;
+
+/**
+ * 나.
+ *
+ * 글쓰기와 한 줄에 섞여 있었다. 글쓰기는 지금 보고 있는 판에 하는 일이고
+ * 내 정보·로그아웃은 계정에 하는 일이라, 같은 줄에 두면 무엇이 무엇에 걸린
+ * 버튼인지 읽히지 않는다. 계정은 계정끼리 묶어 판 목록 아래로 내린다.
+ */
+export const Me = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid ${LINE};
+
+  @media (max-width: 900px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    padding-top: 0;
+    border-top: 0;
+  }
+`;
+
+export const MeName = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0 1.2rem;
+
+  & strong {
+    font-size: 1.5rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    color: ${INK};
+  }
+  & span {
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    color: ${FAINT};
+  }
+
+  @media (max-width: 900px) {
+    padding: 0;
+    /* 이름이 길어도 옆의 항목을 밀어내지 않게 한다. */
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+`;
+
+export const MeLinks = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+
+  @media (max-width: 900px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    /* 좁은 화면에서 세 항목이 한 줄에 안 들어가면 다음 줄로 내린다.
+       넘친 채로 두면 로그아웃이 화면 밖으로 나간다. */
+    flex-wrap: wrap;
+    gap: 0.2rem;
+  }
+`;
+
+/** 계정 쪽 항목. 판 목록과 같은 자리에 서지만 강조는 한 단계 낮춘다. */
+export const MeLink = styled.button`
+  border: 0;
+  background: transparent;
+  text-align: left;
+  white-space: nowrap;
+  min-height: 3.2rem;
+  padding: 0 1.2rem;
+  ${squircle(9)};
+  font-size: 1.4rem;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+  color: ${MUTE};
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
+
+  @media (any-hover: hover) {
+    &:hover {
+      background: rgba(23, 21, 15, 0.04);
+      color: ${INK};
+    }
+  }
+
+  @media (max-width: 900px) {
+    padding: 0 0.8rem;
+  }
+`;
+
 /* ─── 글 목록 ─────────────────────────────────────────────────────────── */
+
+/**
+ * 목록을 감싼다.
+ *
+ * 새 목록을 기다리는 동안 있던 글을 지우지 않고 흐리게만 둔다. 비우면 화면이
+ * 한 번 깜빡이고, 아무 표시도 없으면 눌렀는데 반응이 없는 것처럼 보인다.
+ */
+export const Feed = styled.div<{ $busy: boolean }>`
+  opacity: ${({ $busy }) => ($busy ? 0.45 : 1)};
+  transition: opacity 0.18s ease;
+`;
 
 export const List = styled.ul`
   list-style: none;
