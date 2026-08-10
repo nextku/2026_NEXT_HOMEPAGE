@@ -10,6 +10,10 @@
               └─ Apps Script(매일 밤)  → Gmail                          → 운영진
 ```
 
+요약 메일을 받는 사람은 스크립트에 적어두지 않는다. **사이트에 운영진으로
+등록된 사람**을 보낼 때마다 물어본다. 적어두면 운영진이 바뀔 때마다 스크립트
+편집기를 열어야 하고, 그러면 아무도 안 고쳐서 이미 나간 사람에게 계속 간다.
+
 두 갈래를 다르게 보내는 이유는 한도다. Resend 무료 플랜은 **하루 100통**이고, 마감날에는
 지원자 확인 메일만으로 80통 가까이 쓴다. 운영진 알림을 같은 통으로 보내면 그 통이
 먼저 바닥나서 **지원자가 확인 메일을 못 받는다.** 운영진 쪽은 Gmail 이 직접 보내므로
@@ -26,13 +30,22 @@ Resend 한도와 아무 상관이 없다.
 | --- | --- |
 | `RESEND_API_KEY` | Resend API 키 |
 | `FORM_WEBHOOK_SECRET` | 아무 긴 문자열. 아래 스크립트에도 같은 값을 넣는다 |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → `service_role` |
 
-비밀을 두는 이유는 이 주소가 공개돼 있기 때문이다. 없으면 누구나 남의 주소로
-NEXT 이름의 메일을 보낼 수 있다.
+`FORM_WEBHOOK_SECRET` 을 두는 이유는 이 주소가 공개돼 있기 때문이다. 없으면
+누구나 남의 주소로 NEXT 이름의 메일을 보낼 수 있다. 값은 이렇게 하나 만든다.
 
 ```
 openssl rand -hex 24
 ```
+
+`service_role` 키는 요약 메일의 받는 사람을 정하는 데 쓴다. 운영진 명단이 우리
+데이터베이스에 있는데, `profiles` 는 본인과 운영진에게만 열려 있고 이 요청에는
+로그인한 사람이 없다. 공개 키로는 한 줄도 못 읽는다.
+
+> 이 키는 모든 정책을 지나간다. **`NEXT_PUBLIC_` 을 붙이지 않는다.** 붙이면
+> 브라우저 번들에 실려 나가고, 그 순간 누구나 전체 데이터베이스를 읽고 쓸 수
+> 있다. 접두사 없는 값은 서버에만 남는다.
 
 넣은 뒤 **재배포**해야 반영된다. 환경변수는 빌드 시점에 들어간다.
 
@@ -86,8 +99,26 @@ function onFormSubmit(e) {
 위 코드는 그대로 두고, **파일 맨 아래에 이어 붙인다.**
 
 ```js
-const STAFF_EMAIL = 'nextku.contact@gmail.com';
 /* ─── 매일 밤: 운영진에게 ───────────────────────────────────────────── */
+
+const STAFF_ENDPOINT = 'https://www.next-ku.com/api/staff-emails';
+
+// 받는 사람을 여기 적어두지 않는다. 운영진이 바뀔 때마다 이 편집기를 열어야
+// 하는데 그러면 아무도 안 고쳐서, 이미 나간 사람에게 계속 간다.
+// 사이트에 운영진으로 등록된 사람을 그때그때 물어본다.
+function staffEmails() {
+  const res = UrlFetchApp.fetch(STAFF_ENDPOINT, {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { 'x-next-secret': SECRET },
+    payload: '{}',
+    muteHttpExceptions: true,
+  });
+  if (res.getResponseCode() !== 200) {
+    throw new Error('운영진 목록을 못 받았습니다: ' + res.getContentText());
+  }
+  return JSON.parse(res.getContentText()).emails || [];
+}
 
 // 문항 제목에서 무엇을 찾을지. 기수마다 제목이 조금씩 달라도 걸리게 둔다.
 const FIELDS = [
@@ -106,6 +137,10 @@ function dailyDigest() {
 
   // 아무도 안 냈으면 보내지 않는다. 빈 메일이 매일 오면 열어보지 않게 된다.
   if (responses.length === 0) return;
+
+  // 받을 사람을 먼저 확인한다. 없는데 메일부터 만들면 헛일이다.
+  const to = staffEmails();
+  if (to.length === 0) throw new Error('운영진으로 등록된 사람이 없습니다.');
 
   const rows = responses.map(function (r) {
     const out = { name: '', sid: '', dept: '', files: [] };
@@ -169,7 +204,7 @@ function dailyDigest() {
     '</div>';
 
   MailApp.sendEmail({
-    to: STAFF_EMAIL,
+    to: to.join(','),
     subject: '[NEXT] ' + when + ' 지원 ' + rows.length + '명',
     htmlBody: html,
   });
@@ -221,6 +256,10 @@ function dailyDigest() {
   Supabase 의 `mail_failures` 표에 못 보낸 사람이 적혀 있다
 - 요약 메일의 이름·학번 칸이 비어 있다 — 문항 제목에 그 낱말이 없다.
   `FIELDS` 의 정규식을 문항 제목에 맞게 고친다
+- 요약 메일이 `운영진 목록을 못 받았습니다` 로 멈춘다 — `SUPABASE_SERVICE_ROLE_KEY`
+  가 Vercel 에 없거나, 넣고 재배포를 안 했다
+- 요약 메일이 `운영진으로 등록된 사람이 없습니다` 로 멈춘다 — 사이트에서 승인된
+  운영진이 아직 없다. `/admin` 의 학회원 탭에서 운영진 권한을 준다
 
 ## 왜 이 방식인가
 
