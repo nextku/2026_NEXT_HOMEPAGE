@@ -30,7 +30,7 @@ Resend 한도와 아무 상관이 없다.
 | --- | --- |
 | `RESEND_API_KEY` | Resend API 키 |
 | `FORM_WEBHOOK_SECRET` | 아무 긴 문자열. 아래 스크립트에도 같은 값을 넣는다 |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → `service_role` |
+| `SUPABASE_SECRET_KEY` | Supabase → Settings → API Keys → **Publishable and Secret** → Secret 키 생성 |
 
 `FORM_WEBHOOK_SECRET` 을 두는 이유는 이 주소가 공개돼 있기 때문이다. 없으면
 누구나 남의 주소로 NEXT 이름의 메일을 보낼 수 있다. 값은 이렇게 하나 만든다.
@@ -39,9 +39,14 @@ Resend 한도와 아무 상관이 없다.
 openssl rand -hex 24
 ```
 
-`service_role` 키는 요약 메일의 받는 사람을 정하는 데 쓴다. 운영진 명단이 우리
+Secret 키는 요약 메일의 받는 사람을 정하는 데 쓴다. 운영진 명단이 우리
 데이터베이스에 있는데, `profiles` 는 본인과 운영진에게만 열려 있고 이 요청에는
 로그인한 사람이 없다. 공개 키로는 한 줄도 못 읽는다.
+
+`legacy anon / service_role` 탭의 `service_role` 키도 같은 일을 하고, 그 값을
+`SUPABASE_SERVICE_ROLE_KEY` 로 넣어도 동작한다. 다만 대시보드에 `Disable legacy
+API keys` 가 있어서 언젠가 그 쪽을 끄면 그날 요약 메일이 멈춘다. 이미 공개 키는
+새 방식(`PUBLISHABLE_KEY`)을 쓰고 있으므로 **새 Secret 키로 맞추는 편이 낫다.**
 
 > 이 키는 모든 정책을 지나간다. **`NEXT_PUBLIC_` 을 붙이지 않는다.** 붙이면
 > 브라우저 번들에 실려 나가고, 그 순간 누구나 전체 데이터베이스를 읽고 쓸 수
@@ -256,7 +261,7 @@ function dailyDigest() {
   Supabase 의 `mail_failures` 표에 못 보낸 사람이 적혀 있다
 - 요약 메일의 이름·학번 칸이 비어 있다 — 문항 제목에 그 낱말이 없다.
   `FIELDS` 의 정규식을 문항 제목에 맞게 고친다
-- 요약 메일이 `운영진 목록을 못 받았습니다` 로 멈춘다 — `SUPABASE_SERVICE_ROLE_KEY`
+- 요약 메일이 `운영진 목록을 못 받았습니다` 로 멈춘다 — `SUPABASE_SECRET_KEY`
   가 Vercel 에 없거나, 넣고 재배포를 안 했다
 - 요약 메일이 `운영진으로 등록된 사람이 없습니다` 로 멈춘다 — 사이트에서 승인된
   운영진이 아직 없다. `/admin` 의 학회원 탭에서 운영진 권한을 준다
