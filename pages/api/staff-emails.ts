@@ -64,7 +64,14 @@ export default async function handler(
   if (!r.ok) {
     const detail = await r.text().catch(() => "");
     console.error("[staff-emails] 조회 실패:", r.status, detail);
-    return res.status(502).json({ error: "lookup failed" });
+    /*
+       무엇이 틀렸는지 그대로 돌려준다.
+
+       "lookup failed" 만 보내면 키가 잘못된 것인지, 컬럼이 없는 것인지, 정책에
+       막힌 것인지 알 수 없어 스크립트 앞에서 한참을 헤맨다. 이 응답은 공유
+       비밀을 통과한 요청에만 가므로 아무나 볼 수 있는 값이 아니다.
+    */
+    return res.status(502).json({ error: "lookup failed", detail, status: r.status });
   }
 
   const rows = (await r.json()) as { email: string | null }[];
