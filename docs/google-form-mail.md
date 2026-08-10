@@ -132,12 +132,21 @@ const FIELDS = [
   { key: 'dept', label: '학과', match: /학과|전공/ },
 ];
 
-function dailyDigest() {
+function dailyDigest(e) {
   const form = FormApp.getActiveForm();
-
-  // 오늘 0시 이후에 들어온 것만. getResponses(after) 는 그 시각 뒤의 응답을 준다.
   const now = new Date();
-  const since = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  /*
+     기본은 오늘 0시 이후. getResponses(after) 는 그 시각 뒤의 응답을 준다.
+
+     손으로 확인할 때는 기간을 넓혀 부를 수 있게 첫 인자로 Date 를 받는다.
+     시간 기반 트리거는 첫 인자로 이벤트 객체를 주므로, Date 인지 보고 가른다.
+     그렇게 안 하면 트리거가 준 객체를 시작 시각으로 잘못 읽는다.
+  */
+  const since =
+    e instanceof Date
+      ? e
+      : new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const responses = form.getResponses(since);
 
   // 아무도 안 냈으면 보내지 않는다. 빈 메일이 매일 오면 열어보지 않게 된다.
@@ -213,6 +222,23 @@ function dailyDigest() {
     subject: '[NEXT] ' + when + ' 지원 ' + rows.length + '명',
     htmlBody: html,
   });
+}
+```
+
+### 손으로 확인할 때
+
+오늘 지원이 없으면 `dailyDigest` 는 아무것도 안 보낸다. 그것이 맞는 동작이라
+확인이 안 되므로, 기간을 넓혀 부르는 함수를 하나 곁에 둔다.
+
+```js
+// 최근 7일치로 한 번 보내본다. 확인이 끝나면 지워도 된다.
+function testDigest() {
+  dailyDigest(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+}
+
+// 받는 사람만 확인한다. 메일은 보내지 않는다.
+function testStaff() {
+  Logger.log(staffEmails());
 }
 ```
 
