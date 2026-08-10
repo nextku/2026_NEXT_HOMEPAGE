@@ -146,3 +146,48 @@ export async function sendMail({ to, subject, html, replyTo }: SendArgs) {
   }
   return { ok: true, error: null };
 }
+
+/**
+ * 못 보낸 메일을 적어둔다.
+ *
+ * 지원 마감날에는 지원이 몰리는데 무료 한도가 하루 100통이다. 넘기면 그 뒤로는
+ * 조용히 거절되고, 폼 스크립트는 응답을 무시하도록 되어 있어 아무 데도 남지
+ * 않는다. 다음 날 "메일 못 받았어요" 로 알게 되는 일을 막는다.
+ *
+ * SDK 대신 REST 를 그대로 부른다. 이 파일이 이미 그렇게 하고 있고, 서버에서
+ * 브라우저용 클라이언트를 만들면 쿠키를 찾다가 엉킨다.
+ *
+ * 이 기록이 실패해도 던지지 않는다. 메일이 안 간 것보다 기록이 안 남은 것이
+ * 덜 나쁘고, 여기서 터지면 폼 스크립트가 받는 응답만 더 나빠진다.
+ */
+export async function recordMailFailure(row: {
+  kind?: string;
+  to_email?: string | null;
+  name?: string | null;
+  reason?: string | null;
+}) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) return;
+
+  try {
+    await fetch(`${url}/rest/v1/mail_failures`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        kind: row.kind ?? "form_receipt",
+        to_email: row.to_email ?? null,
+        name: row.name ?? null,
+        // 이유가 길게 오면 표가 읽기 어려워진다. 앞부분이면 원인은 드러난다.
+        reason: (row.reason ?? "").slice(0, 500) || null,
+      }),
+    });
+  } catch {
+    /* 기록까지 실패하면 더 할 수 있는 것이 없다 */
+  }
+}
