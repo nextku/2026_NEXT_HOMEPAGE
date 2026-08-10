@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 import { RECRUIT, RECRUIT_STAGES } from "constants/recruit";
-import { esc, rows, sendMail, shell } from "lib/mail";
+import { esc, recordMailFailure, rows, sendMail, shell } from "lib/mail";
 
 /**
  * 구글 폼이 제출되면 부르는 자리.
@@ -130,6 +130,19 @@ export default async function handler(
 
     if (!sent.ok) {
       console.error("[form-submitted] 지원자 메일 실패:", sent.error);
+      /*
+         누가 못 받았는지 남긴다.
+
+         마감날에 한도(하루 100통)를 넘기면 그 뒤로는 조용히 거절되는데, 폼
+         스크립트가 응답을 무시하도록 되어 있어 지금까지는 아무 데도 남지
+         않았다. 지원서 자체는 구글 폼에 그대로 있으므로, 여기 적힌 사람에게
+         나중에 손으로 보내면 된다.
+      */
+      await recordMailFailure({
+        to_email: applicant,
+        name: who || null,
+        reason: sent.error,
+      });
       return res.status(502).json({ error: "mail failed" });
     }
   }
