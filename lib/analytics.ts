@@ -64,11 +64,30 @@ function sessionId() {
   }
 }
 
+/**
+ * 여기가 진짜 사이트인가.
+ *
+ * 개발할 때 띄우는 localhost 도 .env.local 을 통해 운영 데이터베이스를 본다.
+ * 그래서 화면을 확인하려고 만든 임시 페이지의 방문이 실제 통계로 들어갔고,
+ * 그 브라우저는 로그인한 적이 없어 내부 방문 표시도 안 붙어 바깥 손님으로
+ * 집계됐다. 지원 유입을 보는 숫자가 그만큼 부풀었다.
+ *
+ * 주소로 막는다. 배포된 곳에서 온 것만 센다.
+ */
+function isRealSite() {
+  const h = window.location.hostname;
+  if (h === "localhost" || h === "127.0.0.1" || h === "[::1]") return false;
+  // 미리보기 배포도 우리가 확인하려고 여는 것이라 세지 않는다.
+  if (h.endsWith(".vercel.app")) return false;
+  return true;
+}
+
 export function track(
   name: EventName,
   extra: { path?: string; tab?: string } = {},
 ) {
   if (typeof window === "undefined" || !supabaseEnvReady) return;
+  if (!isRealSite()) return;
 
   try {
     const referrer = document.referrer || null;
