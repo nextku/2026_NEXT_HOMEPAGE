@@ -33,7 +33,16 @@ export default async function handler(
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  /*
+     이름을 둘 다 받는다.
+
+     Supabase 가 키 체계를 바꾸는 중이다. 예전 것은 service_role, 새 것은
+     Secret API key 인데 쓰는 방법은 같다. 대시보드에 "Disable legacy API keys"
+     가 있어서 언젠가 예전 키가 꺼지면 그 이름만 보던 코드는 그날 멈춘다.
+     둘 다 받아두면 어느 쪽을 넣어도 되고, 옮겨갈 때도 값만 바꾸면 된다.
+  */
+  const key =
+    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
     return res.status(500).json({ error: "server not configured" });
   }
