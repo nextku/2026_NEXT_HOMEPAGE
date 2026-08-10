@@ -640,17 +640,19 @@ function funnelSteps(f: Stats["funnel"]) {
 function Stats() {
   const [days, setDays] = useState(30);
   const [data, setData] = useState<Stats | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
     setData(null);
-    setFailed(false);
+    setFailed(null);
     createClient()
       .rpc("admin_stats", { p_days: days })
       .then(({ data: d, error }) => {
         if (!alive) return;
-        if (error) setFailed(true);
+        // 실패 이유를 그대로 보여준다. "확인해 주세요" 만으로는 무엇을
+        // 확인해야 하는지 알 수 없어 한참을 헤맸다.
+        if (error) setFailed(error.message);
         else setData(d as Stats);
       });
     return () => {
@@ -680,10 +682,7 @@ function Stats() {
       </S.StatBar>
 
       {failed ? (
-        <S.Empty>
-          통계를 불러오지 못했습니다. 마이그레이션 0005 가 적용됐는지 확인해
-          주세요.
-        </S.Empty>
+        <S.Empty>통계를 불러오지 못했습니다. {failed}</S.Empty>
       ) : !data ? null : steps[0].value === 0 ? (
         <S.Empty>이 기간에 쌓인 기록이 없습니다.</S.Empty>
       ) : (
