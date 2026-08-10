@@ -38,38 +38,39 @@ openssl rand -hex 24
 
 ## 2. Apps Script
 
-구글 폼 → 오른쪽 위 점 세 개 → **Apps Script** → 아래를 통째로 붙여넣는다.
+구글 폼 → 오른쪽 위 점 세 개 → **Apps Script**.
+
+스크립트는 하나로 둔다. 따로 만들면 폼에 붙어 있지 않아 `FormApp.getActiveForm()`
+을 못 쓰고, 폼 ID 를 따로 넣고 권한도 다시 잡아야 한다.
+
+### ① 제출 즉시 — 지원자 확인 메일
+
+**이미 `onFormSubmit` 이 들어 있으면 이 부분은 건너뛴다.** 특히 `SECRET` 은
+이미 넣어둔 값이 있으므로 덮어쓰지 않는다. 덮으면 API 가 401 로 막아
+지원자 확인 메일이 그 순간부터 안 나간다.
 
 ```js
 // NEXT 지원 폼
 //   onFormSubmit  — 제출 즉시 지원자에게 접수 확인 (문구는 사이트 레포에 있다)
 //   dailyDigest   — 매일 밤 운영진에게 그날 지원자 요약
-
 const ENDPOINT = 'https://www.next-ku.com/api/form-submitted';
 const SECRET = '여기에 FORM_WEBHOOK_SECRET 과 같은 값';
-const STAFF_EMAIL = 'nextku.contact@gmail.com';
-
 /* ─── 제출 즉시: 지원자에게 ─────────────────────────────────────────── */
-
 function onFormSubmit(e) {
   const answers = {};
   let name = '';
   let email = '';
-
   e.response.getItemResponses().forEach(function (item) {
     const title = item.getItem().getTitle();
     const value = String(item.getResponse());
     answers[title] = value;
-
     // 문항 제목은 기수마다 바뀐다. 제목에 든 낱말로 알아본다.
     if (!name && /이름|성함|성명/.test(title)) name = value;
     if (!email && /메일|이메일|email/i.test(title)) email = value;
   });
-
   if (!email && e.response.getRespondentEmail) {
     email = e.response.getRespondentEmail() || '';
   }
-
   UrlFetchApp.fetch(ENDPOINT, {
     method: 'post',
     contentType: 'application/json',
@@ -78,7 +79,14 @@ function onFormSubmit(e) {
     muteHttpExceptions: true,
   });
 }
+```
 
+### ② 하루 한 번 — 운영진 요약
+
+위 코드는 그대로 두고, **파일 맨 아래에 이어 붙인다.**
+
+```js
+const STAFF_EMAIL = 'nextku.contact@gmail.com';
 /* ─── 매일 밤: 운영진에게 ───────────────────────────────────────────── */
 
 // 문항 제목에서 무엇을 찾을지. 기수마다 제목이 조금씩 달라도 걸리게 둔다.
@@ -168,27 +176,37 @@ function dailyDigest() {
 }
 ```
 
-저장한 뒤 **트리거 두 개**를 건다. 왼쪽 시계 아이콘(트리거) → 오른쪽 아래 **트리거 추가**.
+## 3. 트리거
 
-**첫 번째 — 제출 즉시**
+왼쪽 시계 아이콘(트리거) → 오른쪽 아래 **트리거 추가**.
 
-1. 실행할 함수 `onFormSubmit`
-2. 이벤트 소스 **양식에서**
-3. 이벤트 유형 **양식 제출 시**
+| 함수 | 이벤트 소스 | 설정 |
+| --- | --- | --- |
+| `onFormSubmit` | 양식에서 | 양식 제출 시 |
+| `dailyDigest` | 시간 기반 | 일 단위 타이머 · 오후 11시~자정 |
 
-**두 번째 — 매일 밤**
+`onFormSubmit` 트리거가 이미 있으면 다시 만들지 않는다. 함수 이름이 그대로면
+코드를 고쳐도 기존 트리거가 그대로 그 함수를 부른다.
 
-1. 실행할 함수 `dailyDigest`
-2. 이벤트 소스 **시간 기반**
-3. 트리거 유형 **일 단위 타이머**
-4. 시간 **오후 11시~자정**
+### 누구 계정으로 만드느냐가 곧 보내는 사람이다
+
+트리거는 **만든 사람의 권한으로 돌아간다.** 트리거 목록의 `소유자` 칸이 그것을
+말해준다 — 다른 계정이 만든 것은 `다른 사용자` 로 보인다.
+
+`dailyDigest` 는 `MailApp` 으로 보내는데, 그것은 **트리거를 만든 계정에서**
+나간다. 그러므로 요약 메일이 학회 계정에서 나가게 하려면 **학회 계정으로
+로그인한 채** 이 트리거를 추가해야 한다. 개인 계정으로 만들면 받는 곳은 같아도
+보낸 사람이 개인 주소가 된다.
+
+`onFormSubmit` 쪽은 누가 만들었든 상관없다. 그것은 메일을 직접 보내지 않고 우리
+서버를 부르기만 하고, 메일은 Resend 가 `noreply@next-ku.com` 으로 보낸다.
 
 저장할 때 구글 계정 권한을 한 번 허용한다.
 
 > 시간대가 한국인지 확인한다. Apps Script 편집기 왼쪽 **프로젝트 설정** → 시간대가
 > `(GMT+09:00) 서울` 이어야 "오늘 들어온 것" 이 맞게 잘린다.
 
-## 3. 확인
+## 4. 확인
 
 - **지원자 메일**: 폼을 한 번 직접 제출해 본다
 - **요약 메일**: 스크립트 편집기 위쪽에서 함수를 `dailyDigest` 로 고르고 **실행**을
