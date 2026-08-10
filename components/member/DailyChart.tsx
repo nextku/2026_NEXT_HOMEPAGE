@@ -26,7 +26,17 @@ function fillDays(rows: Point[], days: number): Point[] {
   const out: Point[] = [];
   const today = new Date();
 
-  for (let i = days - 1; i >= 0; i--) {
+  /*
+     날짜 수를 못 받으면 눈금을 하나도 만들지 못해 선이 빈 채로 그려진다.
+     서버가 그 값을 빠뜨렸을 때 그래프가 조용히 사라지는 대신, 받아온 기록의
+     범위로 대신 채운다.
+  */
+  const span =
+    Number.isFinite(days) && days > 0
+      ? Math.floor(days)
+      : Math.max(1, rows.length);
+
+  for (let i = span - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(

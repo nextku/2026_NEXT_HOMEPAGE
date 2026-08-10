@@ -58,6 +58,12 @@ begin
   end if;
 
   select jsonb_build_object(
+    /*
+       기간의 날짜 수. 화면이 그래프의 가로 눈금을 이것으로 만든다.
+       daily 와 마찬가지로, 화면이 series 로 옮겨가기 전까지 함께 내보낸다.
+       빠뜨리면 눈금이 하나도 안 만들어져 선이 빈 채로 그려진다.
+    */
+    'days',   greatest(1, ceil(extract(epoch from (to_ts - from_ts)) / 86400)::int),
     'from',   to_char(from_ts at time zone 'Asia/Seoul', 'YYYY-MM-DD"T"HH24:MI'),
     'to',     to_char(to_ts   at time zone 'Asia/Seoul', 'YYYY-MM-DD"T"HH24:MI'),
     'bucket', bucket,
