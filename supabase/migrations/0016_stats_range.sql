@@ -11,6 +11,14 @@
 -- 빈 칸은 여기서 채운다. 기록이 없는 시각은 행이 아예 없는데, 그대로 그리면
 -- 빈 시간이 접혀 가로축이 거짓말을 한다.
 
+-- 예전 것을 먼저 치운다.
+--
+-- create or replace 는 인자 목록이 정확히 같을 때만 교체한다. 칸을 늘렸으므로
+-- 이것은 교체가 아니라 새로 하나 더 만드는 일이 되고, 그러면 admin_stats 가
+-- 둘이 된다. 화면은 p_days 하나만 넘기는데 새 것은 나머지에 기본값이 있어서
+-- 양쪽 다 후보가 되고, 어느 쪽인지 못 정한 채로 거절당한다.
+drop function if exists public.admin_stats(integer);
+
 create or replace function public.admin_stats(
   p_days integer default 30,
   p_from timestamptz default null,
