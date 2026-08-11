@@ -343,6 +343,7 @@ function PostRow({
                 post.author_name,
                 post.author_generation,
                 post.author_title,
+                post.author_staff_generation,
               )}
             </b>
             <span>{whenText(post.created_at)}</span>
