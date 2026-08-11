@@ -1279,3 +1279,124 @@ export const TopBar = styled.div`
   flex-wrap: wrap;
   margin-bottom: clamp(2rem, 3vw, 2.8rem);
 `;
+
+/* ─── 기수 관리 ───────────────────────────────────────────────────────── */
+
+/**
+ * 기수 한 줄.
+ *
+ * 표로 짜지 않는다. 칸이 다섯인데 좁은 화면에서 표는 가로로 밀리고, 여기서
+ * 읽는 것은 "몇 기가 언제부터, 몇 명" 이라 줄글에 가깝다.
+ */
+export const GenRow = styled.li<{ $open?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  padding: 1.6rem 0;
+  border-top: 1px solid #e7e2d8;
+
+  &:last-child {
+    border-bottom: 1px solid #e7e2d8;
+  }
+`;
+
+export const GenNo = styled.strong<{ $open?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 8rem;
+  font-size: 1.7rem;
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  color: #17150f;
+
+  /* 활동 중인 기수 앞에만 점. 끝난 기수는 표시가 없는 것이 곧 표시다. */
+  &::before {
+    content: "";
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 999px;
+    background: ${({ $open }) => ($open ? "#f7941e" : "transparent")};
+    box-shadow: ${({ $open }) => ($open ? "none" : "inset 0 0 0 1px #cfc8bc")};
+  }
+`;
+
+export const GenPeriod = styled.span`
+  min-width: 14rem;
+  font-size: 1.45rem;
+  letter-spacing: -0.02em;
+  color: #8d877f;
+  font-variant-numeric: tabular-nums;
+`;
+
+/** 자리별 인원. 0 인 자리는 그리지 않는다 — 없는 것을 세어 보여줄 이유가 없다. */
+export const GenCounts = styled.span`
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  flex: 1;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+  color: #57524a;
+
+  & b {
+    font-weight: 700;
+    color: #17150f;
+    font-variant-numeric: tabular-nums;
+  }
+  & em {
+    font-style: normal;
+    color: #a9a196;
+  }
+`;
+
+export const GenEdit = styled.div`
+  flex-basis: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+  padding: 1.6rem;
+  border-radius: 12px;
+  background: #f7f4ee;
+`;
+
+export const GenTop = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.6rem;
+`;
+
+export const GenHint = styled.p`
+  margin: 0;
+  font-size: 1.4rem;
+  line-height: 1.7;
+  letter-spacing: -0.02em;
+  color: #8d877f;
+  word-break: keep-all;
+`;
+
+/**
+ * 중립 버튼.
+ *
+ * Reject 와 생김새는 같지만 커서를 올렸을 때 붉어지지 않는다. "기간 수정" 처럼
+ * 되돌릴 수 있는 일에 붉은 신호를 주면 누르기 전에 한 번 망설이게 된다.
+ */
+export const Quiet = styled.button`
+  ${actionBase}
+  background: transparent;
+  border: 1px solid #ddd7cd;
+  color: #57524a;
+
+  @media (any-hover: hover) {
+    &:hover:not(:disabled) {
+      border-color: #a9a196;
+      color: #17150f;
+    }
+  }
+`;
