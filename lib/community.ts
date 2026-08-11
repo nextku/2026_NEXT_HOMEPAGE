@@ -34,6 +34,7 @@ export type PostListItem = {
   author_name: string | null;
   author_generation: number | null;
   author_title: string | null;
+  author_staff_generation: number | null;
   comment_count: number;
   like_count: number;
 };
@@ -227,17 +228,30 @@ export function authorText(
   name: string | null,
   generation: number | null,
   title?: string | null,
+  staffGeneration?: number | null,
 ) {
   const who = name?.trim() || "이름 없음";
-  const parts = [];
-  if (generation) parts.push(`${generation}기`);
-  /*
-     직책이 이름과 같으면 붙이지 않는다.
+  const role = title?.trim();
 
-     공용 계정은 이름과 직책이 둘 다 "관리자" 라서 "관리자 관리자" 로 나왔다.
-     사람 계정에서도 성이 없는 별칭을 쓰면 같은 일이 생길 수 있다. 두 값이
-     같을 때 앞의 것은 아무것도 더 말해주지 않으므로 뺀다.
+  /*
+     직책은 그것을 맡은 기수에 붙인다.
+
+     14기로 들어와 15기에 대표를 맡은 사람이 "14기 대표" 로 나왔다. 들어온
+     기수와 직책을 맡은 기수를 그냥 이어 붙였기 때문인데, 그 사람은 14기 때
+     대표가 아니었다. 직책은 지금 맡고 있는 자리이므로 그 기수를 쓴다.
+
+     이름표 한 줄에 둘 다 넣지는 않는다. 글쓴이 자리에서 알고 싶은 것은 "지금
+     누구인가" 이고, 들어온 기수까지 붙이면 길어져 제목을 밀어낸다. 두 기수를
+     함께 보여주는 것은 내 정보 쪽의 memberLabel 이 한다.
   */
-  if (title && title.trim() !== who) parts.push(title.trim());
+  const at = role && staffGeneration ? staffGeneration : generation;
+
+  const parts = [];
+  if (at) parts.push(`${at}기`);
+  /*
+     직책이 이름과 같으면 붙이지 않는다. 공용 계정은 이름과 직책이 둘 다
+     "관리자" 라서 "관리자 관리자" 로 나왔다.
+  */
+  if (role && role !== who) parts.push(role);
   return parts.length ? `${parts.join(" ")} ${who}` : who;
 }
