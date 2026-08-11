@@ -40,6 +40,7 @@ export default function PostPage() {
     name: string | null;
     generation: number | null;
     title: string | null;
+    staff_generation: number | null;
   } | null>(null);
   const [comments, setComments] = useState<Comment[] | null>(null);
   // 댓글을 못 읽은 것과 댓글이 없는 것은 화면이 구분해서 말해야 한다.
@@ -72,9 +73,14 @@ export default function PostPage() {
           .select("name")
           .eq("id", p.board_id)
           .maybeSingle(),
+        /*
+           profiles 가 아니라 member_public 을 본다. profiles 의 정책은 본인과
+           운영진에게만 열려 있어서, 일반 학회원이 남의 글을 열면 글쓴이 칸이
+           비었다. 댓글에서 이미 겪은 것과 같은 문제다.
+        */
         supabase
-          .from("profiles")
-          .select("name, generation, title")
+          .from("member_public")
+          .select("name, generation, title, staff_generation")
           .eq("id", p.author_id)
           .maybeSingle(),
         supabase
@@ -185,6 +191,7 @@ export default function PostPage() {
                       author?.name ?? null,
                       author?.generation ?? null,
                       author?.title,
+                      author?.staff_generation,
                     )}
                   </b>
                   <span>{whenText(post.created_at)}</span>
