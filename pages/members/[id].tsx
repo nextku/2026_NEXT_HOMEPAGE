@@ -99,12 +99,28 @@ export default function PostPage() {
       setComments(c.rows);
       setCommentError(c.error);
 
-      // 조회수는 한 번만. 새로고침마다 올리면 글쓴이 본인이 제일 많이 올린다.
+      /*
+       * 조회수.
+       *
+       * 한 사람이 한 번. 새로고침마다 올리면 글쓴이 본인이 제일 많이 올린다.
+       *
+       * 자기 글은 세지 않는다. 쓰고 나면 그 글로 넘어가고 고칠 때마다 다시
+       * 들어가므로, 글쓴이가 열심일수록 조회수가 부푼다. 그 수는 남이 얼마나
+       * 봤는지를 말해야 뜻이 있다.
+       *
+       * 올린 뒤에 표시한다. 예전에는 표시를 먼저 하고 요청을 보냈는데, 그러면
+       * 요청이 실패해도 그 세션 동안 다시 시도하지 않는다. 실패는 조용히
+       * 넘어가되 - 조회수 때문에 글이 안 열리면 안 된다 - 로그에는 남긴다.
+       */
       const seenKey = `nextku_seen_${id}`;
       try {
-        if (!sessionStorage.getItem(seenKey)) {
-          sessionStorage.setItem(seenKey, "1");
-          void supabase.rpc("bump_view", { p_post: id });
+        const mine = session?.user.id === p.author_id;
+        if (!mine && !sessionStorage.getItem(seenKey)) {
+          const { error: bumpErr } = await supabase.rpc("bump_view", {
+            p_post: id,
+          });
+          if (bumpErr) console.error("[bump_view]", bumpErr.message);
+          else sessionStorage.setItem(seenKey, "1");
         }
       } catch {
         /* 저장소를 못 쓰면 세지 않는다 */
