@@ -1,5 +1,5 @@
 import Head from "next/head";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useMediaQuery } from "react-responsive";
@@ -37,6 +37,16 @@ export default function Join() {
   // 모달이 떠 있는 동안 뒤 페이지는 움직이지 않는다.
   useScrollLock(modalOpen);
   const [accept, setAccept] = useState(false);
+  /*
+   * 동의를 안 한 채로 지원하기를 눌렀는가.
+   *
+   * 예전에는 버튼에 disabled 를 걸어두었다. 그러면 눌러도 클릭 자체가 생기지
+   * 않아 화면이 아무 반응도 하지 않고, 지원자는 고장으로 받아들인다. 눌리게
+   * 두고, 대신 왜 안 되는지를 그 자리에서 알린다.
+   */
+  const [needsAccept, setNeedsAccept] = useState(false);
+  // 알린 뒤 그 자리로 초점을 옮긴다. 눈으로 못 본 사람도 다음 탭에서 만난다.
+  const acceptRef = useRef<HTMLInputElement>(null);
   /* 로켓 점화 연출 중인지. 연출이 끝나갈 때쯤 안내를 띄운다. */
   const [igniting, setIgniting] = useState(false);
 
@@ -326,12 +336,16 @@ export default function Join() {
               </S.ModalContentWrapper>
               {modalPage == 1 && (
                 <S.ModalFooter>
-                  <S.CheckContainer>
+                  <S.CheckContainer $nudge={needsAccept}>
                     <input
                       checked={accept}
                       type="checkbox"
                       id="acceptCheck"
-                      onChange={() => setAccept((prev) => !prev)}
+                      ref={acceptRef}
+                      onChange={() => {
+                        setAccept((prev) => !prev);
+                        setNeedsAccept(false);
+                      }}
                     />
                     <label htmlFor="acceptCheck">
                       위 안내사항을 확인했으며, 이에 동의합니다.
@@ -362,8 +376,22 @@ export default function Join() {
                     </button>
                     <button
                       type="button"
-                      disabled={!accept || disabled}
+                      /*
+                        모집 기간이 아닐 때만 정말로 잠근다. 그것은 지원자가
+                        어떻게 할 수 없는 일이라 설명할 것도 없다.
+
+                        동의 전은 다르다. 지원자가 지금 풀 수 있는 조건이므로
+                        누를 수 있게 두고 어디를 눌러야 하는지 알린다. 화면에는
+                        같은 모양이지만 보조기기에는 aria-disabled 로 알린다.
+                      */
+                      disabled={disabled}
+                      aria-disabled={!accept}
                       onClick={() => {
+                        if (!accept) {
+                          setNeedsAccept(true);
+                          acceptRef.current?.focus();
+                          return;
+                        }
                         if (
                           currentTime >= startApplicationTime &&
                           currentTime <= endApplicationTime

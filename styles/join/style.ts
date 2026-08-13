@@ -765,8 +765,47 @@ export const NextBtnWrapper = styled.div<{
  * appearance 를 걷어내고 직접 그린다. 라벨 전체가 클릭 영역이라
  * 손가락으로도 누르기 쉽다.
  */
-export const CheckContainer = styled.div`
+/*
+   눌러야 한다는 것을 알리는 흔들림.
+
+   지원하기가 안 눌리는 이유가 이 체크칸인데, 사람은 자기가 누른 곳을 보지 그
+   아래 안내 문구를 읽지 않는다. 눌린 순간 시선을 여기로 데려온다.
+
+   크게 흔들지 않는다. 요란하면 잘못한 것처럼 느껴진다. 한 번 눈에 걸릴 만큼만.
+*/
+const shake = keyframes`
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(2px); }
+`;
+
+export const CheckContainer = styled.div<{ $nudge?: boolean }>`
     width: 100%;
+    border-radius: 10px;
+    /* 흔들릴 때 테두리가 상자 밖으로 나가지 않게 자리를 미리 준다. */
+    margin: 0 -1rem;
+    padding: 0 1rem;
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+
+    ${(props) =>
+      props.$nudge &&
+      css`
+        background: rgba(247, 148, 30, 0.1);
+        box-shadow: inset 0 0 0 1.5px ${THEME.ORANGE};
+        animation: ${shake} 0.42s ease;
+
+        & label::before {
+            border-color: ${THEME.ORANGE};
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
+      `}
 
     & input {
         position: absolute;
