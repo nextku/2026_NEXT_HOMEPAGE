@@ -730,7 +730,7 @@ export const NextBtnWrapper = styled.div<{
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
         flex: 1.3 1 0;
     }
-    & button:last-child:hover:not(:disabled) {
+    & button:last-child:hover:not(:disabled):not([aria-disabled='true']) {
         background: #ffa63d;
         border-color: #ffa63d;
     }
@@ -742,12 +742,28 @@ export const NextBtnWrapper = styled.div<{
         flex: 0 0 auto;
     }
 
-    & button:last-child:disabled {
+    /*
+     * 아직 누를 수 없는 상태.
+     *
+     * disabled 와 aria-disabled 를 같이 본다. 모집 기간이 아닐 때는 정말로
+     * disabled 이고, 동의 전에는 누를 수 있게 두되(그래야 왜 안 되는지 알릴 수
+     * 있다) 겉모습은 같아야 한다. 채워진 오렌지로 두면 눌리는 줄 알고 누르게
+     * 되는데, 그것이 이 화면에서 가장 흔한 막힘이었다.
+     */
+    & button:last-child:disabled,
+    & button:last-child[aria-disabled='true'] {
         background: transparent;
         border-color: #333333;
         color: #6b6b6b;
         box-shadow: none;
+    }
+
+    & button:last-child:disabled {
         cursor: not-allowed;
+    }
+    /* 동의만 하면 열리므로 손가락 커서를 남긴다. 누를 수 있는 것이 맞다. */
+    & button:last-child[aria-disabled='true'] {
+        cursor: pointer;
     }
 
     @media (max-width: 640px) {
@@ -783,29 +799,7 @@ const shake = keyframes`
 
 export const CheckContainer = styled.div<{ $nudge?: boolean }>`
     width: 100%;
-    border-radius: 10px;
-    /* 흔들릴 때 테두리가 상자 밖으로 나가지 않게 자리를 미리 준다. */
-    margin: 0 -1rem;
-    padding: 0 1rem;
-    transition:
-        background 0.2s ease,
-        box-shadow 0.2s ease;
 
-    ${(props) =>
-      props.$nudge &&
-      css`
-        background: rgba(247, 148, 30, 0.1);
-        box-shadow: inset 0 0 0 1.5px ${THEME.ORANGE};
-        animation: ${shake} 0.42s ease;
-
-        & label::before {
-            border-color: ${THEME.ORANGE};
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            animation: none;
-        }
-      `}
 
     & input {
         position: absolute;
@@ -856,4 +850,34 @@ export const CheckContainer = styled.div<{ $nudge?: boolean }>`
         outline: 2px solid ${THEME.ORANGE};
         outline-offset: 2px;
     }
+    /*
+       눌러야 한다는 표시.
+
+       상자를 씌우지 않는다. 반투명 배경에 색 테두리를 두르면 어느 사이트에나
+       있는 경고 상자가 되고, 정작 눌러야 할 곳은 그 안의 작은 네모다.
+       눌러야 하는 것 자체를 물들인다.
+
+       기본 스타일보다 뒤에 둔다. 앞에 두면 아래의 label::before 가 덮어써서
+       아무 일도 일어나지 않는다.
+    */
+    ${(props) =>
+      props.$nudge &&
+      css`
+        & label {
+            color: #ffffff;
+        }
+        & label::before {
+            border-color: ${THEME.ORANGE};
+            border-width: 2px;
+            /* 흔드는 것도 체크칸만. 줄이 통째로 흔들리면 읽던 눈이 흔들린다. */
+            animation: ${shake} 0.42s ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            & label::before {
+                animation: none;
+            }
+        }
+      `}
+
 `;
