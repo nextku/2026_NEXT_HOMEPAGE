@@ -95,6 +95,17 @@ export const SpaceContainer = styled.div<{ isMobile: boolean }>`
 
 export const Planet = styled.div<{ launched: boolean }>`
     width: 180%;
+    /*
+       도착하기 전에 자리를 잡아둔다.
+
+       안에 든 그림이 정사각형(2400×2400)인데, 그것을 알려주지 않으면 그림이
+       올 때까지 이 상자의 높이가 0 이다. 아래의 translate 는 자기 높이의
+       퍼센트라 이동량도 0 이 되고, 그림이 도착하는 순간 높이와 이동량이 함께
+       튄다. 그 사이에 지구가 화면 위쪽에 잠깐 걸쳐 보였다.
+
+       비율을 적어두면 첫 프레임부터 높이가 정해져서 튀지 않는다.
+    */
+    aspect-ratio: 1;
     position: absolute;
     bottom: 0;
     left: 50%;
