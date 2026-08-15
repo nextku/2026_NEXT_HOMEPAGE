@@ -116,3 +116,55 @@ export function track(
     // 기록은 부가 기능이다. 실패해도 조용히 넘어간다.
   }
 }
+
+/* ─── 지금 보고 있는 사람 ──────────────────────────────────────────────── */
+
+/**
+ * 머무는 동안 살아 있다는 신호.
+ *
+ * 방문 기록만으로는 지금 몇 명이 보고 있는지 알 수 없다. 그 기록은 페이지를 열
+ * 때 한 줄이 전부라, 한 화면을 십 분째 읽는 사람은 오 분 안에 아무 자취가 없다.
+ *
+ * 신호는 events 에 쌓지 않는다. 세션마다 한 줄을 두고 시각만 갱신하는 표가 따로
+ * 있어서, 표의 크기가 지금 접속자 수를 넘지 않는다.
+ *
+ * 탭이 보일 때만 보낸다. 뒤에 열어둔 채 잊은 탭까지 세면 그 수는 "지금 보고
+ * 있는 사람" 이 아니라 "브라우저를 안 닫은 사람" 이 된다.
+ */
+export function startPresence() {
+  if (typeof window === "undefined" || !supabaseEnvReady) return () => {};
+  if (!isRealSite()) return () => {};
+
+  const sid = sessionId();
+  if (!sid) return () => {};
+
+  let stopped = false;
+
+  const ping = () => {
+    if (stopped || document.visibilityState !== "visible") return;
+    void import("lib/supabase/client")
+      .then(({ createClient }) =>
+        createClient().rpc("ping_presence", {
+          p_session: sid,
+          p_path: window.location.pathname,
+          p_internal: isInternal(),
+        }),
+      )
+      .then(
+        () => undefined,
+        () => undefined,
+      );
+  };
+
+  ping();
+  // 화면 쪽은 2분 안에 온 신호를 센다. 1분마다 보내면 한 번 놓쳐도 안 사라진다.
+  const timer = window.setInterval(ping, 60_000);
+  // 다른 탭을 보다 돌아오면 바로 알린다. 다음 차례를 기다리면 잠깐 비어 보인다.
+  document.addEventListener("visibilitychange", ping);
+
+  return () => {
+    stopped = true;
+    window.clearInterval(timer);
+    document.removeEventListener("visibilitychange", ping);
+  };
+}
