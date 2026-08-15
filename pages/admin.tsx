@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { PEOPLE_INFORMATION } from "constants/people";
 import DailyChart from "components/member/DailyChart";
 import Generations from "components/member/Generations";
+import LiveNow from "components/member/LiveNow";
 import { memberTags } from "lib/memberLabel";
 import { parseRoster, type RosterParse } from "lib/roster";
 import Confirm from "components/ui/Confirm";
@@ -678,6 +679,9 @@ function Stats() {
 
   return (
     <>
+      {/* 지나간 합계보다 먼저. 홍보 직후에 알고 싶은 것은 지금이다. */}
+      <LiveNow />
+
       <S.StatBar>
         {RANGES.map((r) => (
           <S.Chip

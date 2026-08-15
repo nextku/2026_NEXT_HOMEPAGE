@@ -8,7 +8,7 @@ import { useRouter, Router } from "next/router";
 import { ChakraProvider } from "@chakra-ui/react";
 import Loading from "components/loading/index";
 import * as gtag from "lib/gtag";
-import { track } from "lib/analytics";
+import { startPresence, track } from "lib/analytics";
 import Head from "next/head";
 import Header from "components/header";
 import Script from "next/script";
@@ -82,6 +82,15 @@ export default function App({
     router.events.on("routeChangeComplete", onRoute);
     return () => router.events.off("routeChangeComplete", onRoute);
   }, [router.events]);
+
+  /*
+   * 지금 보고 있는 사람 세기.
+   *
+   * 방문 기록과 달리 로그인 화면도 포함한다. "지금 몇 명이 사이트에 있는가" 를
+   * 묻는 것이라 어느 쪽을 보고 있든 한 명이다. 대신 학회원·운영진은 표시가
+   * 붙어서 화면에서 따로 센다.
+   */
+  useEffect(() => startPresence(), []);
   return (
     <SessionProvider session={pageProps.session}>
       <RecoilRoot>
