@@ -1400,3 +1400,69 @@ export const Quiet = styled.button`
     }
   }
 `;
+
+/* ─── 지금 접속자 ─────────────────────────────────────────────────────── */
+
+/**
+ * 통계 맨 위에 놓는 한 줄.
+ *
+ * 상자로 감싸지 않는다. 아래 퍼널이 이미 줄로 되어 있어서, 여기만 카드가 되면
+ * 그 부분만 다른 화면에서 붙여온 것처럼 보인다.
+ */
+export const LiveBar = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.8rem;
+  margin-bottom: 2.4rem;
+  border-bottom: 1px solid #e7e2d8;
+`;
+
+export const LiveDot = styled.span<{ $on: boolean }>`
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 999px;
+  background: ${({ $on }) => ($on ? "#f7941e" : "#cfc8bc")};
+  /* 아무도 없을 때는 깜빡이지 않는다. 움직임은 무언가 있다는 뜻이어야 한다. */
+  animation: ${({ $on }) => ($on ? "livePulse 2s ease-in-out infinite" : "none")};
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
+
+export const LiveCount = styled.strong`
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #17150f;
+  font-variant-numeric: tabular-nums;
+`;
+
+export const LiveLabel = styled.span`
+  font-size: 1.45rem;
+  letter-spacing: -0.02em;
+  color: #57524a;
+`;
+
+/** 어디를 보고 있는지. 수보다 약하게 둔다 - 곁들이는 정보다. */
+export const LivePaths = styled.span`
+  display: inline-flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: #8d877f;
+
+  & b {
+    font-weight: 700;
+    color: #57524a;
+    font-variant-numeric: tabular-nums;
+  }
+`;
