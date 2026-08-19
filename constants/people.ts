@@ -27,6 +27,8 @@ export enum DEPARTMENT {
     HEALTH_ENVIRONMENTAL_CONVERGENCE_SCIENCE = '보건환경융합과학부',
     HEALTH_POLICY_AND_MANAGEMENT = '보건정책관리학부',
     PSYCHOTHERAPY = '심리학과',
+    // 2021년에 학부로 바뀌었다. 예전 이름으로 올린 분들이 있어 둘 다 둔다.
+    PSYCHOLOGY = '심리학부',
     SOCIOLOGY = '사회학과',
     BIOLOGICAL_ENGINEERING = '생명공학부',
     JAPANESE_LANGUAGE_AND_LITERATURE = '일어일문학과',
@@ -125,6 +127,14 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
         department: DEPARTMENT.HEALTH_ENVIRONMENTAL_CONVERGENCE_SCIENCE,
         classOf: 18,
         imgSrc: '/images/profile/10gen/10기_박견우.png',
+        managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
+    },
+    {
+        gen: PEOPLE_ITEMS.TEN,
+        name: '박기만',
+        department: DEPARTMENT.PSYCHOLOGY,
+        classOf: 19,
+        imgSrc: '/images/profile/10gen/10기_박기만.png',
         managementTeam: MANAGEMENT_TEAM_POSITION.NORMAL,
     },
     {
