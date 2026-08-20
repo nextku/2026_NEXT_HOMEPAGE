@@ -30,35 +30,47 @@ function daysUntil(target: Date, now: Date) {
 }
 
 export default function RecruitTimeline({ stages, now }: Props) {
+  // 사이 구간을 그리려면 다음 단계의 상태까지 알아야 해서 먼저 전부 계산한다.
+  const items = stages.map((stage) => {
+    const endsAt = stage.end ?? stage.start;
+    // 종료일은 그날 하루를 온전히 포함시킨다.
+    const closesAt = new Date(
+      endsAt.getFullYear(),
+      endsAt.getMonth(),
+      endsAt.getDate(),
+      23,
+      59,
+      59,
+    );
+
+    const done = now > closesAt;
+    const active = !done && now >= stage.start;
+    const left = daysUntil(closesAt, now);
+
+    let note = "";
+    if (active) note = left <= 0 ? "오늘 마감" : `마감까지 ${left}일`;
+
+    return { stage, done, active, note };
+  });
+
   return (
     <S.Timeline>
-      {stages.map((stage) => {
-        const endsAt = stage.end ?? stage.start;
-        // 종료일은 그날 하루를 온전히 포함시킨다.
-        const closesAt = new Date(
-          endsAt.getFullYear(),
-          endsAt.getMonth(),
-          endsAt.getDate(),
-          23,
-          59,
-          59,
-        );
-
-        const done = now > closesAt;
-        const active = !done && now >= stage.start;
-        const left = daysUntil(closesAt, now);
-
-        let note = "";
-        if (active) note = left <= 0 ? "오늘 마감" : `마감까지 ${left}일`;
+      {items.map(({ stage, done, active, note }, i) => {
+        const next = items[i + 1];
+        // 앞 단계는 끝났는데 다음 단계는 아직 시작 전 — 지금은 두 단계 "사이".
+        const between = done && next != null && !next.done && !next.active;
 
         return (
-          <S.Row key={stage.label} $done={done} $active={active}>
-            <S.Marker aria-hidden="true" />
-            <S.Label>{stage.label}</S.Label>
-            <S.Date>{stage.display}</S.Date>
-            {active && <S.Badge>진행 중{note && ` · ${note}`}</S.Badge>}
-            {done && <S.DoneMark>마감</S.DoneMark>}
-          </S.Row>
+          <React.Fragment key={stage.label}>
+            <S.Row $done={done} $active={active}>
+              <S.Marker aria-hidden="true" />
+              <S.Label>{stage.label}</S.Label>
+              <S.Date>{stage.display}</S.Date>
+              {active && <S.Badge>진행 중{note && ` · ${note}`}</S.Badge>}
+              {done && <S.DoneMark>마감</S.DoneMark>}
+            </S.Row>
+            {between && <S.Flow aria-hidden="true" />}
+          </React.Fragment>
         );
       })}
     </S.Timeline>
