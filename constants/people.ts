@@ -979,9 +979,10 @@ export const PEOPLE_INFORMATION: PEOPLE_INFORMATION_TYPE[] = [
     {
         gen: PEOPLE_ITEMS.FOURTEEN,
         name: '조영환',
-        department: DEPARTMENT.FREE_MAJOR,
+        department: DEPARTMENT.COMPUTER,
         classOf: 22,
         imgSrc: '/images/profile/14gen/14기_조영환.jpg',
+        secondMajor: '자전',
         managementTeam: MANAGEMENT_TEAM_POSITION.STARTUP,
     },
     {
