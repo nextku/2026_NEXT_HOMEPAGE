@@ -1,6 +1,8 @@
 import React from "react";
+import Image from "next/image";
 import * as A from "styles/activities/shared";
 import blackLogo from "public/assets/new_logo(bl).svg";
+import leads from "public/images/about/greeting-15th-leads.jpg";
 
 /**
  * 인사말.
@@ -11,7 +13,8 @@ import blackLogo from "public/assets/new_logo(bl).svg";
  * 다른 탭과 같은 인트로 구조로 시작하되, 인사말은 옆에 둘 것이 없으므로
  * 글 덩어리 자체를 화면 가운데에 놓는다. 왼쪽에 붙이면 오른쪽 절반이 통째로 빈다.
  * 단체사진은 넣지 않는다 — 보관된 사진이 12기라 15기 인사말과 맞지 않는다.
- * 문구는 그대로다.
+ * 대신 글을 쓴 15기 대표·부대표의 사진을 서명 자리에 둔다. 편지는 쓴 사람의
+ * 얼굴로 끝난다. 문구는 그대로다.
  */
 
 const Mark = () => <img src={blackLogo.src} alt="NEXT" />;
@@ -52,10 +55,21 @@ export default function Greeting() {
             </p>
       </A.Prose>
 
-      <A.Signature>
-        <strong>NEXT 15기 임원진 드림</strong>
-        대표 이성민 · 부대표 박보겸
-      </A.Signature>
+      <A.Closing>
+        <A.ClosingPhoto>
+          <Image
+            src={leads}
+            alt="NEXT 15기 대표 이성민과 부대표 박보겸"
+            fill
+            sizes="(max-width: 860px) 100vw, 740px"
+            placeholder="blur"
+          />
+        </A.ClosingPhoto>
+        <A.ClosingCaption>
+          <strong>NEXT 15기 임원진 드림</strong>
+          <span>대표 이성민 · 부대표 박보겸</span>
+        </A.ClosingCaption>
+      </A.Closing>
     </A.SectionNarrow>
   );
 }
