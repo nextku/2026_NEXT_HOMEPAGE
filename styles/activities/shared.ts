@@ -423,33 +423,23 @@ export const Prose = styled.div`
 `;
 
 /**
- * 글 끝의 서명.
+ * 인사말 머리 사진.
  *
- * 편지는 쓴 사람의 얼굴로 끝난다. 사진이 본문과 서명을 나누므로 위에 선을
- * 긋지 않는다 — 선까지 있으면 구분이 두 겹이 된다.
- * 사진은 다른 탭의 이미지와 같은 모서리·그림자를 쓴다.
- */
-export const Closing = styled.figure`
-  margin: clamp(4.8rem, 7vw, 7.2rem) 0 0;
-  padding: 0;
-`;
-
-/**
+ * 제목 아래, 본문 위에 놓는다. 편지를 읽기 전에 쓴 사람의 얼굴을 먼저 본다.
+ * 사진은 다른 탭의 이미지와 같은 모서리·그림자를 쓴다. 이름은 붙이지 않는다 —
+ * 글 끝 서명에 있는 이름을 한 번 더 쓰면 중복이다.
+ *
  * 원본은 3:2 스튜디오 사진이고 두 사람이 가운데에 있다.
  * 넓은 화면에서는 가로로 길게 잘라 편지 폭에 맞추고, 좁은 화면에서는
  * 그대로 길게 자르면 얼굴이 작아지므로 4:3 으로 둔다.
  * 자르는 기준점을 위쪽에 두어 다리 쪽이 먼저 잘리고 머리 위 여백은 남는다.
- *
- * overflow 는 clip 이다. hidden 은 스크롤 컨테이너를 만들어 아래 view()
- * 타임라인이 사진 자신을 기준으로 잡히고, 그러면 항상 '다 보이는' 상태라
- * 움직이지 않는다.
  */
-export const ClosingPhoto = styled.div`
+export const LeadPhoto = styled.figure`
   position: relative;
   width: 100%;
+  margin: 0 0 clamp(4rem, 6vw, 6.4rem);
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  overflow: clip;
   background: #f4f1ea;
   ${squircle(20)}
   ${lift}
@@ -462,34 +452,25 @@ export const ClosingPhoto = styled.div`
   & img {
     object-fit: cover;
     object-position: 50% 30%;
+    /*
+     * 탭이 열리면서 사진이 살짝 줌아웃되어 자리를 잡는다. 섹션의 페이드(.mount)
+     * 와 같이 시작하고 조금 더 길게 끝난다. 화면 위쪽에 있어 처음부터 다 보이므로
+     * 스크롤에 묶지 않는다.
+     */
+    animation: nextLeadSettle 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-
-  /*
-   * 스크롤해 내려오면서 사진이 살짝 줌아웃되며 자리를 잡는다.
-   * 화면에 들어오기 시작할 때 시작해 다 들어오면 끝난다. 처음부터 다 보이는
-   * 큰 화면에서는 이미 끝난 상태라 그냥 사진이다.
-   */
-  @supports (animation-timeline: view()) {
-    & img {
-      transform: scale(1.06);
-      animation: nextClosingSettle linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 100%;
+  @keyframes nextLeadSettle {
+    from {
+      transform: scale(1.05);
     }
-    @keyframes nextClosingSettle {
-      from {
-        transform: scale(1.06);
-      }
-      to {
-        transform: scale(1);
-      }
+    to {
+      transform: scale(1);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     & img {
       animation: none;
-      transform: none;
     }
   }
 
@@ -500,29 +481,21 @@ export const ClosingPhoto = styled.div`
   }
 `;
 
-/** 사진 아래 서명. 넓으면 이름과 직함을 양 끝에, 좁으면 위아래로. */
-export const ClosingCaption = styled.figcaption`
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-top: clamp(1.6rem, 2.4vw, 2.2rem);
-  padding: 0 0.4rem;
+/** 글 끝 서명. */
+export const Signature = styled.div`
+  margin-top: clamp(3.2rem, 5vw, 4.8rem);
+  padding-top: clamp(2rem, 3vw, 2.8rem);
+  border-top: 1px solid #e7e2d8;
   font-size: 1.5rem;
   letter-spacing: -0.025em;
   color: #8d877f;
-  word-break: keep-all;
 
   & strong {
+    display: block;
+    margin-bottom: 0.5rem;
     color: #17150f;
     font-weight: 700;
     font-size: 1.6rem;
-  }
-
-  @media (min-width: 48rem) {
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1.6rem;
   }
 `;
 
