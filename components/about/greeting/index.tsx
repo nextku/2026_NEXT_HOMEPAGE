@@ -3,6 +3,7 @@ import Image from "next/image";
 import * as A from "styles/activities/shared";
 import blackLogo from "public/assets/new_logo(bl).svg";
 import leads from "public/images/about/greeting-15th-leads.jpg";
+import { VISIBILITY } from "constants/visibility";
 
 /**
  * 인사말.
@@ -30,7 +31,11 @@ export default function Greeting() {
       <A.LeadPhoto>
         <Image
           src={leads}
-          alt="NEXT 15기 대표 이성민과 부대표 박보겸"
+          alt={
+            VISIBILITY.LEAD_TITLES
+              ? "NEXT 15기 대표 이성민과 부대표 박보겸"
+              : "NEXT 15기 운영진"
+          }
           fill
           priority
           sizes="(max-width: 860px) 100vw, 740px"
@@ -67,8 +72,8 @@ export default function Greeting() {
       </A.Prose>
 
       <A.Signature>
-        <strong>NEXT 15기 임원진 드림</strong>
-        대표 이성민 · 부대표 박보겸
+        <strong>NEXT 15기 운영진 드림</strong>
+        {VISIBILITY.LEAD_TITLES && "대표 이성민 · 부대표 박보겸"}
       </A.Signature>
     </A.SectionNarrow>
   );
