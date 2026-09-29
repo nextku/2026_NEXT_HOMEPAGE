@@ -10,7 +10,6 @@ import { Partners } from "constants/partners";
 import { RECRUIT, isRecruiting } from "constants/recruit";
 import Sticky from "components/sticky";
 import { useScrollLock } from "lib/useScrollLock";
-import { VISIBILITY } from "constants/visibility";
 
 // 히어로 워드마크는 canvas 기반이라 서버에서 그릴 수 없다.
 const ParticleWordmark = dynamic(
@@ -377,12 +376,10 @@ export default function Main() {
               </a>
             </p>
           </div>
-          {VISIBILITY.LEAD_TITLES && (
-            <S.FooterContacts>
-              <p>대표 이성민 · 010-8693-1884</p>
-              <p>부대표 박보겸 · 010-3185-7117</p>
-            </S.FooterContacts>
-          )}
+          <S.FooterContacts>
+            <p>대표 이성민 · 010-8693-1884</p>
+            <p>부대표 박보겸 · 010-3185-7117</p>
+          </S.FooterContacts>
         </S.FooterTop>
 
         <S.FooterBottom>

@@ -6,7 +6,6 @@ import { Tabs } from "antd";
 import { useRouter } from "next/router";
 import * as S from "styles/people/style";
 import { PEOPLE_ITEMS, PEOPLE_INFORMATION } from "constants/people";
-import { VISIBILITY } from "constants/visibility";
 
 // AOS 동적 로드 (SSR 방지)
 const AOS = dynamic(() => import("aos"), { ssr: false });
@@ -83,19 +82,15 @@ export default function People() {
                   />
                 ),
               },
-              ...(VISIBILITY.FOURTEENTH_ROSTER
-                ? [
-                    {
-                      label: `${FOURTEEN}기`,
-                      key: "6",
-                      children: (
-                        <Member
-                          peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 14)}
-                        />
-                      ),
-                    },
-                  ]
-                : []),
+              {
+                label: `${FOURTEEN}기`,
+                key: "6",
+                children: (
+                  <Member
+                    peopleInformation={PEOPLE_INFORMATION.filter((item) => item.gen === 14)}
+                  />
+                ),
+              },
             ]}
           />
         </S.Container>
