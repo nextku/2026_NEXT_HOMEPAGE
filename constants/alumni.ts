@@ -14,8 +14,10 @@ import swmaestro from "public/images/alumni/swmaestro.jpeg";
 import google from "public/images/alumni/google.png";
 import ncsoft from "public/images/alumni/ncsoft.png";
 import sume from "public/images/alumni/sume.png";
+import thermit from "public/images/alumni/thermit.svg";
 
 export const Alumni = [
+  { name: "thermit", src: thermit },
   { name: "sume", src: sume },
   { name: "google", src: google },
   { name: "ncsoft", src: ncsoft },
