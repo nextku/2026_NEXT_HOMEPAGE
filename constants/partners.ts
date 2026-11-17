@@ -20,6 +20,10 @@ import nonce from "public/images/partners/nonce.png";
 import desker from "public/images/partners/desker.svg";
 import strongventures from "public/images/partners/strongventures.png";
 import zuzu from "public/images/partners/zuzu.png";
+import lattice from "public/images/partners/lattice.svg";
+import thermit from "public/images/partners/thermit.svg";
+import spacejump from "public/images/partners/spacejump.png";
+import sume from "public/images/partners/sume.png";
 
 export const Partners = [
   { name: "bass", src: bass },
@@ -38,6 +42,10 @@ export const Partners = [
   // { name: "eo", src: eo },
   { name: "strongventures", src: strongventures },
   { name: "zuzu", src: zuzu },
+  { name: "lattice", src: lattice },
+  { name: "thermit", src: thermit },
+  { name: "spacejump", src: spacejump },
+  { name: "sume", src: sume },
   { name: "startupStation", src: startupStation },
   { name: "crimson", src: crimson },
   { name: "koreaIndustry", src: koreaindustry },
