@@ -25,7 +25,7 @@ export default function History() {
           <A.Era key={era.YEAR}>
             <A.EraYear>{era.YEAR}</A.EraYear>
             <div>
-              <A.EraTitle>{era.TITLE}</A.EraTitle>
+              {era.TITLE && <A.EraTitle>{era.TITLE}</A.EraTitle>}
               <A.EraList>
                 {era.CONTENT.map(([text], i) => (
                   <li key={i}>{text}</li>
