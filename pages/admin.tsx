@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { PEOPLE_INFORMATION } from "constants/people";
 import DailyChart from "components/member/DailyChart";
 import Generations from "components/member/Generations";
+import HomecomingStats from "components/member/HomecomingStats";
 import LiveNow from "components/member/LiveNow";
 import { memberTags } from "lib/memberLabel";
 import { parseRoster, type RosterParse } from "lib/roster";
@@ -30,7 +31,13 @@ import * as S from "styles/member/style";
  * is_admin() 을 통과해야만 반영된다.
  */
 
-type Tab = "pending" | "members" | "generations" | "roster" | "stats";
+type Tab =
+  | "pending"
+  | "members"
+  | "generations"
+  | "roster"
+  | "stats"
+  | "homecoming";
 
 /*
  * 직책 고르기.
@@ -175,6 +182,13 @@ export default function Admin() {
             </S.Tab>
             <S.Tab
               type="button"
+              $on={tab === "homecoming"}
+              onClick={() => setTab("homecoming")}
+            >
+              홈커밍
+            </S.Tab>
+            <S.Tab
+              type="button"
               $on={tab === "roster"}
               onClick={() => setTab("roster")}
             >
@@ -188,6 +202,8 @@ export default function Admin() {
             <RosterForm onSaved={load} />
           ) : tab === "stats" ? (
             <Stats />
+          ) : tab === "homecoming" ? (
+            <HomecomingStats />
           ) : rows === null ? null : tab === "pending" ? (
             pending.length === 0 ? (
               <S.Empty>확인할 신청이 없습니다.</S.Empty>
